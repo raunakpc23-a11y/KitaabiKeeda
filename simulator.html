@@ -5,817 +5,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NTA CBT Simulator</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { margin: 0; display: flex; height: 100vh; background-color: #f4f6f8; }
-        
-        /* Left Sidebar: Folder Tree */
-        #sidebar { width: 250px; background: #fff; border-right: 1px solid #ddd; overflow-y: auto; padding: 10px; }
-        .folder-tree ul { list-style-type: none; padding-left: 15px; margin: 5px 0; }
-        .folder { cursor: pointer; font-weight: bold; margin-top: 8px; user-select: none; color: #333; }
-        .file { cursor: pointer; padding-left: 20px; color: #0056b3; margin-top: 5px; font-size: 14px; }
-        .file:hover { text-decoration: underline; background: #f0f8ff; }
-        .hidden { display: none; }
-        
-        /* Center: PDF Viewer */
-        #main-panel { flex-grow: 1; display: flex; flex-direction: column; }
-        #top-bar { height: 50px; background: #007bff; color: white; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
-        #pdf-frame { flex-grow: 1; width: 100%; border: none; background: #e9ecef; }
-        
-        /* Buttons inside Top Bar */
-        .btn-group { display: flex; align-items: center; gap: 10px; }
-        .toggle-btn { background: #ffc107; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 4px; display: none; color: #000; text-decoration: none; font-size: 14px; }
-        .toggle-btn:hover { background: #e0a800; }
-        .failsafe-btn { background: #fff; color: #000; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 4px; display: none; text-decoration: none; font-size: 14px; }
-        .failsafe-btn:hover { background: #f8f9fa; }
+        * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        body { display: flex; height: 100vh; background-color: #f4f4f4; overflow: hidden; }
 
-        /* Right Sidebar: CBT OMR Palette */
-        #cbt-panel { width: 300px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; }
-        .cbt-header { padding: 15px; background: #e9ecef; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; }
-        #question-palette { flex-grow: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-content: start; }
-        .q-btn { padding: 10px; text-align: center; background: #e0e0e0; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; font-weight: bold;}
-        .q-btn.answered { background: #28a745; color: white; border-color: #28a745; }
-        .q-btn.review { background: #17a2b8; color: white; border-color: #17a2b8; }
+        /* Top Header */
+        .header { position: absolute; top: 0; width: 100%; height: 50px; background: #007bff; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header-title { font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+        .timer { font-size: 1.2em; font-weight: bold; font-family: monospace; background: #0056b3; padding: 5px 10px; border-radius: 4px; }
         
-        #action-bar { padding: 15px; border-top: 1px solid #ddd; background: #f8f9fa; display: flex; justify-content: space-between; }
-        .btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .btn-save { background: #28a745; color: white; }
-        .btn-review { background: #17a2b8; color: white; }
+        .failsafe-btn { background: #ffc107; color: #000; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; text-decoration: none; font-size: 13px; margin-right: 10px; cursor: pointer; }
+        .failsafe-btn:hover { background: #e0a800; }
+
+        /* Main Workspace */
+        .workspace { display: flex; width: 100%; margin-top: 50px; height: calc(100vh - 50px); }
+
+        /* Left: PDF Viewer */
+        .pdf-section { flex-grow: 1; display: flex; flex-direction: column; background: #fff; border-right: 2px solid #ccc; }
+        iframe { flex-grow: 1; width: 100%; border: none; }
+
+        /* Right: OMR & Palette */
+        .omr-section { width: 340px; background: #eef2f5; display: flex; flex-direction: column; flex-shrink: 0; }
+        
+        /* Action Area (A, B, C, D) */
+        .action-area { padding: 20px; background: #fff; border-bottom: 2px solid #ddd; }
+        .question-label { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; display: inline-block; }
+        .options-grid { display: flex; gap: 10px; margin-bottom: 20px; }
+        .option-btn { flex: 1; height: 45px; border: 2px solid #ccc; background: #fff; font-size: 1.2em; font-weight: bold; border-radius: 5px; cursor: pointer; transition: all 0.1s; }
+        .option-btn:hover { background: #f0f0f0; }
+        .option-btn.selected { background: #007bff; color: white; border-color: #0056b3; }
+
+        /* Control Buttons */
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { padding: 10px; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; color: white; text-align: center; }
+        .btn-save { background: #28a745; }
+        .btn-save:hover { background: #218838; }
+        .btn-clear { background: #dc3545; }
+        .btn-clear:hover { background: #c82333; }
+        .btn-review { background: #17a2b8; grid-column: span 2; }
+
+        /* Question Palette */
+        .palette-area { flex-grow: 1; overflow-y: auto; padding: 15px; background: #fff; }
+        .palette-title { font-size: 0.9em; font-weight: bold; margin-bottom: 10px; color: #555; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        
+        .q-node { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background: #f8f9fa; color: #333; transition: transform 0.1s; }
+        .q-node:hover { background: #e2e6ea; }
+        .q-node.active { border: 2px solid #000; transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
+        /* NTA Colors */
+        .q-node.answered { background: #28a745; color: white; border-color: #218838; }
+        .q-node.not-answered { background: #dc3545; color: white; border-color: #c82333; }
+        .q-node.review { background: #6f42c1; color: white; border-color: #59339d; }
+        .q-node.answered-review { background: #6f42c1; color: white; border-color: #59339d; position: relative; }
+        .q-node.answered-review::after { content: "✓"; position: absolute; bottom: -5px; right: -5px; background: #28a745; border-radius: 50%; font-size: 10px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
+
     </style>
 </head>
 <body>
 
-    <!-- Left: Folder Tree -->
-    <div id="sidebar">
-        <h3 style="margin-top: 0;">Test Library</h3>
-        <div id="folder-tree"></div>
+    <!-- Top Bar -->
+    <div class="header">
+        <div class="header-title" id="test-title">Loading...</div>
+        <div>
+            <a id="new-tab-btn" class="failsafe-btn" href="#" target="_blank">Pop Out PDF</a>
+            <button id="toggle-key-btn" class="failsafe-btn" onclick="togglePdf()">Show Solutions</button>
+            <span class="timer" id="timer">03:00:00</span>
+        </div>
     </div>
 
-    <!-- Center: Test Viewer -->
-    <div id="main-panel">
-        <div id="top-bar">
-            <h3 id="test-title" style="margin: 0; font-size: 18px;">Select a test from the library</h3>
-            <div class="btn-group">
-                <span id="timer" style="font-size: 18px; font-weight: bold;">03:00:00</span>
-                <a id="new-tab-btn" class="failsafe-btn" href="#" target="_blank">Open in New Tab</a>
-                <button id="toggle-key-btn" class="toggle-btn" onclick="togglePdf()">Show Answer Key</button>
+    <div class="workspace">
+        <!-- Left: Paper -->
+        <div class="pdf-section">
+            <iframe id="pdf-frame" src=""></iframe>
+        </div>
+
+        <!-- Right: OMR Panel -->
+        <div class="omr-section">
+            
+            <div class="action-area">
+                <div class="question-label" id="current-q-label">Question 1</div>
+                
+                <div class="options-grid" id="options-container">
+                    <button class="option-btn" onclick="selectOption('A')">A</button>
+                    <button class="option-btn" onclick="selectOption('B')">B</button>
+                    <button class="option-btn" onclick="selectOption('C')">C</button>
+                    <button class="option-btn" onclick="selectOption('D')">D</button>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-save" onclick="saveNext()">Save & Next</button>
+                    <button class="btn btn-clear" onclick="clearResponse()">Clear</button>
+                    <button class="btn btn-review" onclick="markReview()">Mark for Review & Next</button>
+                </div>
             </div>
-        </div>
-        <iframe id="pdf-frame" src=""></iframe>
-    </div>
 
-    <!-- Right: Digital OMR -->
-    <div id="cbt-panel">
-        <div class="cbt-header">Question Palette</div>
-        <div id="question-palette">
-            <!-- Buttons generated by JS -->
-        </div>
-        <div id="action-bar">
-            <button class="btn btn-review" onclick="markReview()">Mark Review</button>
-            <button class="btn btn-save" onclick="saveAnswer()">Save & Next</button>
+            <div class="palette-area">
+                <div class="palette-title">Question Palette:</div>
+                <div class="grid" id="palette">
+                    <!-- Javascript generates buttons here -->
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Test Data (Paste your FULL mock tests list inside this array!) -->
     <script>
-       // mocktests.js
-const mockTests = [
-  {
-    "title": "QFT 03.pdf",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/10CKcPbZX8wYn1sCQ9Ejo-V6d4NtJ1sgt/preview"
-  },
-  {
-    "title": "QFT - 03",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1HFrdIYmQM8zvqbu22UHhOuCRA72eLkqL/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QFT-2 Qs",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1EmdFY7LfjSG8QBaoKfBkd_T13GwcA2aw/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QFT - 01",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/15A6m2Pi_KKcaevgznmZnZhSRGt6aLQF7/preview"
-  },
-  {
-    "title": "QFT - 01 JEE 26",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1eTtS2_4iQbvH_OqlhgcQPDaK9qr3KAUb/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT 6 (1) (1)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/13KiD70IMviFMJq9prnfYu-mrpQFFyLOQ/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "qpt 06",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1V4yOtI74FsZAayWXAVOOyak9_O-F3utf/preview"
-  },
-  {
-    "title": "qpt 07",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/159mMZBiH_8P36b0elpe-Scyqa6Zn3mLt/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/146Fp6O5NbgmdNky-VJxYfFwz7FLMOdZE/preview"
-  },
-  {
-    "title": "qpt5",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1-o-Hr8znfY9FFBPsm2Sq93AA7LRma-4q/preview"
-  },
-  {
-    "title": "qft 5",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1KVImjlcgKksWV36jDVSwc6YRW_qKV7e1/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT 042026",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1bEp_dwyADPsxE8IHcB4fNhz2abVKQhSJ/preview"
-  },
-  {
-    "title": "Mathongo paper 4 (1)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1jCtkrJClJbHFqMOIeKaXDqjjgM8L-gVl/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT - 03 Mathango 2026",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/14F7Z-HhW29hBtkIPXs3e1rBAzwB96E4I/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "qpt3",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/18eG4ISmTC0f0n7zgktr1gcKOe8PpRHNc/preview"
-  },
-  {
-    "title": "Part Test 02 Mathango",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1vFDJC_mL-5iWARMhzD7iWPxjL-R1F5D3/preview"
-  },
-  {
-    "title": "mathongo paper 2",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1M4GcyjpigyTtVuHOIQPLntJwhCNIEc_W/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-2",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1Yn2gSCKocapD7bDcfOfoicmKgAQ1D87m/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1y-jzjTEWe61LkuotrTB6FtR2F2PphIhi/preview"
-  },
-  {
-    "title": "Full_Test-4",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1Xc2iIm_e0Qv9nccMSPZIRnNeZZ_qGGe1/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1qV7xOENTUbdmeQoxxw7wiBQGuFolfXpH/preview"
-  },
-  {
-    "title": "Full_Test-3",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1pLELrs_UuaBLcLAtYHLm4cGqshY88sP2/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1T4ETO_pNlpndJbLNRfJ0S3_0uu3CA33S/preview"
-  },
-  {
-    "title": "Full_Test-5 (1)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1y5f_fjICkSmCIIhDCdKl0H8n-1-OMtYA/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-6",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1e64boBT_uWliCzDcS5y8dHWPNeS_2nre/preview"
-  },
-  {
-    "title": "Full_Test-8",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1E0dsmmHALWK5rBBevUQCf8cMFsJPSfHi/preview"
-  },
-  {
-    "title": "Full_Test-5",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1xLQ_St0nX5_BgUg28ayFuo487eeon5wb/preview"
-  },
-  {
-    "title": "Full_Test-6 (1)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1m0zwUnESJLy3J4NiFGAII5gLvU26RVC5/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-8 (1)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1u90Nsx2KUFd1PruB4-jx2FFoRQl0WOZ1/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-7",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1wk8fr3LyvJeuyrIHR46PWBbr5x-r8Hgi/preview"
-  },
-  {
-    "title": "Full_Test-7 (7)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/14vw2ZZ1k3zYmLO5zX-wP4JGkDqbG7wFD/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test_11)",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1HGfPQ1VKoslUukLtb6gjkaR5wF26u_r2/preview"
-  },
-  {
-    "title": "Full_Test_1",
-    "folders": ["SIMULATOR","Mathango Papers"],
-    "questionUrl": "https://drive.google.com/file/d/1WOmj7oH2IOvToZx-lM5N9JaOHC0B--iF/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QFT 03.pdf",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/18WPKy4vPPQOC6dpU6rhPhr9IGLmykFww/preview"
-  },
-  {
-    "title": "QFT - 03",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1fhkp2-u-wlUkrp6ZDQizMgowZ0BKs6tk/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QFT-2 Qs",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1N5z25MQOCQYiXxF0mtulEG1J8GGY_kEI/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QFT - 01",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1QfB7x6QXMeYOrsqZkxer3MT3fY9AG4BV/preview"
-  },
-  {
-    "title": "QFT - 01 JEE 26",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1tLCH8mG3PBjjq8VmlKzRVET5ZXK6ZRaN/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT 6 (1) (1)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1PZdcWECdzqu7sUC4-cokCqiPJU8h6oZF/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "qpt 06",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1je7oQqPH855vCww-O20rFTwoGzgRPj6n/preview"
-  },
-  {
-    "title": "qpt 07",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/16qbmZjWcYHUPTfWZFsvdZ_Du2qz48b_X/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/19hCMsBdg-jMdrRq1TPkngpufSGM7bwQm/preview"
-  },
-  {
-    "title": "qpt5",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1Qfovn1qkc8HeqFKtAAGf_DQLBv7aEjk-/preview"
-  },
-  {
-    "title": "qft 5",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1e0f3WVJST94xS6NPQezEEVk5kvOPAd3o/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT 042026",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1EBmY7hx8A1REzfT4ej9VHovv1m8UpNdS/preview"
-  },
-  {
-    "title": "Mathongo paper 4 (1)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/13Xw5m-3MHnEOvvjJ-u_Egxh0mwpRUCz4/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "QPT - 03 Mathango 2026",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1cJM0pY55q4yfdDomfKdUVOoFwnaYBeZI/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "qpt3",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1z3JYdYrBjZmcPgLn8PhrjuLh9wTwdCkt/preview"
-  },
-  {
-    "title": "Part Test 02 Mathango",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1gFGWN92BAg1V1QlkqbqVTjiMk5oYfsgJ/preview"
-  },
-  {
-    "title": "mathongo paper 2",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1fK69ctGxqZfMzXTqFSooG8Az-lAqhbnv/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-2",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1mESw0OTYpxvyF9evlAVVo1WqYupU7bdj/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1DxDBi0ndvivXmOCsi2TsGJu7o1TvifEI/preview"
-  },
-  {
-    "title": "Full_Test-3",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1c8YkPsM8cH_ohZd8JuqdW_KxicWoOwKh/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1INFVOYrv124XbAgfsD8Td-dKCUOIc1sc/preview"
-  },
-  {
-    "title": "Full_Test-4",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1oMWVI-Me7lzlTHPE4AU5M4FXbtqoxqI0/preview",
-    "answerKeyUrl": "https://drive.google.com/file/d/1zVSfZ59Q1ux88fh24GVu6SzzcFS7G5vW/preview"
-  },
-  {
-    "title": "Full_Test-5 (1)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1KbnJmZkRyhtjPzrwNG7XuuAQsvxD_VLI/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-6",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1yGhIqTeBL5OwJBy87hlnazaHwxgnkvzb/preview"
-  },
-  {
-    "title": "Full_Test-5",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1Lpvhx08OJzHPdX2s8ZYK8RMtlXNpk89D/preview"
-  },
-  {
-    "title": "Full_Test-8",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1_icqX5paX40fkKcOYheWOgCZ-39SL4W0/preview"
-  },
-  {
-    "title": "Full_Test-6 (1)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/18xiceSiEJWVugtRoplVLPheHrj4EYsVc/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-8 (1)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1QZ-GPw7YNHSrMuAqY3vUWRaASEvH0nEf/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test-7",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1W_uCk53tPmz7kbyyQ8_moe0e0Jt5_2aG/preview"
-  },
-  {
-    "title": "Full_Test-7 (7)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1-Kuqlx7Q4JE1Wg0_ptt6a9R6N-l2vIjh/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "Full_Test_11)",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1sPcIYrrKr9yXhlL186xMdPWQqfIUkFhl/preview"
-  },
-  {
-    "title": "Full_Test_1",
-    "folders": ["SIMULATOR","Mathango Papers","Mathango"],
-    "questionUrl": "https://drive.google.com/file/d/1HFwbfH4mCmeg1A2NJI1HF9bX2OGN5WYl/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1_K9mDj0XSdfbshhfkDkWpIJjoEn5OvpF/preview"
-  },
-  {
-    "title": "8 April 2",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1b_pLPjPgTZ-JcM8e0WXoD3DXOlX-3pav/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "7 April S2",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1NGCKL_vqYnfBPq708z9FEH_hzthVLxDS/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "7 April S1",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1-xg6cRiyQxSPAJZEOWot745vV5kVj4Yi/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "4 April S2",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1h1LGLkKpjmpApW7CHa08wg2OjQl_BCKA/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "4 April S1",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1ubqR8e9GmV4B3FCytNRQFepQjzVgP47P/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "3 April S2",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/11MzLjXO9eHxb91Nw9wUHQ5xf-5RxEZ-p/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "3 April S1",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/15HDQKFoGgB4tJAlZOck5RqC__6BfSz1W/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "2 April S2",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1FKej07paimk5FNZ5YmF5wyiDcKH_fmHJ/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "2 April S1",
-    "folders": ["SIMULATOR","JEE papers","April 2025"],
-    "questionUrl": "https://drive.google.com/file/d/1t2NJpdfdLgOmDPaF7EOW-PTAqQY-O8e_/preview",
-    "answerKeyUrl": ""
-  },
-  {
-    "title": "JEE Main 2024 (09 Apr Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/18ZI5nyAzZfx4n2kSXGLa1jWhgZgcBlLm/preview"
-  },
-  {
-    "title": "JEE Main 2024 (09 Apr Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1tc9mh9TvT6AZzTvxtcyYlTPDSLXWp_p-/preview"
-  },
-  {
-    "title": "JEE Main 2024 (08 Apr Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/109S5qANFJ5Vf-91wDpd28DRSLVntmkh5/preview"
-  },
-  {
-    "title": "JEE Main 2024 (08 Apr Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1uaHvtLB0HGe0WxpvOGmgeOvyUvVKaC6b/preview"
-  },
-  {
-    "title": "JEE Main 2024 (06 Apr Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1dGc7sW6AcAlDZx1xyVjv8cGB46kUhgKm/preview"
-  },
-  {
-    "title": "JEE Main 2024 (06 Apr Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1513gEZ6y0eS7xth1nIpvoUStOQNHdLXn/preview"
-  },
-  {
-    "title": "JEE Main 2024 (05 Apr Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1f70bCv94Om61uOoUnm7F3uk0AZEjNCV9/preview"
-  },
-  {
-    "title": "JEE Main 2024 (05 Apr Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1OeqDUPjyk44fU1qg11sAuSrLV35HnHP5/preview"
-  },
-  {
-    "title": "JEE Main 2024 (04 Apr Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1HOwJdyd5NB_BFydOVzPN6aaoICrGdXOk/preview"
-  },
-  {
-    "title": "JEE Main 2024 (04 Apr Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","April 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1hMF40KYgnSwO8MF6-wzmhGilSAiJIWcC/preview"
-  },
-  {
-    "title": "JEE Main 2024 (01 Feb Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1ZsbjOY98-2kCLyTiFC-8UsjC_On8xTUl/preview"
-  },
-  {
-    "title": "JEE Main 2024 (01 Feb Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1fTLcBb-f3N1P_yVW4Gg1QVb-XWiRFD-j/preview"
-  },
-  {
-    "title": "JEE Main 2024 (31 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1hewQzGgaRjGnr-pNcqfrQgQwl--l3DGP/preview"
-  },
-  {
-    "title": "JEE Main 2024 (31 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1lZhe0INeLGIVOELscJ5iif9bNYyP_4TD/preview"
-  },
-  {
-    "title": "JEE Main 2024 (30 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1R3cx8iG-9uDs9MhmwotrUxNs4Pc-nIf1/preview"
-  },
-  {
-    "title": "JEE Main 2024 (30 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1vNNHFqJLSJqJO-Y0r-35OLipHC8bZbdv/preview"
-  },
-  {
-    "title": "JEE Main 2024 (29 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1syS1IairU8t16-UEg2zSdbP8eXmuZ0D1/preview"
-  },
-  {
-    "title": "JEE Main 2024 (29 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/13Ix-Fo9mvm8Tgs4FdsOYU2tSD2hqxVUT/preview"
-  },
-  {
-    "title": "JEE Main 2024 (27 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1n_AH535leS4PnS4IjYjjslJeOHijtvgh/preview"
-  },
-  {
-    "title": "JEE Main 2024 (27 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2024"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1rtCFJaMNQfR9KyY3_GPc3w01kj5K4xrz/preview"
-  },
-  {
-    "title": "JEE Main 2025 (29 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1JAQJ6FUbK_vi5U93RGwwKJZ7rK69ofW6/preview"
-  },
-  {
-    "title": "JEE Main 2025 (29 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1ddETjOiW_EnTFCmtmh-Iv6DOxW0c7PaB/preview"
-  },
-  {
-    "title": "JEE Main 2025 (28 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/10JSY82NJRB2gofyB_QY4JUP_FVmcz6uX/preview"
-  },
-  {
-    "title": "JEE Main 2025 (28 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1kj_2EpWJJjIjg5dkainzeAu0dqtyHD5w/preview"
-  },
-  {
-    "title": "JEE Main 2025 (24 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1EMd3JM771zdnBrz8NO_iC3dpm-0dBxGz/preview"
-  },
-  {
-    "title": "JEE Main 2025 (24 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1c3VpttiHgi0GFvQ59W8oSZ9VANWUl-e1/preview"
-  },
-  {
-    "title": "JEE Main 2025 (23 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1t6lYOspdDPkI6QjskahyATmfNXEpeP0v/preview"
-  },
-  {
-    "title": "JEE Main 2025 (23 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1g-vuIrQ3T6in9onmtG_L7H6zY7l3zQ8i/preview"
-  },
-  {
-    "title": "JEE Main 2025 (22 Jan Shift 2) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1uOfgAfm14svtl-UFQvLmhYnedGFZaBhE/preview"
-  },
-  {
-    "title": "JEE Main 2025 (22 Jan Shift 1) Previous Year Paper withs - MathonGo",
-    "folders": ["SIMULATOR","JEE papers","Jan 2025"],
-    "questionUrl": "",
-    "answerKeyUrl": "https://drive.google.com/file/d/1NPjwQTJZs9UmOUoyoXiXx09ebUoH8STM/preview"
-  },
-];
+        // 1. Grab URLs from index.html
+        const urlParams = new URLSearchParams(window.location.search);
+        const qUrl = urlParams.get('qUrl') || '';
+        const aUrl = urlParams.get('aUrl') || '';
+        document.getElementById('test-title').innerText = urlParams.get('title') || 'Mock Test';
 
-    </script>
-
-    <!-- Main Logic -->
-    <script>
-        let currentTest = null;
         let isShowingKey = false;
-        let activeQuestion = 1;
+        let activeQ = 1;
+        const totalQ = 90; // Standard JEE Length
+        let userAnswers = {}; // Stores { questionNumber: 'A', status: 'answered' }
 
-        // 1. Build the Folder Tree
-        function buildFolderTree(data) {
-            const tree = {};
-            data.forEach(item => {
-                let current = tree;
-                item.folders.forEach(folder => {
-                    if (!current[folder]) current[folder] = { _files: [] };
-                    current = current[folder];
-                });
-                current._files.push(item);
-            });
-            return tree;
-        }
-
-        function renderTree(node, container) {
-            const ul = document.createElement('ul');
-            ul.className = "folder-tree";
-            
-            for (const key in node) {
-                if (key === '_files') {
-                    node[key].forEach(file => {
-                        const li = document.createElement('li');
-                        li.className = 'file';
-                        li.innerHTML = `📄 ${file.title || "Combined Paper"}`;
-                        li.onclick = (e) => {
-                            e.stopPropagation();
-                            loadTest(file);
-                        };
-                        ul.appendChild(li);
-                    });
-                } else {
-                    const li = document.createElement('li');
-                    li.className = 'folder';
-                    li.innerHTML = `📁 ${key}`;
-                    const childContainer = document.createElement('div');
-                    childContainer.className = 'hidden';
-                    renderTree(node[key], childContainer);
-                    
-                    li.onclick = (e) => {
-                        e.stopPropagation();
-                        childContainer.classList.toggle('hidden');
-                        li.innerHTML = childContainer.classList.contains('hidden') ? `📁 ${key}` : `📂 ${key}`;
-                    };
-                    ul.appendChild(li);
-                    ul.appendChild(childContainer);
-                }
-            }
-            container.appendChild(ul);
-        }
-
-        // Initialize Folder Tree
-        const treeContainer = document.getElementById('folder-tree');
-        renderTree(buildFolderTree(mockTests), treeContainer);
-
-        // 2. Load the Test into the Iframe
-        function loadTest(test) {
-            currentTest = test;
-            isShowingKey = false;
-            document.getElementById('test-title').innerText = test.title || "Mock Test";
-            
+        // Initialize PDF
+        window.onload = function() {
             const pdfFrame = document.getElementById('pdf-frame');
-            const toggleBtn = document.getElementById('toggle-key-btn');
             const newTabBtn = document.getElementById('new-tab-btn');
-
-            // Show failsafe button
-            newTabBtn.style.display = "inline-block";
-
-            // Handle Combined vs Separate Files logic
-            if (test.questionUrl !== "" && test.answerKeyUrl !== "") {
-                pdfFrame.src = test.questionUrl;
-                newTabBtn.href = test.questionUrl; // Point failsafe to Question
-                toggleBtn.style.display = "inline-block";
-                toggleBtn.innerText = "Show Answer Key";
-            } else if (test.questionUrl !== "") {
-                pdfFrame.src = test.questionUrl;
-                newTabBtn.href = test.questionUrl;
-                toggleBtn.style.display = "none";
-            } else if (test.answerKeyUrl !== "") {
-                pdfFrame.src = test.answerKeyUrl;
-                newTabBtn.href = test.answerKeyUrl;
-                toggleBtn.style.display = "none"; 
-            }
-
-            // Reset Palette
-            generatePalette(75); // Standard length
-        }
-
-        // 3. Toggle between Question and Answer Key
-        function togglePdf() {
-            if (!currentTest) return;
-            const pdfFrame = document.getElementById('pdf-frame');
             const toggleBtn = document.getElementById('toggle-key-btn');
-            const newTabBtn = document.getElementById('new-tab-btn');
 
-            if (isShowingKey) {
-                // Switch back to questions
-                pdfFrame.src = currentTest.questionUrl;
-                newTabBtn.href = currentTest.questionUrl; 
-                toggleBtn.innerText = "Show Answer Key";
+            let initialSrc = qUrl || aUrl;
+            pdfFrame.src = initialSrc;
+            newTabBtn.href = initialSrc;
+
+            if(qUrl && aUrl) {
+                toggleBtn.style.display = 'inline-block';
             } else {
-                // Switch to answers
-                pdfFrame.src = currentTest.answerKeyUrl;
-                newTabBtn.href = currentTest.answerKeyUrl; 
-                toggleBtn.innerText = "Back to Questions";
+                toggleBtn.style.display = 'none';
             }
+
+            buildPalette();
+            goToQuestion(1);
+        };
+
+        function togglePdf() {
+            const pdfFrame = document.getElementById('pdf-frame');
+            const toggleBtn = document.getElementById('toggle-key-btn');
+            const newTabBtn = document.getElementById('new-tab-btn');
+
             isShowingKey = !isShowingKey;
+            let targetUrl = isShowingKey ? aUrl : qUrl;
+            
+            pdfFrame.src = targetUrl;
+            newTabBtn.href = targetUrl;
+            toggleBtn.innerText = isShowingKey ? "Back to Paper" : "Show Solutions";
         }
 
-        // 4. Generate CBT Question Palette
-        function generatePalette(totalQuestions) {
-            const palette = document.getElementById('question-palette');
-            palette.innerHTML = "";
-            for (let i = 1; i <= totalQuestions; i++) {
-                const btn = document.createElement('div');
-                btn.className = 'q-btn';
+        // --- OMR ENGINE ---
+
+        function buildPalette() {
+            const palette = document.getElementById('palette');
+            for(let i = 1; i <= totalQ; i++) {
+                userAnswers[i] = { option: null, status: 'unvisited' };
+                let btn = document.createElement('div');
+                btn.className = 'q-node';
                 btn.id = `qbtn-${i}`;
                 btn.innerText = i;
-                btn.onclick = () => setActiveQuestion(i);
+                btn.onclick = () => goToQuestion(i);
                 palette.appendChild(btn);
             }
-            setActiveQuestion(1);
         }
 
-        function setActiveQuestion(num) {
-            if(document.getElementById(`qbtn-${activeQuestion}`)) {
-                document.getElementById(`qbtn-${activeQuestion}`).style.border = "1px solid #ccc";
+        function goToQuestion(num) {
+            // Mark previous as 'not-answered' if it was merely visited
+            if(userAnswers[activeQ].status === 'unvisited') {
+                userAnswers[activeQ].status = 'not-answered';
+                updateNodeUI(activeQ);
             }
-            activeQuestion = num;
-            document.getElementById(`qbtn-${activeQuestion}`).style.border = "2px solid #000";
+
+            // Remove active state from old
+            document.getElementById(`qbtn-${activeQ}`).classList.remove('active');
+            
+            // Set new active
+            activeQ = num;
+            document.getElementById(`qbtn-${activeQ}`).classList.add('active');
+            document.getElementById('current-q-label').innerText = `Question ${num}`;
+
+            // Restore options UI for this question
+            const currentSelected = userAnswers[activeQ].option;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                if(btn.innerText === currentSelected) {
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.remove('selected');
+                }
+            });
         }
 
-        function saveAnswer() {
-            document.getElementById(`qbtn-${activeQuestion}`).className = 'q-btn answered';
-            if(activeQuestion < 75) setActiveQuestion(activeQuestion + 1);
+        function selectOption(opt) {
+            userAnswers[activeQ].option = opt;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if(btn.innerText === opt) btn.classList.add('selected');
+            });
+        }
+
+        function clearResponse() {
+            userAnswers[activeQ].option = null;
+            userAnswers[activeQ].status = 'not-answered';
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            updateNodeUI(activeQ);
+        }
+
+        function saveNext() {
+            if(userAnswers[activeQ].option) {
+                userAnswers[activeQ].status = 'answered';
+            } else {
+                userAnswers[activeQ].status = 'not-answered';
+            }
+            updateNodeUI(activeQ);
+            if(activeQ < totalQ) goToQuestion(activeQ + 1);
         }
 
         function markReview() {
-            document.getElementById(`qbtn-${activeQuestion}`).className = 'q-btn review';
-            if(activeQuestion < 75) setActiveQuestion(activeQuestion + 1);
+            if(userAnswers[activeQ].option) {
+                userAnswers[activeQ].status = 'answered-review';
+            } else {
+                userAnswers[activeQ].status = 'review';
+            }
+            updateNodeUI(activeQ);
+            if(activeQ < totalQ) goToQuestion(activeQ + 1);
+        }
+
+        function updateNodeUI(num) {
+            let node = document.getElementById(`qbtn-${num}`);
+            node.className = `q-node active ${userAnswers[num].status}`;
         }
     </script>
 </body>
