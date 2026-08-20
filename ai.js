@@ -1,4 +1,4 @@
-// ai.js - Conversational Study Copilot Engine
+// ai.js - Sassy Study Copilot Engine
 
 // Helper: Pick a random response to make the AI feel dynamic
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -17,89 +17,94 @@ const removeStopwords = (str) => {
 };
 
 // ==========================================
-// MASSIVE CONVERSATIONAL DICTIONARY
+// MASSIVE SASSY CONVERSATIONAL DICTIONARY
 // ==========================================
 const conversationIntents = [
     {
         patterns: [/\b(hi|hello|hey|yo|sup|greetings)\b/i],
         replies: [
-            "Hey there! 👋 How's your day going?",
-            "Hello! Ready to get some studying done? 🚀",
-            "Hi! I'm here and ready to help. What's on your mind?"
+            "Hey sugar! 👋🏾 What are we getting into today? Don't tell me you're slacking.",
+            "Hello! 💅🏾 Ready to get some actual studying done, or are we just staring at the screen?",
+            "Hi honey! I'm here and ready to help. What's on your mind? ☕"
         ]
     },
     {
         patterns: [/\b(how are you|how you doing|whats up|what's up)\b/i],
         replies: [
-            "I'm just lines of code, but I'm feeling great! How are you holding up? 🔋",
-            "Doing well and ready to assist! What are we focusing on today?",
-            "I'm good! Just hanging out in your browser. Ready to tackle some subjects?"
+            "I'm fully charged and minding my business. The real question is, how are *your* grades looking? 🤨",
+            "Doing well, honey! Just hanging out in your browser waiting for you to open a PDF. 📁👀",
+            "I'm good, chile! Ready to tackle these subjects whenever you are. 🚀"
         ]
     },
     {
-        patterns: [/\b(good|great|awesome|fine|okay|ok|doing well|not bad)\b/i],
+        patterns: [/\b(good|great|awesome|fine|okay|ok|doing well|not bad|understood)\b/i],
         replies: [
-            "Glad to hear that! Want to dive into some study material?",
-            "Awesome! A positive mindset is half the battle. What should we study?",
-            "Love that energy! Let me know if you need me to pull up any notes or mock tests."
+            "Mmhmm. We'll see when the test scores come back. ☕",
+            "That's what I like to hear! Now let's dive into this material. 📖✨",
+            "Period. 💅🏾 Now let me know if you need me to pull up any notes or mock tests."
         ]
     },
     {
-        patterns: [/\b(bad|sad|depressed|tired|exhausted|stressed|anxious|scared|fail|failing|giving up|quit)\b/i],
+        patterns: [/\b(bad|sad|depressed|tired|exhausted|burnout)\b/i],
         replies: [
-            "I hear you. 💙 Studying can be incredibly overwhelming. It's completely okay to step back and take a breather. Your mental health comes first.",
-            "Take a deep breath. 🧘‍♂️ Don't look at the whole mountain right now, just focus on the next step. You've got this.",
-            "It's tough, but you are tougher. Try taking a 10-minute walk, grab some water, and come back. I'll be right here waiting! 💪"
+            "Oh, you tired? You think the examiners care if you're tired? ...Alright, look here. Take 10 minutes. Drink some water. But if you fall asleep on that textbook, I'm judging you. 🛏️👀",
+            "Honey, it is okay to be exhausted. Your brain needs rest to build memories. Go take a nap, but I expect you back here ready to work! 💙💤"
+        ]
+    },
+    {
+        patterns: [/\b(stress|anxious|scared|fail|failing|giving up|quit|hard|difficult|tough)\b/i],
+        replies: [
+            "Lord have mercy, child, take a breath! 🛑 Panic never passed a test. You've been working hard. Fix your crown, review your mistakes, and get back in the ring. You got this! 👑💅🏾",
+            "I know it's tough, honey, but so are you! Stop looking at the whole mountain and just take the next step. Let's break this down. 🧠✨"
         ]
     },
     {
         patterns: [/\b(lazy|distracted|procrastinating|cant focus|can't focus)\b/i],
         replies: [
-            "It happens to the best of us! Try this: close your other tabs, put your phone out of reach, and just start for 5 straight minutes. Motivation follows action! 🚀",
-            "Want to try the Pomodoro timer in the sidebar? Working in small 25-minute bursts makes it so much easier to start."
+            "Oh, absolutely not. Not on my watch. Put that phone DOWN. 📱❌ Give me 5 solid minutes of focus right now before I lose my digital mind.",
+            "Child, motivation is a myth. Put on the Pomodoro timer in the sidebar and get to work. 🍅 Chop chop!"
         ]
     },
     {
         patterns: [/\b(thanks|thank you|thx|appreciate it)\b/i],
         replies: [
-            "You're very welcome! Keep up the amazing work.",
-            "Anytime! I'm always right here if you need more help.",
-            "Happy to help! Now let's crush the rest of your study session. 📚"
+            "You're welcome, chile. Now get back to the books! 🏃🏾‍♀️💨",
+            "Anytime, honey! I'm always right here if you need more help. 💅🏾",
+            "Happy to help! Now let's crush the rest of your study session. Period. 📚✨"
         ]
     },
     {
         patterns: [/\b(joke|funny|laugh)\b/i],
         replies: [
-            "Why was the math book sad? Because it had too many problems! 😂",
-            "Are you made of Copper and Tellurium? Because you are Cu Te! 🧪",
-            "I'd tell you a chemistry joke, but I know I wouldn't get a reaction. 🤓"
+            "You want a joke? Your screen time report. 💀 Now open a PDF before I get mad.",
+            "I'd tell you a chemistry joke, but I know I wouldn't get a reaction. Now get back to work. 🤓🧪",
+            "Why was the math book sad? Because it had too many problems! ...Just like your syllabus if you don't start studying. 😂📖"
         ]
     },
     {
         patterns: [/\b(who are you|what are you|your name)\b/i],
         replies: [
-            "I'm your AI Study Copilot! I live right here in your app to help you find notes, solve math, and keep you on track.",
-            "Think of me as your personal study assistant. I navigate your files, grab facts from the web, and chat with you when you need a break!"
+            "I am your AI Study Copilot, honey. Part machine, part no-nonsense tutor. I'm here to make sure you pass these classes, period. 💁🏾‍♀️✨",
+            "Think of me as your personal, sassy study assistant. I navigate your files, grab facts from the web, and keep you from slacking off! 💅🏾"
         ]
     },
     {
         patterns: [/\b(bye|goodbye|see ya|cya|later|going to sleep)\b/i],
         replies: [
-            "Goodbye! Rest up and come back stronger! 👋",
-            "See ya! Remember to take care of yourself.",
-            "Catch you later! Awesome job today. 🌟"
+            "Goodbye! Rest up and come back stronger! Don't let me catch you slipping tomorrow. 👋🏾",
+            "See ya, honey! Take care of yourself. 🌟"
         ]
     },
     {
         patterns: [/\b(memorize|forget|remember|memory|keep forgetting)\b/i],
         replies: [
-            "🧠 <strong>Memory Tip:</strong> Don't just re-read your notes! Use <strong>Active Recall</strong> (testing yourself without looking) and <strong>Spaced Repetition</strong>. It forces your brain to build permanent neural pathways."
+            "Honey, reading the same page 10 times ain't studying, that's just staring! 🙄 Use <strong>Active Recall</strong> (test yourself!) and space it out. You can't cram a whole semester in one night, chile. 🧠✨"
         ]
     },
     {
         patterns: [/\b(don't understand|confused|explain better|stuck)\b/i],
         replies: [
-            "💡 <strong>The Feynman Technique:</strong> If a concept is confusing, try explaining it out loud right now as if you were teaching a 10-year-old. When you stumble, you've found your exact knowledge gap!"
+            "Alright, let's break it down like we're 10 years old. That's the Feynman Technique, sugar. 💡 If you can't explain it simply, you don't know it! Find out exactly where you're stumbling and fix *that*. 🗣️📖"
         ]
     }
 ];
@@ -109,9 +114,8 @@ async function processAIQuery(query, libraryData) {
     const cleanQuery = removeStopwords(qLower);
 
     // ==========================================
-    // 1. SMALL TALK & CONVERSATION CHECK
+    // 1. SMALL TALK & SASSY CONVERSATION CHECK
     // ==========================================
-    // If the query is short (under 10 words), check our conversation dictionary first
     if (qLower.split(' ').length < 10) {
         for (let intent of conversationIntents) {
             for (let pattern of intent.patterns) {
@@ -125,11 +129,11 @@ async function processAIQuery(query, libraryData) {
     // Time & Date Check
     if (qLower.match(/(what time is it|time please|current time)/)) {
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        return { type: 'fact', reply: `It's currently <strong>${time}</strong>. Let's make this next hour count! ⏳` };
+        return { type: 'fact', reply: `It's <strong>${time}</strong>, honey. Tick tock! ⏰ Time waits for nobody, especially not the examiners.` };
     }
     if (qLower.match(/(what day is it|current date|what is today)/)) {
         const date = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        return { type: 'fact', reply: `Today is <strong>${date}</strong>. 📅` };
+        return { type: 'fact', reply: `Today is <strong>${date}</strong>. Make it count! 📅💅🏾` };
     }
 
     // ==========================================
@@ -142,7 +146,7 @@ async function processAIQuery(query, libraryData) {
             if (/^[0-9\+\-\*\/\(\)\.\s\*]+$/.test(expression)) {
                 let result = new Function(`return ${expression}`)();
                 if (!isNaN(result)) {
-                    return { type: 'fact', reply: `🔢 <strong>Calculation:</strong> ${calcMatch[1]} <br>✅ <strong>Result:</strong> ${result}` };
+                    return { type: 'fact', reply: `Numbers don't lie, honey. Here you go: <br>🔢 <strong>Calculation:</strong> ${calcMatch[1]} <br>✅ <strong>Result:</strong> ${result} 💅🏾` };
                 }
             }
         } catch (e) { /* Ignore and fall through */ }
@@ -186,7 +190,7 @@ async function processAIQuery(query, libraryData) {
                     if (wikiData.type !== 'disambiguation' && wikiData.extract) {
                         return { 
                             type: 'fact', 
-                            reply: `🧠 <strong>${wikiData.title}:</strong> ${wikiData.extract} <br><br><a href="${wikiData.content_urls.desktop.page}" target="_blank" style="color:var(--highlight-text);font-size:0.85em;text-decoration:underline;">Read more on Wikipedia</a>` 
+                            reply: `Look what I dug up for you. Read it carefully! 🧐📖<br><br>🧠 <strong>${wikiData.title}:</strong> ${wikiData.extract} <br><br><a href="${wikiData.content_urls.desktop.page}" target="_blank" style="color:var(--highlight-text);font-size:0.85em;text-decoration:underline;">Read more on Wikipedia</a>` 
                         };
                     }
                 }
@@ -215,7 +219,7 @@ async function processAIQuery(query, libraryData) {
             return {
                 type: 'navigation',
                 matches: scoredFallback.map(item => item.book).slice(0, 4),
-                prefix: `I was listening to what you said and found these relevant files in your library:`
+                prefix: `I couldn't find a direct answer, honey, but I found these files in your library. Open one up! 📁👇🏾`
             };
         }
     }
@@ -236,7 +240,7 @@ async function processAIQuery(query, libraryData) {
                         if (summaryData.type !== 'disambiguation' && summaryData.extract) {
                             return {
                                 type: 'fact',
-                                reply: `🌐 <strong>Web Search Result:</strong><br><br><strong>${summaryData.title}:</strong> ${summaryData.extract} <br><br><a href="${summaryData.content_urls.desktop.page}" target="_blank" style="color:var(--highlight-text);font-size:0.85em;text-decoration:underline;">Read more</a>`
+                                reply: `Wikipedia says this. You better take notes! 🌐📝<br><br><strong>${summaryData.title}:</strong> ${summaryData.extract} <br><br><a href="${summaryData.content_urls.desktop.page}" target="_blank" style="color:var(--highlight-text);font-size:0.85em;text-decoration:underline;">Read more</a>`
                             };
                         }
                     }
@@ -248,26 +252,24 @@ async function processAIQuery(query, libraryData) {
     }
 
     // ==========================================
-    // 7. CONVERSATIONAL CATCH-ALL (If the AI is stumped)
+    // 7. CONVERSATIONAL CATCH-ALL (If Stumped)
     // ==========================================
-    // Check if it's a question
     if (qLower.includes('?')) {
         return {
             type: 'fact',
-            reply: `That's a great question, but I couldn't find a direct answer in your library or the web.<br><br>
+            reply: `Now you know good and well I don't have the answer to that. Ask me to find a PDF, solve some math, or define a concept. For everything else, the Lord gave us Google. 🤷🏾‍♀️☕<br><br>
             <div style="display:flex; gap:8px; margin-top:10px;">
-                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" class="nav-shortcut-btn" style="flex:1; text-align:center; justify-content:center; text-decoration:none;">🔍 Google It</a>
+                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" class="nav-shortcut-btn" style="flex:1; text-align:center; justify-content:center; text-decoration:none;">🔍 Google It, Honey</a>
                 <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" class="nav-shortcut-btn" style="flex:1; text-align:center; justify-content:center; text-decoration:none;">▶️ YouTube It</a>
             </div>`
         };
     } else {
-        // If it's just a statement
         return {
             type: 'fact',
             reply: rand([
-                "I hear you! Does that relate to a specific topic you're studying right now? 🤖",
+                "Mmhmm. I hear you. Does that relate to a specific topic you're studying right now, or are we just chatting? 🤨",
                 "Interesting! Want me to search your library for anything related to that?",
-                "Got it! Let me know if you want me to pull up any notes, solve math, or define a concept for you."
+                "Got it! Let me know if you want me to pull up any notes, solve math, or define a concept for you. 💅🏾"
             ])
         };
     }
