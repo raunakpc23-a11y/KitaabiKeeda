@@ -1,490 +1,6460 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Study Library</title>
-    <style>
-        :root { 
-            --primary-bg: #f4f6f8; --sidebar-bg: #ffffff; --sidebar-text: #2d3748; 
-            --highlight: #ebf8ff; --highlight-text: #3182ce; --text-color: #1a202c; 
-            --header-bg: #ffffff; --reader-bg: #edf2f7; --border-color: #e2e8f0;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            --folder-bg: #f7fafc; --success: #48bb78;
-        }
-
-        body.dark-mode {
-            --primary-bg: #0b0f19; --sidebar-bg: #111827; --sidebar-text: #e5e7eb; 
-            --highlight: #1e3a8a; --highlight-text: #60a5fa; --text-color: #f3f4f6; 
-            --header-bg: #111827; --reader-bg: #0f172a; --border-color: #1f2937;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); --folder-bg: #1f2937;
-            --success: #38a169;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-        body { display: flex; height: 100vh; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; overflow: hidden; }
-        
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        body.dark-mode ::-webkit-scrollbar-thumb { background: #374151; }
-
-        /* Sidebar & Header */
-        .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
-
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
-        .sidebar-overlay.open { display: block; opacity: 1; }
-
-        /* Big Category & Progress */
-        .mode-selector { display: flex; gap: 12px; padding: 16px 20px 6px 20px; background-color: var(--sidebar-bg); }
-        .mode-btn { flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.9em; cursor: pointer; transition: all 0.25s; text-align: center; }
-        .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
-        .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); }
-
-        .progress-wrapper { padding: 10px 20px; background-color: var(--sidebar-bg); }
-        .progress-bar { width: 100%; height: 6px; background-color: var(--border-color); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--highlight-text), var(--success)); width: 0%; transition: width 0.4s ease; }
-        .progress-text { font-size: 0.75em; font-weight: 600; color: #718096; margin-top: 4px; text-align: right; }
-
-        /* Filters & Search */
-        .search-container { padding: 8px 20px 12px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
-        
-        .subject-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-        .subject-filters::-webkit-scrollbar { display: none; }
-        .subj-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--sidebar-text); font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-        .subj-chip:hover { border-color: var(--highlight-text); }
-        .subj-chip.active { background: var(--highlight-text); color: white; border-color: var(--highlight-text); }
-
-        .search-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
-        .search-input { width: 100%; padding: 10px 35px 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.9em; }
-        .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
-        .clear-search-btn { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: #a0aec0; font-size: 1.2em; display: none; padding: 4px; }
-        .clear-search-btn:hover { color: #e53e3e; }
-        .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
-        .tree-controls span:hover { text-decoration: underline; }
-
-        .book-list { flex-grow: 1; overflow-y: auto; padding: 14px 16px; list-style: none; }
-        
-        /* Nested Directory Tree UI */
-        details { margin-bottom: 4px; }
-        summary { padding: 9px 12px; cursor: pointer; font-weight: 600; border-radius: 8px; display: flex; align-items: center; background-color: var(--folder-bg); user-select: none; transition: background 0.2s, color 0.2s; font-size: 0.91em; color: var(--sidebar-text); border: 1px solid transparent; }
-        summary:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--border-color); }
-        summary.active-path { color: var(--highlight-text); font-weight: 700; border-bottom: 2px solid var(--highlight-text); border-radius: 8px 8px 0 0; }
-        summary::marker { display: none; content: ""; } 
-        summary::-webkit-details-marker { display: none; }
-        summary::before { content: "📁"; margin-right: 10px; font-size: 1.1em; filter: grayscale(0.2); }
-        details[open] > summary::before { content: "📂"; filter: none; }
-        .folder-contents { padding-left: 14px; margin-top: 4px; border-left: 2px dashed var(--border-color); margin-left: 14px; }
-        
-        /* File Items */
-        .book-item { padding: 8px 10px 8px 8px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid transparent; gap: 8px; }
-        .book-item:hover { background-color: var(--highlight); color: var(--highlight-text); }
-        .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25); }
-        
-        .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
-        .book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
-        
-        .book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-        .check-done { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
-        .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0 4px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
-        .fav-star:hover { opacity: 1; transform: scale(1.25); }
-        .fav-star.is-fav { opacity: 1; color: #ecc94b; text-shadow: 0 0 8px rgba(236, 201, 75, 0.5); }
-        .book-item.active .fav-star { color: white; text-shadow: none; }
-
-        /* Main Reader Workspace */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; position: relative; overflow: hidden; }
-        .reader-header { padding: 16px 24px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); gap: 15px; }
-        .reader-header-info { display: flex; align-items: center; gap: 15px; overflow: hidden; flex-grow: 1; }
-        .reader-header-info h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .breadcrumb { color: #64748b; font-size: 0.83em; margin-top: 4px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .header-actions { display: flex; gap: 8px; align-items: center; }
-        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
-        .icon-btn:hover { background-color: var(--border-color); }
-        .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
-        .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
-        .primary-btn:active { transform: scale(0.96); }
-        #mobile-menu-btn { display: none; }
-
-        /* Reader Area & Floating Controls */
-        .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
-        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; text-align: center; }
-        .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
-        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); display: none; background-color: white; border: 1px solid var(--border-color); position: relative; }
-        
-        .floating-nav { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 20px; gap: 15px; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .floating-nav button { background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; transition: transform 0.2s; font-weight: bold; }
-        .floating-nav button:hover { transform: scale(1.2); }
-
-        /* Quick Notes Slide-out */
-        .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.05); transition: right 0.3s ease; display: flex; flex-direction: column; z-index: 10; }
-        .notes-panel.open { right: 0; }
-        .notes-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-        .notes-area { flex-grow: 1; border: none; padding: 20px; width: 100%; resize: none; background: var(--reader-bg); color: var(--text-color); outline: none; font-size: 0.95em; line-height: 1.5; }
-
-        @media (max-width: 800px) {
-            .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; max-width: 380px; }
-            .sidebar.open { left: 0; }
-            #mobile-menu-btn { display: flex; }
-            .reader-container { padding: 5px; }
-            .primary-btn span { display: none; }
-            .notes-panel { width: 100%; right: -100%; }
-        }
-    </style>
-</head>
-<body>
-
-    <script src="data.js"></script>
-
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>📚 Study Library</h2>
-            <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
-        </div>
-
-        <div class="mode-selector">
-            <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
-            <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
-        </div>
-        
-        <div class="progress-wrapper">
-            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-            <div class="progress-text" id="progress-text">0% Completed</div>
-        </div>
-
-        <div class="search-container">
-            <div class="subject-filters" id="subject-filters">
-                <button class="subj-chip active" data-subj="All">All</button>
-                <button class="subj-chip" data-subj="Physics">Physics</button>
-                <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
-                <button class="subj-chip" data-subj="Maths">Maths</button>
-            </div>
-            <div class="search-wrapper">
-                <input type="text" id="search-bar" class="search-input" placeholder="Search files... (Press '/' to focus)">
-                <button id="clear-search-btn" class="clear-search-btn" title="Clear Search">✖</button>
-            </div>
-            <div class="tree-controls">
-                <span id="expand-all">Expand All</span>
-                <span id="collapse-all">Collapse All</span>
-            </div>
-        </div>
-        <div class="book-list" id="book-list">
-            <div class="placeholder-text" style="font-size: 0.9em; margin-top:20px; text-align:center;">Loading library...</div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div class="reader-header">
-            <div class="reader-header-info">
-                <button id="mobile-menu-btn" class="icon-btn" title="Open Menu">☰</button>
-                <div>
-                    <h2 id="current-book-title">Select a file</h2>
-                    <div id="current-book-breadcrumb" class="breadcrumb"></div>
-                </div>
-            </div>
-            <div class="header-actions">
-                <button id="download-btn" class="icon-btn" title="Download PDF" style="display:none;">⬇️</button>
-                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
-                <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
-            </div>
-        </div>
-        
-        <div class="reader-container">
-            <div class="placeholder-container" id="placeholder-box">
-                <p class="placeholder-text" id="placeholder">Choose a PDF file from the tree structure on the left to begin reading.</p>
-            </div>
-            <div id="viewer-wrapper">
-                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" loading="lazy"></iframe>
-                <div class="floating-nav" id="floating-nav">
-                    <button id="prev-btn" title="Previous File">◀ Prev</button>
-                    <span style="opacity: 0.5;">|</span>
-                    <button id="next-btn" title="Next File">Next ▶</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="notes-panel" class="notes-panel">
-            <div class="notes-header">
-                <span>📝 Notes</span>
-                <button class="icon-btn" id="close-notes-btn" style="font-size: 1em; padding: 2px;">✖</button>
-            </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your quick notes here..."></textarea>
-        </div>
-    </div>
-
-    <script>
-        // Error Catcher
-        window.onerror = function(message) {
-            if(message.includes("allBooks is not defined")) {
-                document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> data.js file is missing or not loaded correctly.</div>`;
-            } return false;
-        };
-
-        // State Tracking
-        let currentRoot = "CLASS 10"; 
-        let currentSubject = "All";
-        let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
-        let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
-        let recentBooks = JSON.parse(localStorage.getItem('library-recent')) || [];
-        let searchTimeout;
-
-        // Elements
-        const bookListElement = document.getElementById('book-list');
-        const searchBar = document.getElementById('search-bar');
-        const clearSearchBtn = document.getElementById('clear-search-btn');
-        const themeToggle = document.getElementById('theme-toggle');
-        const viewerWrapper = document.getElementById('viewer-wrapper');
-        const bookFrame = document.getElementById('book-frame');
-        const floatingNav = document.getElementById('floating-nav');
-        const downloadBtn = document.getElementById('download-btn');
-        const notesPanel = document.getElementById('notes-panel');
-        const notesArea = document.getElementById('notes-area');
-
-        // Mobile Menu
-        function toggleMobileMenu() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebar-overlay').classList.toggle('open');
-        }
-        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
-        document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
-
-        // UI Interactions
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentRoot = btn.getAttribute('data-root');
-                searchBar.value = ''; clearSearchBtn.style.display = 'none';
-                filterAndRender();
-            });
-        });
-
-        document.querySelectorAll('.subj-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                currentSubject = chip.getAttribute('data-subj');
-                filterAndRender();
-            });
-        });
-
-        document.getElementById('fullscreen-btn').addEventListener('click', () => {
-            if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
-            else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
-        });
-
-        document.getElementById('notes-toggle-btn').addEventListener('click', () => {
-            notesPanel.classList.toggle('open');
-        });
-        document.getElementById('close-notes-btn').addEventListener('click', () => {
-            notesPanel.classList.remove('open');
-        });
-
-        // Search
-        searchBar.addEventListener('input', () => {
-            clearSearchBtn.style.display = searchBar.value.length > 0 ? 'block' : 'none';
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(filterAndRender, 250); 
-        });
-        clearSearchBtn.addEventListener('click', () => {
-            searchBar.value = ''; clearSearchBtn.style.display = 'none'; searchBar.focus();
-            filterAndRender();
-        });
-
-        // Core Functions
-        function updateProgress() {
-            if (typeof allBooks === 'undefined') return;
-            const rootBooks = allBooks.filter(b => b.folders[0].toUpperCase() === currentRoot.toUpperCase());
-            const total = rootBooks.length;
-            const completed = rootBooks.filter(b => completedBooks.includes(b.title)).length;
-            const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-            document.getElementById('progress-fill').style.width = pct + '%';
-            document.getElementById('progress-text').textContent = `${pct}% Completed`;
-        }
-
-        function filterAndRender() {
-            if (typeof allBooks === 'undefined') return;
-            updateProgress();
-            const query = searchBar.value.toLowerCase();
-            
-            const filteredBooks = allBooks.filter(book => {
-                const matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
-                const searchString = book.title + " " + book.folders.join(" ");
-                const matchesSearch = searchString.toLowerCase().includes(query);
-                const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
-                return matchesRoot && matchesSearch && matchesSubject;
-            });
-            renderTree(filteredBooks, query.length > 0 || currentSubject !== "All");
-        }
-
-        function renderTree(booksArray, isSearching) {
-            bookListElement.innerHTML = ''; 
-
-            // Render Recent
-            const localRecent = recentBooks.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
-            if (localRecent.length > 0 && !isSearching) {
-                const rDet = document.createElement('details'); rDet.open = true;
-                const rSum = document.createElement('summary'); rSum.textContent = `🕒 Recently Viewed`;
-                rDet.appendChild(rSum);
-                const rCont = document.createElement('div'); rCont.className = 'folder-contents';
-                localRecent.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) rCont.appendChild(createBookElement(b)); });
-                rDet.appendChild(rCont); bookListElement.appendChild(rDet);
-            }
-
-            // Render Favorites
-            const rootFavs = favorites.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
-            if (rootFavs.length > 0 && !isSearching) {
-                const fDet = document.createElement('details'); fDet.open = true;
-                const fSum = document.createElement('summary'); fSum.textContent = `⭐ Favorites (${rootFavs.length})`;
-                fDet.appendChild(fSum);
-                const fCont = document.createElement('div'); fCont.className = 'folder-contents';
-                rootFavs.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) fCont.appendChild(createBookElement(b)); });
-                fDet.appendChild(fCont); bookListElement.appendChild(fDet);
-            }
-
-            if (booksArray.length === 0) {
-                bookListElement.innerHTML += '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px;">No files found.</div>'; return;
-            }
-
-            const fileTree = { _files: [], _isFolder: true };
-            booksArray.forEach(book => {
-                let currentLevel = fileTree;
-                book.folders.slice(1).forEach(folder => {
-                    if (!currentLevel[folder]) currentLevel[folder] = { _files: [], _isFolder: true };
-                    currentLevel = currentLevel[folder];
-                });
-                currentLevel._files.push(book);
-            });
-
-            function countAllFiles(node) {
-                let count = (node._files ? node._files.length : 0);
-                Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => count += countAllFiles(node[k]));
-                return count;
-            }
-
-            function buildHTMLNode(nodeObj, isOpen) {
-                const container = document.createElement('div');
-                Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort().forEach(folderName => {
-                    const details = document.createElement('details'); if (isOpen) details.open = true; 
-                    const summary = document.createElement('summary');
-                    summary.textContent = `${folderName} (${countAllFiles(nodeObj[folderName])})`;
-                    details.appendChild(summary);
-                    const contents = document.createElement('div'); contents.className = 'folder-contents';
-                    contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
-                    details.appendChild(contents); container.appendChild(details);
-                });
-                if (nodeObj._files) nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
-                return container;
-            }
-            bookListElement.appendChild(buildHTMLNode(fileTree, isSearching));
-        }
-
-        function createBookElement(book) {
-            const div = document.createElement('div'); div.className = 'book-item';
-            const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
-
-            const actions = document.createElement('div'); actions.className = 'book-actions';
-            
-            // Completion Checkbox
-            const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
-            check.checked = completedBooks.includes(book.title);
-            check.onclick = (e) => {
-                e.stopPropagation();
-                if(check.checked) completedBooks.push(book.title); else completedBooks = completedBooks.filter(t => t !== book.title);
-                localStorage.setItem('library-completed', JSON.stringify(completedBooks));
-                updateProgress();
-            };
-
-            // Favorite Star
-            const star = document.createElement('button'); star.className = 'fav-star';
-            const isFav = favorites.includes(book.title); star.textContent = isFav ? '★' : '☆'; if (isFav) star.classList.add('is-fav');
-            star.onclick = (e) => {
-                e.stopPropagation();
-                if (favorites.includes(book.title)) { favorites = favorites.filter(t => t !== book.title); star.textContent = '☆'; star.classList.remove('is-fav'); } 
-                else { favorites.push(book.title); star.textContent = '★'; star.classList.add('is-fav'); }
-                localStorage.setItem('library-favorites', JSON.stringify(favorites));
-                filterAndRender();
-            };
-
-            actions.appendChild(check); actions.appendChild(star);
-            div.appendChild(content); div.appendChild(actions);
-            div.onclick = () => loadBook(book, div);
-            return div;
-        }
-
-        function loadBook(book, clickedElement) {
-            // Update UI Tracking
-            document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
-            document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
-            clickedElement.classList.add('active');
-            let parent = clickedElement.parentElement;
-            while(parent && parent.id !== 'book-list') {
-                if (parent.tagName.toLowerCase() === 'details') { const sum = parent.querySelector('summary'); if (sum) sum.classList.add('active-path'); }
-                parent = parent.parentElement;
-            }
-
-            // Update Recent
-            recentBooks = recentBooks.filter(t => t !== book.title);
-            recentBooks.unshift(book.title);
-            if(recentBooks.length > 5) recentBooks.pop();
-            localStorage.setItem('library-recent', JSON.stringify(recentBooks));
-
-            // Load Content
-            document.getElementById('current-book-title').textContent = book.title;
-            document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
-            document.getElementById('placeholder-box').style.display = 'none';
-            document.getElementById('fullscreen-btn').style.display = 'flex';
-            document.getElementById('notes-toggle-btn').style.display = 'flex';
-            
-            // Setup Download
-            const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if(match) {
-                downloadBtn.style.display = 'flex';
-                downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
-            } else { downloadBtn.style.display = 'none'; }
-
-            // Setup Notes
-            notesArea.value = localStorage.getItem('notes_' + book.title) || '';
-            notesArea.oninput = function() { localStorage.setItem('notes_' + book.title, this.value); };
-
-            viewerWrapper.style.display = 'block';
-            floatingNav.style.display = 'flex';
-            bookFrame.src = book.url; 
-            localStorage.setItem('last-opened-book', book.title);
-
-            if (window.innerWidth <= 800) toggleMobileMenu(); // Close menu on mobile
-        }
-
-        // Prev/Next Navigation
-        function navigateBook(direction) {
-            const items = Array.from(document.querySelectorAll('#book-list .book-item'));
-            const currentIndex = items.findIndex(item => item.classList.contains('active'));
-            if(currentIndex !== -1 && items[currentIndex + direction]) items[currentIndex + direction].click();
-        }
-        document.getElementById('prev-btn').onclick = () => navigateBook(-1);
-        document.getElementById('next-btn').onclick = () => navigateBook(1);
-
-        // Boot Init
-        setTimeout(() => {
-            if (typeof allBooks !== 'undefined') {
-                filterAndRender();
-                const lastBookTitle = localStorage.getItem('last-opened-book');
-                if (lastBookTitle && allBooks.length > 0) {
-                    const targetBook = allBooks.find(b => b.title === lastBookTitle);
-                    if (targetBook) {
-                        setTimeout(() => {
-                            document.querySelectorAll('.book-item').forEach(el => {
-                                if (el.querySelector('.book-item-content').textContent.trim() === targetBook.title) loadBook(targetBook, el);
-                            });
-                        }, 100);
-                    }
-                }
-            }
-        }, 50);
-    </script>
-</body>
-</html>
+// data.js
+let allBooks = [
+  {
+    "title": "OSWAL GURUKUL SSC QB CLASS 10 BY @PROCBSE",
+    "folders": [
+      "CLASS 10",
+      "Oswaal QB"
+    ],
+    "url": "https://drive.google.com/file/d/1qIJlcRZerU5-zr6J-FRe3X3Erv3LTGzQ/preview"
+  },
+  {
+    "title": "Class 10 Oswaal Sst",
+    "folders": [
+      "CLASS 10",
+      "Oswaal QB"
+    ],
+    "url": "https://drive.google.com/file/d/1_Sv-Zur1KpapBEzcVKw4Xtm5UgKzOhqO/preview"
+  },
+  {
+    "title": "Class 10 Oswaal Science",
+    "folders": [
+      "CLASS 10",
+      "Oswaal QB"
+    ],
+    "url": "https://drive.google.com/file/d/11AvmyYL9sI0Mn6NBlSCfzXsscn3-bUGb/preview"
+  },
+  {
+    "title": "Class 10 Oswaal Maths",
+    "folders": [
+      "CLASS 10",
+      "Oswaal QB"
+    ],
+    "url": "https://drive.google.com/file/d/1RkekjDrm2f85eFEjbabM2ReK47-B3k6c/preview"
+  },
+  {
+    "title": "Class 10 MATHS QB Educart",
+    "folders": [
+      "CLASS 10",
+      "Educart QBs"
+    ],
+    "url": "https://drive.google.com/file/d/1S0Xq7T2sv2xuW4iyufrzF6cizxuslaHd/preview"
+  },
+  {
+    "title": "Class 10 Educart Social Sciene QB",
+    "folders": [
+      "CLASS 10",
+      "Educart QBs"
+    ],
+    "url": "https://drive.google.com/file/d/1iDVCphW71RBbw8CWDbahjCJuiwC0x-Nt/preview"
+  },
+  {
+    "title": "Class 10 EDUCART ENGLISH QB BY @SIKHBHARAT",
+    "folders": [
+      "CLASS 10",
+      "Educart QBs"
+    ],
+    "url": "https://drive.google.com/file/d/1_lyotCo_gQ8_VijrFPp1p_1FspkH79tB/preview"
+  },
+  {
+    "title": "Class 10 MATHS ONESHOT Educart",
+    "folders": [
+      "CLASS 10",
+      "Oneshot"
+    ],
+    "url": "https://drive.google.com/file/d/1fUTrR7yesKl0am_MRXZao6mJwDgJINoc/preview"
+  },
+  {
+    "title": "Class 10 Educart one shot social science by @PROCBSE",
+    "folders": [
+      "CLASS 10",
+      "Oneshot"
+    ],
+    "url": "https://drive.google.com/file/d/1rZDap4efrUo-AVfzEuhkmAGEIbRkBdXh/preview"
+  },
+  {
+    "title": "Class 10 educart one shot science",
+    "folders": [
+      "CLASS 10",
+      "Oneshot"
+    ],
+    "url": "https://drive.google.com/file/d/1myji3datQ5_HMrWNuKkn2nPhgEh03Qqt/preview"
+  },
+  {
+    "title": "Class 10 Educart English ONESHOT by @PROCBSE",
+    "folders": [
+      "CLASS 10",
+      "Oneshot"
+    ],
+    "url": "https://drive.google.com/file/d/1Q_5-U8pH3sELPulCMG_RHldLMA7ySjn0/preview"
+  },
+  {
+    "title": "Educart SST Sample Paper Class 10 2023-24 (Full) (1)",
+    "folders": [
+      "CLASS 10",
+      "Educart SQP"
+    ],
+    "url": "https://drive.google.com/file/d/1LD5dxSqJ8KyAuFQmigBKyQDbWr5g5qND/preview"
+  },
+  {
+    "title": "Educart Class 10 Maths Standard Sample Paper 2023-24",
+    "folders": [
+      "CLASS 10",
+      "Educart SQP"
+    ],
+    "url": "https://drive.google.com/file/d/1hG3iKAlK78lDIXXQhs7d80dsYs8g-y7v/preview"
+  },
+  {
+    "title": "Educart 2023-24 Science Class 10 Sample Paper",
+    "folders": [
+      "CLASS 10",
+      "Educart SQP"
+    ],
+    "url": "https://drive.google.com/file/d/1tKBaJOspsupQBBwwtiK5R1VOxly8liDd/preview"
+  },
+  {
+    "title": "Educart 2023-24 Class 10 English Sample Paper",
+    "folders": [
+      "CLASS 10",
+      "Educart SQP"
+    ],
+    "url": "https://drive.google.com/file/d/1wc5OXMd8zzLIWI_Z5JnGNalj0e4uArjq/preview"
+  },
+  {
+    "title": "9. Applications of trigonometry",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/19zq5eaqsNkMOEtuPempbNuOYKINzS-pG/preview"
+  },
+  {
+    "title": "8. Trigonometry",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/14q9CpbB3TxUwOkiDtLF65YWabsQ6ebxN/preview"
+  },
+  {
+    "title": "7. Coordinate Geometry",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1BduYysdipqbWaBt8LS6WCNCKTavZb5B9/preview"
+  },
+  {
+    "title": "6. Triangles",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1XKqpjwaNlwBdgV7k44nhKSSfG3HUNi8a/preview"
+  },
+  {
+    "title": "5. Arithmetic Progressions",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1jeVDcFDDglxnOGvA2yFg0cwZNxHhKfXX/preview"
+  },
+  {
+    "title": "4. Quadratic Equations",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1kS7eUXzpqRrXaZF3rXGrgZYuqH6hh9Zl/preview"
+  },
+  {
+    "title": "3. Linear Equatios",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1Vgts6Tc8-v33tpvOSgXi0Locjvr5JgGS/preview"
+  },
+  {
+    "title": "2. Polynomials",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1pJtTsV_6iAN3Z4h4ynE10BIwV2E_J-gS/preview"
+  },
+  {
+    "title": "14. Probability",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1GWiZm0xoJNj1UZZDQ4jzRaRL6OgktpNd/preview"
+  },
+  {
+    "title": "13. Statistics",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/14nyF4Mv5uls2V_gI01Eo82oe9Uul7lHT/preview"
+  },
+  {
+    "title": "12. Surface Areas an Volumes",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1pECY3EK1CdZSOmGsf2DYY_t77OuOjYy7/preview"
+  },
+  {
+    "title": "11. Area of Crircles",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1RJP0i-oXZaDdC7-mTVbjSiwpW7_WWcjx/preview"
+  },
+  {
+    "title": "10. Circles",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1cdHX4981-835P-E1aklEiGfyHUHw8NIj/preview"
+  },
+  {
+    "title": "1. Real Numbers",
+    "folders": [
+      "CLASS 10",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/11NwZdY2yQYGOhm2OzTAemD4YgBZ5B19j/preview"
+  },
+  {
+    "title": "Allen Physics Class 9 (ch 6-11) and 10",
+    "folders": [
+      "CLASS 10",
+      "Allen"
+    ],
+    "url": "https://drive.google.com/file/d/1JT0WlApHpOE0cLqC43TZL48C-l7Q5eYO/preview"
+  },
+  {
+    "title": "Allen Maths Class 9 and 10",
+    "folders": [
+      "CLASS 10",
+      "Allen"
+    ],
+    "url": "https://drive.google.com/file/d/1B3_g0bmf8ygQpzI9oXU7i5MNuL1g3o-Q/preview"
+  },
+  {
+    "title": "Allen Biology Module class - 9 (page 99) and 10",
+    "folders": [
+      "CLASS 10",
+      "Allen"
+    ],
+    "url": "https://drive.google.com/file/d/1DQOOHYR26eyjtBqEER3buCzWWxI4Yuk4/preview"
+  },
+  {
+    "title": "Class 10 Social Science Arihant All In One",
+    "folders": [
+      "CLASS 10",
+      "All In One"
+    ],
+    "url": "https://drive.google.com/file/d/1rP81basZYsQ_1-9pO0nPj_CEMDqXKBER/preview"
+  },
+  {
+    "title": "Class 10 Science Arihant All In OneCBSE",
+    "folders": [
+      "CLASS 10",
+      "All In One"
+    ],
+    "url": "https://drive.google.com/file/d/1esypxjSuzotZf63Em3iSjlOoyzkht1U1/preview"
+  },
+  {
+    "title": "Class 10 Mathematics All In One CBSE",
+    "folders": [
+      "CLASS 10",
+      "All In One"
+    ],
+    "url": "https://drive.google.com/file/d/1PJUBWHLaQCjNgkqSmMWmEiiUiAH1jbwN/preview"
+  },
+  {
+    "title": "XAM Idea Social Science 2024 EXAM",
+    "folders": [
+      "CLASS 10",
+      "XamIdea"
+    ],
+    "url": "https://drive.google.com/file/d/1MWj13nazzs5-Or9bVTHqx-P4X0gUxKP-/preview"
+  },
+  {
+    "title": "Xam Idea Science 2024 EXAM",
+    "folders": [
+      "CLASS 10",
+      "XamIdea"
+    ],
+    "url": "https://drive.google.com/file/d/1T_NvMCPgfUbdW0iWgZpwkEtFqjr7CUY5/preview"
+  },
+  {
+    "title": "Mathematics Xamidea Class 10 20244444444 Clear Haaaaaiiiiii 2",
+    "folders": [
+      "CLASS 10",
+      "XamIdea"
+    ],
+    "url": "https://drive.google.com/file/d/1mpstwp4KXk1EM64inhRXmaXs0aBWIyxE/preview"
+  },
+  {
+    "title": "English xamidea-2024 Class 10 Latest (1)",
+    "folders": [
+      "CLASS 10",
+      "XamIdea"
+    ],
+    "url": "https://drive.google.com/file/d/1kgI-jZb8EBO8BSA1IybVvPcTIzua9Kb9/preview"
+  },
+  {
+    "title": "Ch 9",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1GgjNk5e917hF5c3qkJ0XQepg8GLWsqri/preview"
+  },
+  {
+    "title": "Ch 8",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1Hw1GsRwEA7xeFlsJRJBrnQLueDaWZ4Oj/preview"
+  },
+  {
+    "title": "Ch 6",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1F5AeLeoX3LBC-8a8zPiL1_cZq_5Fs0Tr/preview"
+  },
+  {
+    "title": "Ch 4",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1ekrhDtlaZFSBjSBLrug4epDR3USHOMwz/preview"
+  },
+  {
+    "title": "Ch 3",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/188NZeRBdPeqH9sJ0vlcnkc_Egm3n1Pv5/preview"
+  },
+  {
+    "title": "Ch 13",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/12iqbW3pDbww_kUiP5jgJi0xv5Z4wIB3q/preview"
+  },
+  {
+    "title": "Ch 12",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1oirSIbsta7yQXgvMbn2xquCWIHg6Hcv3/preview"
+  },
+  {
+    "title": "Ch 10",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1jzpYaYHM53lF-mdaUo8LuCXiTLhRfp9D/preview"
+  },
+  {
+    "title": "Ch 1",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1-uliKe4TO53R07qjEwfqD2EqsZeeMLhz/preview"
+  },
+  {
+    "title": "Ch 7",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1CL6Lk6daLK1YeB0QaqWMvCNKP1tZOLUl/preview"
+  },
+  {
+    "title": "Ch 2",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1AIu-tB7g5aHP6I3R05WB-Eys3Tl7ZHog/preview"
+  },
+  {
+    "title": "Ch 11",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1IL_HZm-zyGdvcrNVoCxIVrb-mhn0Oh64/preview"
+  },
+  {
+    "title": "ch 15",
+    "folders": [
+      "CLASS 10",
+      "Science MIQs"
+    ],
+    "url": "https://drive.google.com/file/d/1EWB-2jhkQ9iEgI_0Z_5iD72EBqOb-iQi/preview"
+  },
+  {
+    "title": "Class 10 Rs Aggarwal (Crackcbse.in)",
+    "folders": [
+      "CLASS 10",
+      "R.S. Aggarwal"
+    ],
+    "url": "https://drive.google.com/file/d/1QiQWZsWOidhYe2PJbSUDpK5HGss69NHy/preview"
+  },
+  {
+    "title": "CLASS 10 SCIENCE P..W QB BY @PROCBSE (2)",
+    "folders": [
+      "CLASS 10",
+      "PW QBs"
+    ],
+    "url": "https://drive.google.com/file/d/1YhvGGUbLA0UtBSLFcFGaW7XoLe5jbJYM/preview"
+  },
+  {
+    "title": "CLASS 10 PW SST QB BY @PROCBSE (2)",
+    "folders": [
+      "CLASS 10",
+      "PW QBs"
+    ],
+    "url": "https://drive.google.com/file/d/1gkRxFPQz9EHzKDDfEXH-JwUBieP6VrV7/preview"
+  },
+  {
+    "title": "PW Old Test Series",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW"
+    ],
+    "url": "https://drive.google.com/file/d/1Emnjudx3tfSJct8--uQ2z26TZj86H7oJ/preview"
+  },
+  {
+    "title": "PW NSEP",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW"
+    ],
+    "url": "https://drive.google.com/file/d/17FzVNq7ElEJX8ew_Irk4fEv4av-in3m2/preview"
+  },
+  {
+    "title": "Physics ARCHIVE - JEE (Main)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/1tA2TE6nY8pEqxymkj734VSv-dcn7tev1/preview"
+  },
+  {
+    "title": "Physics Archive - JEE (Main) Solutions",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/1BUioz6yZGETzjsLuR4XKlKDO40bERoc_/preview"
+  },
+  {
+    "title": "Mathematics ARCHIVE - JEE (Main)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/1fyN6TqNl54WI1XZkFHiG34Q7HqNOPHrB/preview"
+  },
+  {
+    "title": "Mathematics Archive - JEE (Main) Solutions",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/1zGri0N_oUEbrm3qWvB0ik_6YUAaHUfjt/preview"
+  },
+  {
+    "title": "Chemistry ARCHIVE - JEE (Main)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/1nsO5H549jvYWkeyYWcEeegSqJeo8QfRA/preview"
+  },
+  {
+    "title": "Chemistry Archive - JEE (Main) Solutions",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "AAKASH Archives"
+    ],
+    "url": "https://drive.google.com/file/d/19o6UQZCp7FMyQmyg8IXLb2iJjVTk5oU-/preview"
+  },
+  {
+    "title": "R S Aggarwal Senior Secondary School",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special"
+    ],
+    "url": "https://drive.google.com/file/d/1roqhcr9mEw2tthlhfZ28uBtbAQeDOCJa/preview"
+  },
+  {
+    "title": "Black Book Algebra (Vikas Gupta)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special"
+    ],
+    "url": "https://drive.google.com/file/d/14HukOgsh19UCXfpHXVWA1a7yPurM8rRl/preview"
+  },
+  {
+    "title": "VK Jaiswal Inorganic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Inorganic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/14EVwhdkYYjFDfNiSbh3pWNN_wSF5DFUF/preview"
+  },
+  {
+    "title": "Inorganic Chemistry V Joshi Cengage",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Inorganic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1ViSbCC3isEKL3_0_p_PxPvKTI8F1ql2k/preview"
+  },
+  {
+    "title": "SOLUTIONS OF HIMANSHU PANDEY @EngineeringEntrance",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1cj7cIJaixw7mKwWQog8-H4WM-onicEqG/preview"
+  },
+  {
+    "title": "Solomon's",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1hii-MGmLGPfE1990P6xQ2l56MbjSah-B/preview"
+  },
+  {
+    "title": "Paula Yurkanis Bruice Organic Chemistry(BLUNT LIBRARY)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1q4o5H1pwVAvNfdC7tG_PYSYPEgD0jz9b/preview"
+  },
+  {
+    "title": "organic chemistry Peter Sykes",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1PjWDWfqgEAM1a8UE12AwZspAnUPyusp2/preview"
+  },
+  {
+    "title": "Morrison & Boyd - Organic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1D5_Ah31gmm72wlN_y3U3RNr8rHil_jyz/preview"
+  },
+  {
+    "title": "Himanshu Pandey Organic",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1e6M1o-aL3_ljsS_-ez4yGOtaYoSczRUo/preview"
+  },
+  {
+    "title": "francis a carey Organic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1rKh__FNDRyVxPesr7TYAswazlEK-2LXJ/preview"
+  },
+  {
+    "title": "Black Book (Ashish Mishra)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1WhdfQp2HibUelWv0IPBz6lkeEN0QM3eE/preview"
+  },
+  {
+    "title": "Physical Chemistry (P Bahadur)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physical Chenistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1KRwuBmQUI-2sBqtjdAFVcTZmFhEOJY1Q/preview"
+  },
+  {
+    "title": "Physical Chemistry - Narendra Avasthi",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physical Chenistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/1UdvBPQyfuyqNAw3lUnIj4_yxTRF33H8y/preview"
+  },
+  {
+    "title": "Narendra Awasti Physical Chemistry @iitandneetguide",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physical Chenistry Special Books"
+    ],
+    "url": "https://drive.google.com/file/d/12ZA84qXWPZM6Mh4eBxIoprhNXBgmV42v/preview"
+  },
+  {
+    "title": "Olympiad Arvind Tiwari",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials"
+    ],
+    "url": "https://drive.google.com/file/d/1ZPdcFAif6rlZhuU4Ei9_6zt1uTPcmYGy/preview"
+  },
+  {
+    "title": "DC Pandey Arihant",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials"
+    ],
+    "url": "https://drive.google.com/file/d/1FHuoAZrC36sUKKAy3PuHZaEeo_fknDbx/preview"
+  },
+  {
+    "title": "Physics ARS Class 12",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Flashcards"
+    ],
+    "url": "https://drive.google.com/file/d/17BOjGk1HO_KZdGKgjItlTag18Wens8vS/preview"
+  },
+  {
+    "title": "Physics ARS Class 11",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Flashcards"
+    ],
+    "url": "https://drive.google.com/file/d/1eNXeL3ohXrm0XTGgX3kdZ3RT7h2BO08P/preview"
+  },
+  {
+    "title": "Chemistry ARS Class 12",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Flashcards"
+    ],
+    "url": "https://drive.google.com/file/d/10j6hRd8tt5za9bDqUBkR0Q9U4NIAp91v/preview"
+  },
+  {
+    "title": "Chemistry ARS Class 11",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Flashcards"
+    ],
+    "url": "https://drive.google.com/file/d/1qytl9OdIW30ijDavvvfSaHZdb9_N_npp/preview"
+  },
+  {
+    "title": "@iitjeeadvancedmaterial Mathematics flashcards",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Flashcards"
+    ],
+    "url": "https://drive.google.com/file/d/1dsp04rVqxjgFsUnXHTOttmUVPSYgvfXE/preview"
+  },
+  {
+    "title": "JEE physics formula booklet",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Formula BOOKLET"
+    ],
+    "url": "https://drive.google.com/file/d/1-DkwbSvzoYBKtXvx0IUMfYyzur9XcoOv/preview"
+  },
+  {
+    "title": "JEE maths formula booklet",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Formula BOOKLET"
+    ],
+    "url": "https://drive.google.com/file/d/1BvvhnHsZ_L-vCKBxVXE1V77ZmGf-Zcfx/preview"
+  },
+  {
+    "title": "JEE chemistry formula booklet",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Formula BOOKLET"
+    ],
+    "url": "https://drive.google.com/file/d/1Fp3O8J-Oy82ZBLkkl3cHQtryWx_lGjm-/preview"
+  },
+  {
+    "title": "PHYSICS CONCEPT MAP CLASS 11 AND 12",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Concept Maps"
+    ],
+    "url": "https://drive.google.com/file/d/15XEURyXYGyUZz8n3BuJ5tYlf2ELzoWhN/preview"
+  },
+  {
+    "title": "Maths",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Concept Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1s31K47z09kgoV9i6wRB1EMsrk5L5r9kJ/preview"
+  },
+  {
+    "title": "CHEMISTRY CONCEPT MAP",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Concept Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1FCQot9abtW3KHHXPXt1NKper9xmSQ_IJ/preview"
+  },
+  {
+    "title": "Physical Chemhack",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Hack Books"
+    ],
+    "url": "https://drive.google.com/file/d/1GLBEHS_DRrWU6g-BBWjCdaUZtoxxvrlo/preview"
+  },
+  {
+    "title": "Organic Chemhack",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Hack Books"
+    ],
+    "url": "https://drive.google.com/file/d/1qsfoK7ythXDqGEorVHwRUbksblQcaGK7/preview"
+  },
+  {
+    "title": "Inorganic Chemhack",
+    "folders": [
+      "IIT-JEE",
+      "EXTRAS",
+      "Hack Books"
+    ],
+    "url": "https://drive.google.com/file/d/1ngAepRgoe4coWeyVrWIPvYXkAs2a5Q37/preview"
+  },
+  {
+    "title": "13 circle formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1r73gdV_DUtfS2kulxLeL7qu9ncRjL5rZ/preview"
+  },
+  {
+    "title": "16 hyperbola formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1i-cNgjD9mlyarv41Gj0lcsU64pT16dWb/preview"
+  },
+  {
+    "title": "15 ellipse formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1h3UxZkXLsInP5twudypkqQMsZsTNosC3/preview"
+  },
+  {
+    "title": "14 parabola formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1i48fYdaF7TpgukFDWwgp0ZJu0c1TP6k6/preview"
+  },
+  {
+    "title": "12 straight line formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1iHl_cWsgpJr7GwdsovIecjdDsijZYkji/preview"
+  },
+  {
+    "title": "Logical Reasoning - Puzzle Tips",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1wgi1d6vzxMQ7GWJga5d8SnzQ8fNkLnu8/preview"
+  },
+  {
+    "title": "Logical Reasoning - Missing Series",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1aKGSl4SJlqRm5d4QVgKwi2iCudkV271p/preview"
+  },
+  {
+    "title": "Logical Reasoning - Missing Numbers",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1OE2ErJQXrTVP7-dDs4Ls-QZogfYYyaxu/preview"
+  },
+  {
+    "title": "Logical Reasoning - Number Series",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/16_cZcK3nis00QLMfF9tstcys0znxFH9U/preview"
+  },
+  {
+    "title": "Logical Reasoning - Cutting with Symmetry",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1wB6h8vc3FDhS94WK5STMlp9SsGYH8Gyu/preview"
+  },
+  {
+    "title": "Logical Reasoning - Cubes and Dice",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1OMTdFoPse8k3svIEDdaA7Dn8PTpTOEPN/preview"
+  },
+  {
+    "title": "Logical Reasoning - Coding Decoding",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1-KNGf7HUcDUUcT9Ic5JKYAe1h7E2rtlu/preview"
+  },
+  {
+    "title": "Logical Reasoning - Blood Relation",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1y19geHS9qWf4xQziiYfAgSWxjGroRdnM/preview"
+  },
+  {
+    "title": "Logical Reasoning - Calendar",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1rreEFkgEuezZ1VnkpWJnHjoeUmQ3BJCW/preview"
+  },
+  {
+    "title": "Logical Reasoning - Analyzing Patterns",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1GHy-z_f8WRD9X1AXZKXlBFl-KBk3BAQj/preview"
+  },
+  {
+    "title": "English Notes - Grammar",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1ROqAElna1YuGmAvlg_1mpZfPkgFVy0cl/preview"
+  },
+  {
+    "title": "Logical Reasoning - Alphabet Series",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1ho8JV-6zcEwBzFXLwPd2hZjwdJhzdxGn/preview"
+  },
+  {
+    "title": "English Notes - Synonyms Antonyms",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1U5lTTGi55sI5a5RGD45vWP7wnKPjgovX/preview"
+  },
+  {
+    "title": "English Notes - List of Common Synonyms and Antonyms",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1tWNJsH1eIQXk-ty1VKJxhOCO2N5R9Kj6/preview"
+  },
+  {
+    "title": "English Notes - Reading Comprehension",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1qOzlR35U16sSm9wJDaoYQ4teRx4rqweb/preview"
+  },
+  {
+    "title": "English Notes - Composition",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1XSduR01AOSK4BAw5VCAbYnb6Si9uyeV_/preview"
+  },
+  {
+    "title": "English Notes - Analogies",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Mathongo English & LR Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1iI1ZebsVo2bncO_Xrj4miClL6l_yjxqx/preview"
+  },
+  {
+    "title": "Arihant NCERT Exemplar Chemistry Class 11",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Arihant NCERT Exemplar"
+    ],
+    "url": "https://drive.google.com/file/d/1iNrIddzztR5L7ThGy8jBl5QKyID0wm-s/preview"
+  },
+  {
+    "title": "Arihant NCERT Examplar Physics 12th",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Arihant NCERT Exemplar"
+    ],
+    "url": "https://drive.google.com/file/d/1C_-y17T_C8r2SxFpzTFbrthcUSu8-lxd/preview"
+  },
+  {
+    "title": "Arihant NCERT Examplar Physics 11th",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Arihant NCERT Exemplar"
+    ],
+    "url": "https://drive.google.com/file/d/17FKg-WbCUzAAc8TV0WffFc-ok13RGOdC/preview"
+  },
+  {
+    "title": "Arihant NCERT Examplar Chemistry 12th",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Arihant NCERT Exemplar"
+    ],
+    "url": "https://drive.google.com/file/d/1hFAygxNOviiMaCvM4yiIHFSrtaTbY3qo/preview"
+  },
+  {
+    "title": "Balaji Chapter 1 to 5 Problems in Inorganic Chemistry by V K Jaiswal",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/1cVxrUcFMK2aJllzUK8ViDj74dtfGG29x/preview"
+  },
+  {
+    "title": "Mechanic 1",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/16_E0svoHAIVwOVyGs_eYGLfkwUmA2V7I/preview"
+  },
+  {
+    "title": "Mechanic 2",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/1UIs_hN81GY2Xit5WmMC1qdQzZkEco3Go/preview"
+  },
+  {
+    "title": "Heat and thermodynamics",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/1ADZ4qWz6ePnRDgdbnzkZCvQaBO62jfSE/preview"
+  },
+  {
+    "title": "Electricity and magnetism",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/1fLkEHAhL6G2gLNerXptG28du_aw8g3Wz/preview"
+  },
+  {
+    "title": "Optics",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Balajji"
+    ],
+    "url": "https://drive.google.com/file/d/1Gqwmwzbzx-YFmFLOl9L4yYkmY3092oj3/preview"
+  },
+  {
+    "title": "OP Tandon Physical Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "OP Tandon Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1BjVJ3cgl-zJ2g7sRZX_yjwD8F_haDfeO/preview"
+  },
+  {
+    "title": "OP Tandon Organic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "OP Tandon Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/15E5y97s7eVP58qOeWrZ5lxP2GZm5fZB7/preview"
+  },
+  {
+    "title": "OP Tandon Inorganic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "OP Tandon Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1XZanxWEG2TsT_POpaTbXuOPixM2s5MgQ/preview"
+  },
+  {
+    "title": "SL ARORA VOL1",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "SL Arora"
+    ],
+    "url": "https://drive.google.com/file/d/1v4JvrzVXLQtgw6WtF7fFxLB08mrgB_uK/preview"
+  },
+  {
+    "title": "SL Arora physics class 11 vol 2 blunt library ",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "SL Arora"
+    ],
+    "url": "https://drive.google.com/file/d/1jn25_vru7vVN8sgyLmgcIZ7a7vTgneNf/preview"
+  },
+  {
+    "title": "Sl arora class 11 vol 1 blunt library",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "SL Arora"
+    ],
+    "url": "https://drive.google.com/file/d/1Jr1rg9CcY5oZs2oJcwuuRb305NIs1zGp/preview"
+  },
+  {
+    "title": "Physical Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/17FnHP3oDcSRJLMB_H2Q0uOT8HRYxgHxv/preview"
+  },
+  {
+    "title": "Organic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1Cubh3dtmY0pfn_CCKiviLpHVLCkNkYWP/preview"
+  },
+  {
+    "title": "Mechanics 2",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1tyZDM0UdWPUtIvS5gS6PKuNV6A5RxMXp/preview"
+  },
+  {
+    "title": "Mechanics 1",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1gqP-xjVwGICiS8jnYqfEd6Ipi2Z-iwcn/preview"
+  },
+  {
+    "title": "Inorganic Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1vf0Adva2_Feqhs0rR7M6xBxHe_gjLlMK/preview"
+  },
+  {
+    "title": "Algebra 2",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1FRAz5Dul21yUreQKo1hyFln1hah9fETU/preview"
+  },
+  {
+    "title": "Algebra 1",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "PEARSON"
+    ],
+    "url": "https://drive.google.com/file/d/1ujiYp-EotfHKQ02MQa_jXQjfeq6ssZX-/preview"
+  },
+  {
+    "title": "Inorganic Chem atkins",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Peter Atkins"
+    ],
+    "url": "https://drive.google.com/file/d/19b8owDcaoGdLtw8KdTojTvOj7fQfsAf7/preview"
+  },
+  {
+    "title": "Atkins’ Physical Chemistry by Peter Atkins, Julio de Paula, James",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Peter Atkins"
+    ],
+    "url": "https://drive.google.com/file/d/19hXU7_-5tREW2DZXby1i_P_NmJpoDoc4/preview"
+  },
+  {
+    "title": "Atkins Physical chemistry by Peter Atkins, Julio de Paula z lib",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Peter Atkins"
+    ],
+    "url": "https://drive.google.com/file/d/14nIpxww7-Kja4lko8javBmg5qF6QBCBn/preview"
+  },
+  {
+    "title": "Disha Physics 500 BlockBuster Problems for JEE Advanced",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Disha"
+    ],
+    "url": "https://drive.google.com/file/d/13bL7HPqEXVKYu8MoHFibyqIs_acSbtUn/preview"
+  },
+  {
+    "title": "Disha Mathematics 500 BlockBuster Problems for JEE Advanced",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Disha"
+    ],
+    "url": "https://drive.google.com/file/d/1r6wsZ8B3W4RAh77vYzyaCDPk3w0Gz5PK/preview"
+  },
+  {
+    "title": "Disha Chemistry 500 BlockBuster Problems for JEE Advanced",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Disha"
+    ],
+    "url": "https://drive.google.com/file/d/1ayE4jrU-VMELw7wxIfVwTKGutS2cYcbD/preview"
+  },
+  {
+    "title": "Wiley maths class 12",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/1bGyEToUBtStKgrvd0VbRYFllmf84mpDG/preview"
+  },
+  {
+    "title": "Wiley Maths 2",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/190nwPG0oqYCgZciDGxKWw3EAvpaWFTqx/preview"
+  },
+  {
+    "title": "Wiley Maths 11",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/1M9e1BnvzslFPe7BTn7YLWI4R6Z-AP7We/preview"
+  },
+  {
+    "title": "Wiley Maths 1",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/1T_CqRlFIEF-1phkyVQi25wsXzEXZIKQe/preview"
+  },
+  {
+    "title": "Wiley Geometry",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/10CHORKTj0VKfslxMNn-LwX1EucsKLsZI/preview"
+  },
+  {
+    "title": "Wiley Algebra",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/1f8_Ad-cueHWAaKGN0pRTgp5LlVmKq7xZ/preview"
+  },
+  {
+    "title": "Calculas",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Wiley"
+    ],
+    "url": "https://drive.google.com/file/d/17AIeddxg7BHxVKnY1dwn6FSyrtLmoPVN/preview"
+  },
+  {
+    "title": "PhysicalEducation12 2022",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physical Education"
+    ],
+    "url": "https://drive.google.com/file/d/1ab76PqmovuHj1_BcIh81L7zYqWcQIDQe/preview"
+  },
+  {
+    "title": "leph206",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/15zJ4nmakh1oiVsbBOAqxBJo5Gc7dl97Q/preview"
+  },
+  {
+    "title": "leph205",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1hqV2BZl1_X6HcadQoz-fT5RJWPEcxsbF/preview"
+  },
+  {
+    "title": "leph204",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1Br5FOhX71xO5wOqRAMsx_85g9Fa0xKe7/preview"
+  },
+  {
+    "title": "leph203",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/153v6X_XboAx2YHh2_9J8nCUzutEfzYgX/preview"
+  },
+  {
+    "title": "leph202",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1hPuacGILKRefl0lj1hwp8FPt7X_HL5Bb/preview"
+  },
+  {
+    "title": "leph201",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1l1jMCBlre3j7c9u3Qn2x3PTghJS2QlsA/preview"
+  },
+  {
+    "title": "leph108",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1K8NrfRZ-Y67NB-zQx6MUgOwrQE-U6AtW/preview"
+  },
+  {
+    "title": "leph107",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1m3KP0bs3QMK75H8FJ5EYNoiDpUmrueDK/preview"
+  },
+  {
+    "title": "leph106",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/176bMRG-1D2XOT9fBtNYX45eRVqZH-6WP/preview"
+  },
+  {
+    "title": "leph105",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/121awrY83XfnbSlPPqypGudJfoBBJyNCs/preview"
+  },
+  {
+    "title": "leph104",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1VeWQQIG0VZJ7cpXguplJj9JyUF7rrNxF/preview"
+  },
+  {
+    "title": "leph103",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/16-3OGqy8bndGAKQ37g0dj0sKw8g_0Z2M/preview"
+  },
+  {
+    "title": "leph102",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1P0oPdl46DdAw55eJBGuwwi10Xr-j1gaQ/preview"
+  },
+  {
+    "title": "leph101",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1j-X7p6B7DlIoAHgH_h1auQef6J0pmUn1/preview"
+  },
+  {
+    "title": "Jee Main Physics Syllabus",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1Icw61aNVJ_1MKfumgYQHwShdrFmdsudM/preview"
+  },
+  {
+    "title": "levt1ps",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1FBJBUOUmN-yBOBuuM7OBvvZwkP3uRmks/preview"
+  },
+  {
+    "title": "levt105",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1pyHmhwdLWy9zWUyvlKTTABUe5P-E-E6M/preview"
+  },
+  {
+    "title": "levt104",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1cUGkTZTmT4NED-OwYv4ohJcA69mMaCYT/preview"
+  },
+  {
+    "title": "levt102",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1yS5w8i6Ah8xSjloKnAnTDy_Oz9cYH9fG/preview"
+  },
+  {
+    "title": "lefl1ps",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1YUmdTTdOrCwOLjfF2EXVLeMCX0QybcmW/preview"
+  },
+  {
+    "title": "lefl101",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1b2ntFDXGf6zNMZucSIge9tC5obe65oOb/preview"
+  },
+  {
+    "title": "lefl104",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1m_g7_yTtpTuBn875kbWsFWj2yvqQ_mzB/preview"
+  },
+  {
+    "title": "lefl102",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1aZW-VTi2ZOzaOqPRB5h9pUXzgvxhLZCN/preview"
+  },
+  {
+    "title": "lefl108",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1Pf3Tdyp0KHQGgzmXdUCB43QJtu9rAq_7/preview"
+  },
+  {
+    "title": "lefl105",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1N79zI75SIeiM-QyMTDMVLzOHQ7UNLcGt/preview"
+  },
+  {
+    "title": "levt106",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1Xa4f08lzFKa6_p1MDcQFW6Ax5y1iefl6/preview"
+  },
+  {
+    "title": "levt101",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1HUM_WNPB-8xfXCD12X7zKN5o33rbJJ3c/preview"
+  },
+  {
+    "title": "lefl103",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1iZr-9UBP_Xm239L9ifGWVgy2MVneP6ja/preview"
+  },
+  {
+    "title": "lefl106",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1V8In8xITTIj1ULpi6nj4OvotgUHwb8tL/preview"
+  },
+  {
+    "title": "lefl107",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1R4YpXNnHi1fdHxWvfqQa1IgavU6HHghj/preview"
+  },
+  {
+    "title": "levt103",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1M3z5PSNVLTkOgrardctAwLjyT19DGftI/preview"
+  },
+  {
+    "title": "lefl115",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1zflPUIEdv4ege-OvwRTCYFu7dpr0xcht/preview"
+  },
+  {
+    "title": "lefl111",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1ka1JWaYbUuF9cPwUXemFpc2yDPqoEoGu/preview"
+  },
+  {
+    "title": "lefl114",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1J0eYZa60Fd-Jgl3B_5ZYy3u9MuVN-FGY/preview"
+  },
+  {
+    "title": "lefl113",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1A4Ptoy-bajV2RhjrKtqc4tvEViskVDmC/preview"
+  },
+  {
+    "title": "lefl112",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "English"
+    ],
+    "url": "https://drive.google.com/file/d/1LMdRpyW8DeE6KpNA3fUAl8VLYuqopPfF/preview"
+  },
+  {
+    "title": "lech205",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/18vKrFaRicotPCj7NN4BqOQZuOko9OBYx/preview"
+  },
+  {
+    "title": "lech204",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1v7sqHRUdVivyTgEIFwI91krpufwF7IX6/preview"
+  },
+  {
+    "title": "lech203",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1dTvdqgFN3nkKkvWosgmTcPDu4m08kmRP/preview"
+  },
+  {
+    "title": "lech202",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1smH_l4qUHyXbRtLQW5dwAQdUnjBywvPt/preview"
+  },
+  {
+    "title": "lech201",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1GsKv2-M3gAmhS8Iumc9VTC16tG-xrwfP/preview"
+  },
+  {
+    "title": "lech105",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1kBmgy--Mmo2rveZ0SUFHp7LjT9c3YGoD/preview"
+  },
+  {
+    "title": "lech104",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/113CKLW8AlDDFRFlUDnJNLJYk6VqNI0H_/preview"
+  },
+  {
+    "title": "lech103",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1qvA5UChSUsgOfCf29E-oc7RCW1on45Ke/preview"
+  },
+  {
+    "title": "lech102",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1C52qs9JSBmYR28R7VyGPR-kFluoAhMb5/preview"
+  },
+  {
+    "title": "lech101",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1Cf_qeBqmZJFcIRh7EDsMNyOjI1sNQ6gN/preview"
+  },
+  {
+    "title": "Triangles full chapter class notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1-Dgikj5EhqqdvgWLeaHx36ZpY0WP9okm/preview"
+  },
+  {
+    "title": "Surface Area and Volume Class Notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1zo3dBvxrnrOb4cdYU0-MvI5Y-MbNZO1a/preview"
+  },
+  {
+    "title": "Real Numbers-1",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1a4gCRkEk7_NMVV4bW9xEJBBnVDXtF48d/preview"
+  },
+  {
+    "title": "Probability extra clas notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1Nwz0Vdp86V-2fiYbz5T7_zHvAz93Nh0O/preview"
+  },
+  {
+    "title": "Circles class notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1Ka4xktOqAHc0hkuFKBidYd5HDcmhWy-p/preview"
+  },
+  {
+    "title": "Areas Class notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1fzWgSKMWWFDT7yahzE6q_5qJbtbftikw/preview"
+  },
+  {
+    "title": "AP full chapter class notes",
+    "folders": [
+      "CLASS 10",
+      "Maths",
+      "Class Notes"
+    ],
+    "url": "https://drive.google.com/file/d/1wnJ_eD3415Zi7i9V5f9RQ14OYznlLV3k/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Physics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1Nyv7aLN-adqKzgy2hDsBBaeKL3c1qjX5/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Physics (2)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1yZ0ftszCR5v1kdFtZrGBkWJVzgHlsaUj/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Mathematics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1tTwjo7ypQPXOdDz40NZBhoboBz2V-kvP/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Mathematics (2)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1MQXIlmT0jAKsKUjuneoP8Kni5R4Z-s3c/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Chemistry",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1o4tatzPu-6nu81RTSmuGPP88nhcThUGA/preview"
+  },
+  {
+    "title": "JEE 47 Years JEE Advanced Chemistry (2)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "PW",
+      "47 Year JEE"
+    ],
+    "url": "https://drive.google.com/file/d/1YmMXSuSpO4fHnHpI4_4a__IMLMUlTAyw/preview"
+  },
+  {
+    "title": "WEP",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1xULnniKoj59JwLEi8AXJv4n51UiACQiS/preview"
+  },
+  {
+    "title": "wave optics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1AgKut73Qr_Du05cELF2hGcl8x8NORcjD/preview"
+  },
+  {
+    "title": "WAVE MOTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1eG_N2BL6hjIC3OynNeZi5ZcotCPm3uJ_/preview"
+  },
+  {
+    "title": "Ray Optics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1ZT2CcRbV4mEbkN1bPxKFgU1l9RrD5nMK/preview"
+  },
+  {
+    "title": "SHM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/11o5EqW3f92OecPIfc0E1tF4G83uFcCHE/preview"
+  },
+  {
+    "title": "thermal physics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1T-W2u2GcdqdQh6PSb25QEMTv-daahqIb/preview"
+  },
+  {
+    "title": "semiconductor",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1p_sPdnFMSbiskCEW173UfbPUv1kTporN/preview"
+  },
+  {
+    "title": "Physics Module 4 solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1A3I8A7r3ckWxEw075RWTa0qyb0mK30nM/preview"
+  },
+  {
+    "title": "rotational motion",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/136jvz4DUPwgFqVVoUbCL5yUVKoDMG_tS/preview"
+  },
+  {
+    "title": "Physics Module 2 Solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/198VWd_BR43sRxYq27am8gVdeDHbepYHj/preview"
+  },
+  {
+    "title": "Physics Module 1 Solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1q0fUx3x2k6xNS-6XHmHYWorrG3eT-jsZ/preview"
+  },
+  {
+    "title": "Physics Module 5 Solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1Ff63q0W-8a5lgMDdaEX5FmYmV1gESgig/preview"
+  },
+  {
+    "title": "NLM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/12rGR_t0rbAalfcvS1liHgCg6ZzFtMads/preview"
+  },
+  {
+    "title": "modern physics 2",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1etQgEfaN6scWlBWbQZUVEbs4MEyZ5Mm1/preview"
+  },
+  {
+    "title": "modern physics 3",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1w_FE2VeGKv6QJJzvFlaZAvjdQvA8kOVp/preview"
+  },
+  {
+    "title": "Magnetism Module",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1Pr7AiY_flRQmZaOSaWWzsowJjF1fxENM/preview"
+  },
+  {
+    "title": "Physical World Unit Dimensions Error",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1h-yY0G0jYXm5hzF0ZEgEqL_WfOyHzrXv/preview"
+  },
+  {
+    "title": "modern physics 1",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1r9t3BAWQukY9-5hWNXh-qr2uQP1jF1sU/preview"
+  },
+  {
+    "title": "kinematics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1bvIu_ADongu9euU_IG8gmI7gJRlbwTQL/preview"
+  },
+  {
+    "title": "EMI",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1OaJElTRy0gWn3dy9UZWsH-ima3ILqEwE/preview"
+  },
+  {
+    "title": "gravitation",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1JT3wytjJjJBZGd7EV7emA563Csu0GDXz/preview"
+  },
+  {
+    "title": "electrostatics",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/17-pl-QrrvuyCpF2QvbNfjdEV32sTYub1/preview"
+  },
+  {
+    "title": "current electricity",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1nxzaSZaLEzj22bJ3bgJqPONYEbf2_EmF/preview"
+  },
+  {
+    "title": "com collision",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1HbRjHRtmO5NmvOwYlqjbFwUbexvxa6AO/preview"
+  },
+  {
+    "title": "Circular motion",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1I7p3siljsC5rOZA7yeNK7Q1cNbbqszqE/preview"
+  },
+  {
+    "title": "capacitor",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1S4CT-NdklfwBsOPdfSCfYJmOczVA6U0Z/preview"
+  },
+  {
+    "title": "basic math",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1odngS2g1Owh-K0JqTyI1Z_GayO8dBRCq/preview"
+  },
+  {
+    "title": "Alternating current",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1kT2AWWti5Gg2_AwZz5KvLJCCBqKwUTye/preview"
+  },
+  {
+    "title": "ALLEN PHYSICS RACE SOLUTIONS-2021",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/178xaPf58qPmEyPLq401YQX2muFGklp9G/preview"
+  },
+  {
+    "title": "ALLEN PHYSICS RACE 2021",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1G_Ol5DxwFLjcBgAsxU9AavQf74_wRRcm/preview"
+  },
+  {
+    "title": "Physics Module 6 Solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1EgwquKwScWV7UskP7SWkPTOM5z35ynHz/preview"
+  },
+  {
+    "title": "Physics Module 03 Solution",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/19TI7oxTCgwqEjctBywBLCVPcBYPzVwOp/preview"
+  },
+  {
+    "title": "EM WAVES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Physics Module"
+    ],
+    "url": "https://drive.google.com/file/d/1SsTDpQ5XAPvW6UkFlN6UDgw2c1zO7Qte/preview"
+  },
+  {
+    "title": "THERMODYNAMICS 02",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/18_mcOetIuv2-XSXBaLbIO_G-FwrymI1A/preview"
+  },
+  {
+    "title": "THERMODYNAMICS 01 SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1jRh0FyjWCHHuCaXIhdEv7Tj8-AZiXUD6/preview"
+  },
+  {
+    "title": "THERMODYNAMICS 01",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/12UUAzXguNgETp-BguebpE55Q72HDlQhs/preview"
+  },
+  {
+    "title": "THERMOCHEMISTRY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1a1E6DuNdllWzIm5rUuBfBWNxUBijn6f0/preview"
+  },
+  {
+    "title": "REDOX REACTIONS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1-J6BPBQmUszCdnnkH0wyAheCuGQrUhEn/preview"
+  },
+  {
+    "title": "SOLID STATE",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1kwHYdYSP-bO2NAtmQKA9f4HfljUNhyRG/preview"
+  },
+  {
+    "title": "SURFACE CHEMISTRY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1FpB8JGRMPd60TAGygocRTFLkqDow-Hb_/preview"
+  },
+  {
+    "title": "REAL GAS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1GDXP2sJlQ4do05hHh_IoAbRTk22aeMlu/preview"
+  },
+  {
+    "title": "MOLE CONCEPT",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1n6zANn6Gz32GhLbCo7tEL4wZPHprhi0W/preview"
+  },
+  {
+    "title": "RADIOACTIVITY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1gTBwoGU5GzaaOIlG2ZihDSEEmyJH9aFG/preview"
+  },
+  {
+    "title": "LIQUID SOLUTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1H950_SoOzi4Ll_9AYQ7syc1STV4BOBss/preview"
+  },
+  {
+    "title": "IONIC EQUIBRILIUM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1PepL9JEy1d3vNGITz9aquE-wlRr5-vF6/preview"
+  },
+  {
+    "title": "IDEAL GAS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1TIQrbMh-L6oplN2LR3iQanv5jgWwrB0c/preview"
+  },
+  {
+    "title": "ELECTROCHEMISTRY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1138LQl_OegEByQ-hYgY3DnIVEd-zOhhf/preview"
+  },
+  {
+    "title": "CONCENTRATION TERMS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1JyGSHZnq3DSPFDFXvB3N0rVm515BjTu9/preview"
+  },
+  {
+    "title": "CHEMICAL EQUIBRILIUM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/19bkGlS526PHEdS4lPbOkO7--aUMJvf1_/preview"
+  },
+  {
+    "title": "CHEMICAL KINETICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1s3dIxGCC88WYOAV5XlD7y2cNxGNx1vt7/preview"
+  },
+  {
+    "title": "CHEMICAL KINETICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1wI9ioYcRAOZ6ogSR7eW_zu4RalzUmnDX/preview"
+  },
+  {
+    "title": "ATOMIC STRUCTURE",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1SaqUlWE20CDg3AgUyaVn-0cu2rsYWd9n/preview"
+  },
+  {
+    "title": "SOLID STATE SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1_uE3Uf1lBvL6hP1epYlk2fMgCZzR_c58/preview"
+  },
+  {
+    "title": "MOLE CONCEPT SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/11hDexOsXH5WPjqVqsw_PprJ2P3XALwcJ/preview"
+  },
+  {
+    "title": "RADIOACTIVITY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1a_z_rVmIMEprK3vJurvEVOkql--MbG3k/preview"
+  },
+  {
+    "title": "CONCENTRATION TERMS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physical Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1UmNWQ1bP23QFAOedy80zM23v3Wi9ye8m/preview"
+  },
+  {
+    "title": "SUBSTITUTION ELIMINATION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1GwGaSv32UZK70oRhjqdvxjHj6KRJBc5K/preview"
+  },
+  {
+    "title": "POLYMERS POC",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1SWqX_mHSdU_v6x84yvQ5JjI-p8z2NKzE/preview"
+  },
+  {
+    "title": "REDUCTION OXIDATION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1ElfKw0ghE3CHRiCy__mQj-w3tuydYurK/preview"
+  },
+  {
+    "title": "IUPAC NOMENCLATURE",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1cc3ts2K23zknehhfkTRERPrqH25Q-LOS/preview"
+  },
+  {
+    "title": "HYDROCARBON",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1tYbnp3etrxdoxFMbZPNWbaxAgkjfqpP7/preview"
+  },
+  {
+    "title": "ELECTRONIC DISPLACEMENT EFFECT GOC",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1xq_dheRxFUmkKWYohEMFkv7sOMIWe-lH/preview"
+  },
+  {
+    "title": "CARBOXYLIC ACIDS AMINES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/19uRStPW01R1GZHeePW7Q8B84pCjrfZN0/preview"
+  },
+  {
+    "title": "CARBONYL COMPOUND",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1psdLjJSST4j9sMmDKMN_0LGH0kZyVair/preview"
+  },
+  {
+    "title": "CARBOCATION FREE RADICAL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/18QRTYT4SHbEYl4Oz9l_7FlkAvE4Mnpnm/preview"
+  },
+  {
+    "title": "BIOMOLECULES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1EQZEUIyDMO0O7MmCpmwY368D_vzck3lQ/preview"
+  },
+  {
+    "title": "AROMATIC COMPOUNDS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1nFl2KwQtYcZye-htOP61o5IoWSV8t5zB/preview"
+  },
+  {
+    "title": "ALDOL SIMILAR NAME REACTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1KV72VMfo7v_kybZNRxhbX2b4hi1LOBfB/preview"
+  },
+  {
+    "title": "ALCOHOL ETHER",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1dXi_4gGMGaJQj9eFqMOLjcmXgVrJWnXw/preview"
+  },
+  {
+    "title": "ACID BASES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1_2WczhgMG3HR1M-RQgbdw4SVpkSFDoj9/preview"
+  },
+  {
+    "title": "ISOMERISM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1xP7q9XX1b798bbirClT6K59kWEYXDSAF/preview"
+  },
+  {
+    "title": "STEREO ISOMERISM",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Organic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1jmcg7ApU5gx17TJadMJ7hXn3HAPhKYCO/preview"
+  },
+  {
+    "title": "VECTOR 3D SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1CNPCPWYJFZmME5_aN_4dxPUHsNif9-bI/preview"
+  },
+  {
+    "title": "VECTOR 3D WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/10lw0pFZHr_3vtfNBaFmPRW8LQ7grsNpV/preview"
+  },
+  {
+    "title": "ST LINE SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1qfLLl2FXFwpNEO1K2asg5G11ueBEwf9v/preview"
+  },
+  {
+    "title": "VECTOR 3D SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1UKddBCT476D0AVANXW4QBQe9A1F_U4-_/preview"
+  },
+  {
+    "title": "TRIGONOMETRIC EQUATION WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1VKKZmra9YgI-cH4akRlJZ0g4QbEolJs3/preview"
+  },
+  {
+    "title": "SPECIAL DPP INTEGRATION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/17qsbbM3e3vG7CnPLA5ZUPvJ_jt4qfASU/preview"
+  },
+  {
+    "title": "TE SOT SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/11DVOJ55Z-ywaTwBLGzG7hnO3UTz3NINF/preview"
+  },
+  {
+    "title": "ST LINE SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1hhQhO_-dC25bWc9Nx-RfS_Kx1O9HcrWi/preview"
+  },
+  {
+    "title": "TRIGONMETRIC EQUATION SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/10IJPXMAJuZGSn0PsMa2PEr6q_GTWaDiE/preview"
+  },
+  {
+    "title": "STRAIGHT LINE WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1_UWYQoSQIw7wp4WRwfpvv7X6_HmQdxpb/preview"
+  },
+  {
+    "title": "SEQUENCE SERIES WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1SJEsXZiG85er4dYw-JWo-tHIEvzcC7oe/preview"
+  },
+  {
+    "title": "SOT SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1MDbvgRHjU1GA3BBdB-s5enLPeULzP3AY/preview"
+  },
+  {
+    "title": "SOLUTION OF TRIANGLES WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1DHgQK71psHN_gAYBzZeIdGkVswiXrgmx/preview"
+  },
+  {
+    "title": "S L LONEY COMPOUND ANGLE SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1a2oHImqGqD6n3sxi4gCXNHEH65m_KGAu/preview"
+  },
+  {
+    "title": "SEQUENCE SERIES SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1tO1br4bqL7S7h5ljW7qpWGwQSy4LH5jO/preview"
+  },
+  {
+    "title": "QUADRATIC EQUATION SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1YvsS0ny5mE5o-Ao0AO1OTRUwyKiX3WvK/preview"
+  },
+  {
+    "title": "QUADRATIC EQUATION WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1ztCkESFdIJSq1-POoQ8WCasRUxB-7PbQ/preview"
+  },
+  {
+    "title": "QUADRATIC LOG SEQUENCE INEQUALITY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1VflIal16FNAugn-9RcnL6LgLwi0PHXfH/preview"
+  },
+  {
+    "title": "PROBABLITY WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1scBgpsLfQQk-K0nUONPxgvKLGDcbC--q/preview"
+  },
+  {
+    "title": "PROBABLITY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1wOkiGDiSrF2STy4EYfq__ycaYMTAZDhp/preview"
+  },
+  {
+    "title": "PnC SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1boSyKBvSJEeF5o33HmbFIv3NuJPnVvPa/preview"
+  },
+  {
+    "title": "P and C SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1NVNYgCQZSDJDxqAqelK8DI9Smo1tIHBI/preview"
+  },
+  {
+    "title": "PROBABLITY SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1VhwvQo0YscE0pUyum_zShn2px_DjguTH/preview"
+  },
+  {
+    "title": "PERMUTATION COMBINATION WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1CWsMzd5R0kYXxE3eVNNJbvQRTXushlqR/preview"
+  },
+  {
+    "title": "MATRIX SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1FIfpgrpA0rxunh1t0KVNFqqGRszGYpk7/preview"
+  },
+  {
+    "title": "MOD WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Dg1-C8NiS6A2SI2Ph6iNMag91HtvVM8k/preview"
+  },
+  {
+    "title": "LOGARITHM SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1v5ErYP35CuKB_JaT1AmY60JW3j8PZ_1S/preview"
+  },
+  {
+    "title": "MOD SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1iZhCBlXqJG3fGvPVCCpO3AAW3k4DhfKQ/preview"
+  },
+  {
+    "title": "LOGARITHM WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1YteatMgN4_wGqX7IPYzQejhBBrx_BX_D/preview"
+  },
+  {
+    "title": "JEE MAINS TOPIC SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1y1-WJw3hRZJZo8PNRij9c3hXc4cFYgxt/preview"
+  },
+  {
+    "title": "JEE MAINS TOPIC WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1ISoLBLdO-_vPXrNWJk_mpy2kAxZaPMsS/preview"
+  },
+  {
+    "title": "LCD SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1I7oj7cK2gN9k5yQRw-B9kNT_7P_E7CTB/preview"
+  },
+  {
+    "title": "LCD WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1i6ZfCILubZHLKviMFyD4TgruUrL0vRfH/preview"
+  },
+  {
+    "title": "LCD MOD SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1iTVQG2xKgKoG2NpS6wIKW9F_nxxQgUQP/preview"
+  },
+  {
+    "title": "ITF WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1c5PDH-45yCjbK_blRBBQJgl65Nu0OsZp/preview"
+  },
+  {
+    "title": "INTEGRATION SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/14idOSLu4txozg19w3WlnpKKEJVwvLcFJ/preview"
+  },
+  {
+    "title": "INTEGRATION WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1OOtK2RubRIX1lj7xm8ad1c0VNpHb4PDT/preview"
+  },
+  {
+    "title": "INTEGRATION SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/15HzkGah9lroiB-kYf1ErU7Y9slFz3mAj/preview"
+  },
+  {
+    "title": "DE AUC SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Oj63WYRRqhfgHe1gEf6wzcEJwKsrxDTl/preview"
+  },
+  {
+    "title": "INEQUALITY SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1tbn_hP5PHqgoSzcGDHoSUyZx3DLZgD8v/preview"
+  },
+  {
+    "title": "INEQUALITY WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1TaptuIBpPsH10FaN4Vi7cdYaNaU8VuMH/preview"
+  },
+  {
+    "title": "FUNCTION WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1j7xoda99qLZVfjs8C2H5ZY7GnFa9BQuI/preview"
+  },
+  {
+    "title": "HALL AND KNIGHT",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/15clOLKkw0R9GD5Dolw5THxTQAlDOh6zN/preview"
+  },
+  {
+    "title": "DIFFERENTIAL EQN AUC SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1VaYXXcgJe71WC5FvyKRZ_7Q7DGJKn1j7/preview"
+  },
+  {
+    "title": "DIFFERENTIAL EQN AUC WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1A5kDlX5Se04liMvMLJT7k-7I1AXyY49h/preview"
+  },
+  {
+    "title": "FUNCTION ITF SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1P2F67KaR457gkxbw2rO8Mbc382vDf_Bp/preview"
+  },
+  {
+    "title": "DETERMINANT MATRIX SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Q91kSwk1OjYHlzimYbCoYajkBbfqOxsD/preview"
+  },
+  {
+    "title": "DETERMINANT WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1tnt62RGpLWMp4NDadG89SQMZtXYBnNTR/preview"
+  },
+  {
+    "title": "CONIC SECTION SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/18rwizlvVcVTQcZt1hpzpqNJ4hkdJlIZN/preview"
+  },
+  {
+    "title": "CONIC SECTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1HOdy4jWiOwzUeOjr-WrJC8xPwk999opg/preview"
+  },
+  {
+    "title": "COMPOUND ANGLE WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1kjeASY3wZH8xLXVJNb2fAv2KL0sInZhO/preview"
+  },
+  {
+    "title": "DETERMINANT SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1wJdNSSH4GrbD6UGceYkkyDnyXwNFjvES/preview"
+  },
+  {
+    "title": "CIRCLE SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/16d6tLa7GiVrzPDEg-UQOd6lHpqiM0utQ/preview"
+  },
+  {
+    "title": "COMPLEX NUMBER WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1KN9HRv-s5dtMLNdMxOQjyEwlqDGVnNgA/preview"
+  },
+  {
+    "title": "COMPLEX NUMBER SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/11NoDhy536AUkVkpMTa_KdJAwCildNq0B/preview"
+  },
+  {
+    "title": "COMPLEX NUMBER SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1iKeU-MkPT-omXLhMssZvV0CW4fZLe3tV/preview"
+  },
+  {
+    "title": "CIRCLE WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1MRZ0ofaNjuSoZ8l2srYKLfD0-dS-_b9d/preview"
+  },
+  {
+    "title": "CIRCLE SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1jUT6sbOxuls-NUov_HUiz_eJ9Ezw7vPm/preview"
+  },
+  {
+    "title": "BINOMIAL SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1rJXkS8Zqi8C7EHMJGqrI7Bskx7_qGmDX/preview"
+  },
+  {
+    "title": "BINOMIAL THEOREM SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/109A9iOpB1QsE_HeKkk0Sg2qDXrgNz9XI/preview"
+  },
+  {
+    "title": "BASIC MATHS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1tV7H_biFJ3x43oXNvIXhh2XP2zdCMcHu/preview"
+  },
+  {
+    "title": "AOD WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1ETxnDKQ_ymbuiOKdG1rKErk6wfdd3MBE/preview"
+  },
+  {
+    "title": "AOD SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1jUO4SqGIfS8J2xTcWGVAeZMUe-BSAwml/preview"
+  },
+  {
+    "title": "AOD SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1_d4b2kyKaZPoE9wfmaIw5xyVIVOJsZQk/preview"
+  },
+  {
+    "title": "SPECIAL DPP MOD",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1y_rV_RQUnmeiLBTITGd3Q4NU8_lV6iQp/preview"
+  },
+  {
+    "title": "MATRIX WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1KaEwpsBNo75S7wrBVTa_-ah8TEJ-2JpH/preview"
+  },
+  {
+    "title": "FUNCTION SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/190V4cRwPhMAAhgY-yzGZjzb3tIjJbI1K/preview"
+  },
+  {
+    "title": "ITF SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1igyT9TtO528hFipLHOwxkT1iyhd8sul5/preview"
+  },
+  {
+    "title": "COMPOUND ANGLE SHEET",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Gqhqpm4gh0BRyz7ESUGMWqGmTCih2yai/preview"
+  },
+  {
+    "title": "BASIC MATHEMATICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1lsj7nbH4tDTS8GC1zZSodqVXNyo5pwBK/preview"
+  },
+  {
+    "title": "BINOMIAL THEOREM WORKBOOK",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Maths all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1bseMjg43y2CNlAMw8zFLokQRVmghnndm/preview"
+  },
+  {
+    "title": "SaltAnalysisDpp00to19",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Sln4QD-RWLmRtk5slk9jGA-hBHyRSGfs/preview"
+  },
+  {
+    "title": "PERIODIC TABLE AND PROPEETIES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1LfhOnXEACveq6Rh6ebVk099Z6GjLBQlC/preview"
+  },
+  {
+    "title": "SALTANALYSISDPPSOL.01TO19 (1)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1jyW0WNXF_gPl2YH562yFtMzsNJRzPTjH/preview"
+  },
+  {
+    "title": "SALT ANALYSIS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1kE2FRbIFKVHI20CSQAFxN3CH65aj8thX/preview"
+  },
+  {
+    "title": "S BLOCK ELEMENTS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/17Dw0f6mNb_irJ-zJE8ryW7FxX4SQxiY_/preview"
+  },
+  {
+    "title": "METTALURGY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1cEfbHxGPoJRgyOaM7f71DZ7wmyKWKa_w/preview"
+  },
+  {
+    "title": "P BLOCK ELEMENTS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/13Js67CwPIGwsKYhcrl_4i4lc2EZjjIh1/preview"
+  },
+  {
+    "title": "IMPORTANT QUESTION IOC",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1QwqMq0_Fw5KKWfZj9hkKCGetEabROoHp/preview"
+  },
+  {
+    "title": "HYDROGEN",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/10GTGvz16Vj6OggzVvPU0f6WNdwMBd8jm/preview"
+  },
+  {
+    "title": "ENVIRONMENTAL CHEMISTRY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1WhijOo4YA9X8jZeIFHPDyytZj3s60tWT/preview"
+  },
+  {
+    "title": "DPP-COORDINATION1to11 (2)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1EKqOAWw4xX1xbm5770-3qUjGRdr4-cvz/preview"
+  },
+  {
+    "title": "D BLOCK ELEMENTS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/15whfiz3vlrEms8ToccIwdZSNi5fl1sAg/preview"
+  },
+  {
+    "title": "COORDINATION CHEMISTRY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1fmexKj8CsaHwN9BpxtE4h7hxMt8SWkUj/preview"
+  },
+  {
+    "title": "CHEMICAL BONDING 02",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1UBQ43kUY06IOPBChBGhrXc1whWZyDYO1/preview"
+  },
+  {
+    "title": "CHEMICAL BONDING 01",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1hKRkm1uJ7l2xn2HavnKcQdenC9eyMpqA/preview"
+  },
+  {
+    "title": "MetallurgyDPPanswerkey (2)",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1NyxAHhSbKyEs2ZhaLleQuTdiV1M-Imeo/preview"
+  },
+  {
+    "title": "F BLOCK ELEMENTS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/13GIV3GkNSpI98szERL5psLR_oeWLitJ3/preview"
+  },
+  {
+    "title": "QUANTUM NUMBER",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Inorganic Chem all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1l-YiNp6cxhwllMiDboNm15o5TAaLTC-y/preview"
+  },
+  {
+    "title": "WORK POWER ENERGY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1_bLGNVletLtckmCQc1SWnYkjkfxveQqC/preview"
+  },
+  {
+    "title": "WAVES",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/13vHR3kW4_8q8T0VIvNismYaBh54Pegk8/preview"
+  },
+  {
+    "title": "WAVES SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1h5UZ4eFklHAIavTyYCjgj8BBeoEVbOmQ/preview"
+  },
+  {
+    "title": "UNITS AND DIMENSIONS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1LlGoorVU5XrEzuiL97GZltzDsfWPF4SS/preview"
+  },
+  {
+    "title": "RIGID BODY DYNAMICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1s8Kryi_cujPj6nl7i8UhckNqgudrO_7w/preview"
+  },
+  {
+    "title": "SHM SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1XrUH2uHB8YZiCal3LnGXPKRaDtIaATGT/preview"
+  },
+  {
+    "title": "RBD SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1i_L6LFconFA2Ukdg1RtL6oIRbmxUuN_M/preview"
+  },
+  {
+    "title": "OPTICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1IANGbOHXAZ6UNWIA-bSO6HlDR97VI2NY/preview"
+  },
+  {
+    "title": "ONLY JEE MAIN TOPICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1q70URE_INYFUSfvbCxo7YcUnm4rXox42/preview"
+  },
+  {
+    "title": "NLM FRICTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1ekDiD1p_IhAGlZE3aUpsjNwEL1MKJwmD/preview"
+  },
+  {
+    "title": "NLM FRICTION SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1biGMCXYYfDJCFpUrcXvEbMz-r9qpJiSy/preview"
+  },
+  {
+    "title": "OPTICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1dV7ADNYhc5R70skNAT5wI3G0Sg7NxbIq/preview"
+  },
+  {
+    "title": "MODERN PHYSICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1DxMVlA1tLKxLwlsSRsjCCOm70vq1Xsgp/preview"
+  },
+  {
+    "title": "MEC SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Xkemn634qijAiauiOTlfeOFIsPVRwMQd/preview"
+  },
+  {
+    "title": "KTG THERMO SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1bPwqOWhE9RjutbTKQXgILJ8MV2hm76TV/preview"
+  },
+  {
+    "title": "MAGNETIC EFFECTS OF CURRENT",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1cocef9OO-FVdp7RReEJV7t6GWI6OsfuQ/preview"
+  },
+  {
+    "title": "KTG THERMODYNAMICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1qQ51a69QLC5MNwL7XnSSVHEBpSpc5o8J/preview"
+  },
+  {
+    "title": "INTRO TO PHY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1XWkvzCju3aqP49g7WIsNb5oANKIDlXeg/preview"
+  },
+  {
+    "title": "KINEMATICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1hZU18Z6kDSk06S95sSOefE13I51A5IsC/preview"
+  },
+  {
+    "title": "KINEMATICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1wypFbDemNZ7ki2aK4nCTJs0pWtO8xZ0Q/preview"
+  },
+  {
+    "title": "EXPERIMENTAL PHYSICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/14CeUayh75I9-6D5fER3JnXMMA7Ofx8TL/preview"
+  },
+  {
+    "title": "FLUID MECHANICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1MYAoiERjFDdcEAAu2cfd1pbK4spkjmaI/preview"
+  },
+  {
+    "title": "ELASTICITY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1r77hBwB3hJc3wLISUzUyIQTlexjctdMF/preview"
+  },
+  {
+    "title": "ELECTROSTATICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/129501PgA2HQCanJxETeUVgkSuO9sJp66/preview"
+  },
+  {
+    "title": "ELECTROSTATICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1pc5C0mgg23gpPRjDgimezvW8ih2aR4Y7/preview"
+  },
+  {
+    "title": "FLUID MECHANICS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/16vAQ7-jwxa06CxSDJhV4xz9-5OzsTbnl/preview"
+  },
+  {
+    "title": "EMI SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1NqMkkuU-Xg_e-ZhmG8VBn6BX60qnrTtw/preview"
+  },
+  {
+    "title": "ELASTICITY HEAT T CALORIMETRY T. EXPANSION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/19DagY_M1pyNSAcpA36WFXVbuv7xNyeP0/preview"
+  },
+  {
+    "title": "ELECTROMAGNETIC INDUCTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1reoYl5KyoHUsupk5T4dfTF9LbkTIp5dX/preview"
+  },
+  {
+    "title": "CURRENT ELECTRICITY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1Xey717viqw1xlb4kSOELiZKYtSYpg2RF/preview"
+  },
+  {
+    "title": "CURRENT ELECTRICITY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1xE-vjIildJddke88M10ftyp5PP7Txp4X/preview"
+  },
+  {
+    "title": "COM SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1fPF1T6pUekrCIDHZBRkwS0WF9K_QaI5P/preview"
+  },
+  {
+    "title": "COM MOMENTUM COLLISION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1pqdSL5uDwes58ubcGdj87Y9VYiyHbs-1/preview"
+  },
+  {
+    "title": "CAPACITANCE SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/16-VMiFsmsl06pcvoN4a1JmWaSm8SNjyQ/preview"
+  },
+  {
+    "title": "CAPACITANCE",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1RBLsMciAtKyP89YRPhGdeS9EXfdy9SWW/preview"
+  },
+  {
+    "title": "WORK POWER ENERGY SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1lmnC-Z7b0nOZBIZXQ4k7mDIMyTLa7RDh/preview"
+  },
+  {
+    "title": "GRAVITATION SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1EIiR_2xpF5C_z9p3TW9LYVGv0GXLBeFC/preview"
+  },
+  {
+    "title": "SIMPLE HARMONIC MOTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1w2etrCBlfdDPVQFMXGT5bc1n57nVxgRQ/preview"
+  },
+  {
+    "title": "UNITS DIMENSIONS SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1co8RkEYE3g5-3CDpChp7HdhC12eSPZXT/preview"
+  },
+  {
+    "title": "MODERN PHYSICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1RgQlSmLCIVQamyz9VO_M_jNJBY_KHNrj/preview"
+  },
+  {
+    "title": "GRAVITATION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1wBqCdOI88OXxaZh2ZlI5RDakeQpjid0t/preview"
+  },
+  {
+    "title": "CIRCULAR MOTION SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1TyiO9kWPJOFP4ZhRhbtTxw-UC2ackqaX/preview"
+  },
+  {
+    "title": "AC SOL",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/12WGLLwxX7ktTu69MN6Ycz-cbCmxfo0vL/preview"
+  },
+  {
+    "title": "ALTERNATING CURRENT",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1RIIcikbMjNqQw_MvSpiSPVMDEzMBFyNK/preview"
+  },
+  {
+    "title": "CIRCULAR MOTION",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1QGshntBl624U3kf7AkkvRFY7wZnxgsH4/preview"
+  },
+  {
+    "title": "INTRODUCTION TO PHYSICS",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "NUCLEAS Modules",
+      "Nucleus Physics all material combined"
+    ],
+    "url": "https://drive.google.com/file/d/1FFyk9X9eB2KVoQSEy68jGA4EU3AN8Pnv/preview"
+  },
+  {
+    "title": "RD Sharma XI",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special",
+      "RD Sharma"
+    ],
+    "url": "https://drive.google.com/file/d/1snOvRMYYpvUahT1t0sX7Nw68WqF1T90D/preview"
+  },
+  {
+    "title": "RD sharma class 12 volume 2",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special",
+      "RD Sharma"
+    ],
+    "url": "https://drive.google.com/file/d/1k7B2x5zJHH0vhgdnv8Oz4XfYI19oAcaA/preview"
+  },
+  {
+    "title": "Class 12 RD Sharma part 1",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special",
+      "RD Sharma"
+    ],
+    "url": "https://drive.google.com/file/d/1_Cb3iKjkK2u22khee5pUWvkPcU5jmt6s/preview"
+  },
+  {
+    "title": "Sameer Bansal Solutions",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special",
+      "Sameer Bansal"
+    ],
+    "url": "https://drive.google.com/file/d/1a1jjWj4RAK_mGzvFgz73QgbAQqxEYJhk/preview"
+  },
+  {
+    "title": "Sameer Bansal (Calculus)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Maths Special",
+      "Sameer Bansal"
+    ],
+    "url": "https://drive.google.com/file/d/1sUQhmwzAfYqy0YT5-G0orjauv_iKsb4s/preview"
+  },
+  {
+    "title": "Organic chemistry 2 for JEE Mc graw hill Blunt library",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books",
+      "Mc Graw Hill"
+    ],
+    "url": "https://drive.google.com/file/d/1_E18uvHE6w4zF_Eyt5uW2KE0dKmxjQv4/preview"
+  },
+  {
+    "title": "Organic chemistry 1 for JEE Mc graw hill Blunt library",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books",
+      "Mc Graw Hill"
+    ],
+    "url": "https://drive.google.com/file/d/1DE6mNtrS-8EzDzUXS58SnrmNVEnRMRbk/preview"
+  },
+  {
+    "title": "M.S. Chauhan Balaji (Organic)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books",
+      "M.S. Chauhan"
+    ],
+    "url": "https://drive.google.com/file/d/115SVTrs9sXRaYRK6Rz7EEoKw5k7sPUZu/preview"
+  },
+  {
+    "title": "M.S. Chauhan Balaji (Organic) (Solutions)",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Organic Chemistry Special Books",
+      "M.S. Chauhan"
+    ],
+    "url": "https://drive.google.com/file/d/1F1ynJktB7ttYPK9sZcchgQTP6N4CS3ct/preview"
+  },
+  {
+    "title": "Solutions to Irodov 2",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Irodov"
+    ],
+    "url": "https://drive.google.com/file/d/1meHmYWdgfkLEtC46sjHQBzoa-D1IC_FG/preview"
+  },
+  {
+    "title": "Solutions to Irodov 1",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Irodov"
+    ],
+    "url": "https://drive.google.com/file/d/1F3W_Qw7VESf-Vfl4r_ZS9TNaaLXbf2rj/preview"
+  },
+  {
+    "title": "Irodov",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Irodov"
+    ],
+    "url": "https://drive.google.com/file/d/1ZBLPSV2lvNyYEIsEdsS47uMWN4yZfzFR/preview"
+  },
+  {
+    "title": "DC Pandey Waves And Thermodynamics",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "DC Pandey"
+    ],
+    "url": "https://drive.google.com/file/d/100JwDyaIhuEqSxTSr8K9Q4yG-QJ87Lln/preview"
+  },
+  {
+    "title": "DC Pandey Optics And Modern Physics",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "DC Pandey"
+    ],
+    "url": "https://drive.google.com/file/d/1WXdx6lSTMhlRrzcCCXnaZjoWjQ9H0oBf/preview"
+  },
+  {
+    "title": "DC Pandey Mechanics Volume-2",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "DC Pandey"
+    ],
+    "url": "https://drive.google.com/file/d/1cjWJ6B6FHqP4X5nGuqzZsAzZbeu8B7mg/preview"
+  },
+  {
+    "title": "DC Pandey Mechanics Volume-1",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "DC Pandey"
+    ],
+    "url": "https://drive.google.com/file/d/1JQQoDETXifTl9ncORgpeb2Vnqf2GiVIn/preview"
+  },
+  {
+    "title": "DC Pandey Electricity And Magnetism",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "DC Pandey"
+    ],
+    "url": "https://drive.google.com/file/d/1eEZZ_MIvoyWe1b1wh7h9W_OhpXNVaY6V/preview"
+  },
+  {
+    "title": "Concept of Physics HC Verma Vol 2",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "HC Verma"
+    ],
+    "url": "https://drive.google.com/file/d/15lg6DFtpExmilI8YXaXlUbdgCVRz7RkV/preview"
+  },
+  {
+    "title": "Concept of Physics HC Verma Vol 1",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "HC Verma"
+    ],
+    "url": "https://drive.google.com/file/d/1lfFiGEUvj2_EWi4L08z-Gnwumbs9r9Cf/preview"
+  },
+  {
+    "title": "Physics Galaxy Optics ",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1wv1LpTWYK0QJmz4MOrI_DLGK2b1HyntU/preview"
+  },
+  {
+    "title": "Physics Galaxy Magnetism EMI and AC",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1bo8bp9lPl1ejMpnMEJa2Cdn2Ao5znwVX/preview"
+  },
+  {
+    "title": "Physics Galaxy electrostatics &Current 3A",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1rj7ZwFb83vBdGfROmm5C7w9L9APELMwy/preview"
+  },
+  {
+    "title": "Mechanics Physics Galaxy",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1hha9C9UpP2H76_VYW47xIFRT_PpysWnA/preview"
+  },
+  {
+    "title": "galaxy vol 2 thermodynamics, oscillations & waves",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1U-DCdgAtG9LX95haPIYDB6Fn81ONYesk/preview"
+  },
+  {
+    "title": "700+ Advanced Illustrations in Physics by Physics Galaxy @J",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Physics Galaxy"
+    ],
+    "url": "https://drive.google.com/file/d/1ivzQ916gntIuVrXF-SHKz2uvOwAH7WFj/preview"
+  },
+  {
+    "title": "Solutions to Resnixk halliday",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Resnick Halliday"
+    ],
+    "url": "https://drive.google.com/file/d/17fimn7oyIQa-HDCvlkonSlB6Cqp4LiIn/preview"
+  },
+  {
+    "title": "Halliday Resnick",
+    "folders": [
+      "IIT-JEE",
+      "SUBJECTS",
+      "Physics Specials",
+      "Resnick Halliday"
+    ],
+    "url": "https://drive.google.com/file/d/1Onlhw7OiZD-s8Uhpp3Z8U6t-0ubdib47/preview"
+  },
+  {
+    "title": "Wave Optics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1QB0PLEzhrDZhIYTsdJtNmxCcbMIfCLEY/preview"
+  },
+  {
+    "title": "Ray Optics-2",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1RvUD1HelWJ1pyInTvEaeZjSr9RvkGRcl/preview"
+  },
+  {
+    "title": "Ray Optics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/11mwSItL0Fp0rpldPAZvoRNh8aqYZ6c44/preview"
+  },
+  {
+    "title": "Nuclei",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1up1exlpdRiavrw3BBdPrXap0bFuRRWTS/preview"
+  },
+  {
+    "title": "Moving Charges & Magnetism",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1w0rvYC7aquIPA73llqOzk5WtLQcF9BTO/preview"
+  },
+  {
+    "title": "Semiconductors",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1eMc3uYPGqodA2M5QCy-HEK8iAUFGGvVx/preview"
+  },
+  {
+    "title": "Magnetism & Matter",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1XViZ4GoDLyCZ88c0dbHwXaZvLhVj9j5B/preview"
+  },
+  {
+    "title": "Electrostatic",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1r7P3XQ-JTg_mhKTppT_YFy5uqa-CgAuK/preview"
+  },
+  {
+    "title": "Electromagnetic Waves",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1ahpWYfrmjbVPrcyiMAen4kasF6omgrVG/preview"
+  },
+  {
+    "title": "Electromagnetic Induction",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1fjeU6D6iI2gc5tKICUQvl9FXGZcvP1LW/preview"
+  },
+  {
+    "title": "Electric Charges and Fields",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1OywwzhYTFXybwXvMtqbCcLymL2ae7mU_/preview"
+  },
+  {
+    "title": "Current Electricity",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1grDB6mhvKpyLA-NEKoHOAmWxMxJiOTJu/preview"
+  },
+  {
+    "title": "Alternating Current",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/18Bnxy4aa90WLh2NKk2uo_Hz6S1ERnDUz/preview"
+  },
+  {
+    "title": "Atoms",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1SPEk1UJKPkBIqdNIVkOmOxjOyeqReRl7/preview"
+  },
+  {
+    "title": "Dual Nature Of Matter & Radiation",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/15zsldpRSiCIXEu2ir8y-5Ev4tutPYq5M/preview"
+  },
+  {
+    "title": "Electric Potential and Capacitance",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Mind Maps"
+    ],
+    "url": "https://drive.google.com/file/d/1EvRcy_6DPwwys6B6ZyktVlGRxAkbXXgc/preview"
+  },
+  {
+    "title": "Semiconductor Electronics Materials, Devices and Simple Circuits",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1mg2tpKjZ6PhrtBG7IqIs4AWuB_Bs8B4T/preview"
+  },
+  {
+    "title": "Units and Dimensions",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1xVAfbSbk_p45_zDtFO9yTLyWrO7OBBm1/preview"
+  },
+  {
+    "title": "Thermal Properties of Matter",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1eXdKluMMPngSJKDVlSKC8ap8TgAFdKU3/preview"
+  },
+  {
+    "title": "Waves Motion",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Y1cwnV8AR0QhRunDEi9xBMyWR_Z7nD9-/preview"
+  },
+  {
+    "title": "Thermodynamics and KTG",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1fQVQ8s1_exFhFE3ccfxmiAPrMEaMjeuJ/preview"
+  },
+  {
+    "title": "Work, Power and Energy",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/19wN65Vh5ogEnbBEmhjs8OgVk0tnHX4oM/preview"
+  },
+  {
+    "title": "Wave Optics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Z3rzMAUdF1Ruw20pEZNOvgfEN1pmI0-n/preview"
+  },
+  {
+    "title": "Vector and Calculus",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1DHFW4nRA0SyYx-eKDMuPwN6gtEeEX6-m/preview"
+  },
+  {
+    "title": "Rotational Motion",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Gek3AJY2n8bi1b-obkeKoRcsB-NmgsHU/preview"
+  },
+  {
+    "title": "Simple Harmonic Motion",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1PdT8mjyKRq2jS-QmkqXUaWuTGyTro83I/preview"
+  },
+  {
+    "title": "Ray Optics and Optical Instruments",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1mFW74oD7ktBTta9153gEw8KPikuytXuU/preview"
+  },
+  {
+    "title": "Newton’s Laws of Motion",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1ShTSlo8Slb1iRB1h5MLQqZH2_ZSqkhBN/preview"
+  },
+  {
+    "title": "Magnetism and Matter",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1EVkYj07S8qx_qHu4KEEYHjmY1JUyoGku/preview"
+  },
+  {
+    "title": "Moving Charges and Magnetism",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1irQzEGZQBW6ATUu4gTKt5ZQ88vuR-jQE/preview"
+  },
+  {
+    "title": "Motion of system of particle and COM",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1AXJMAgcZqebQ_KhuYRu6f6vLTuWnAvam/preview"
+  },
+  {
+    "title": "Mechanical Properties of  Solids and Fluids",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1jTgDU0yYdHSpGKEEraQrntnQZelwn9oD/preview"
+  },
+  {
+    "title": "Motion in 2D",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1ldcoXR5Fp0sPEYgQ4LezbW_hCATERQ7m/preview"
+  },
+  {
+    "title": "Electrostatic Potential and Capacitance",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1wQmSOD-wGnefnZ-4WkjaTCDc26DC4s0u/preview"
+  },
+  {
+    "title": "Friction",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Jz3L4ERTrxxeKURg1_iOU8EJCHHbJzV6/preview"
+  },
+  {
+    "title": "Gravitation",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1u4yXKs7xc-3e2PeQn8Q98EFSBYR83hX5/preview"
+  },
+  {
+    "title": "Current Electricity",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1u9G9jsvCL4dYVvEu6pYEdlEPQug2ilcK/preview"
+  },
+  {
+    "title": "Electromagnetic Induction",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1t2G3VUVGj2Kj9mwdJzwgSRym2VpR6RTs/preview"
+  },
+  {
+    "title": "Electromagnetic Waves",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1H2UL_or5tsFNhptdstshTh9Rb0kOSV5Y/preview"
+  },
+  {
+    "title": "Electric Charges and Fields",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1_ywAul41EKS3VIIIu5WTz_QOYbl3CA1P/preview"
+  },
+  {
+    "title": "Motion in a Straight Line",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1y_3fLLlhR8U4e8SrQ5H0AukDt0r8QEFL/preview"
+  },
+  {
+    "title": "Dual Nature of  Radiation and Matter",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1izHmWqsMiiMmgDVX07__IrfRbm45EHSg/preview"
+  },
+  {
+    "title": "Alternating Current",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1HgbnQGROOthHUslVaH8ehnpxLsitgKer/preview"
+  },
+  {
+    "title": "Circular Motion",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1x3TAELvMgJBAQYR_j8ZdE33yAYzq5cnJ/preview"
+  },
+  {
+    "title": "Atomic Physics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "PYQ Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1atkntAVvC787oNHa9T4Q_NNlJTBZDiTG/preview"
+  },
+  {
+    "title": "Three Dimensional Geometry",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1GI0YvlEQHo1p2ENX7qBiqCP9vyBiHs4A/preview"
+  },
+  {
+    "title": "Straight Lines",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/19xp5NlkR5IFprEOG4RLxIcepzCdciwWL/preview"
+  },
+  {
+    "title": "Vector Algebra",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/16SMV2RATtOHdgjIztbZaHF7fMz_KP601/preview"
+  },
+  {
+    "title": "Set Theory and Relations",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1BCI-y_ZGG7xuhUmjKLJGc7nF5hOMjVHz/preview"
+  },
+  {
+    "title": "Trigonometric Ratios and Identities",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1dKiglvrb8dEWI8mA7-ewMpyfPbenRLgj/preview"
+  },
+  {
+    "title": "Quadratic Equations",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1nijytYNiXkHTiK7SPUblRP2uHcKAlibH/preview"
+  },
+  {
+    "title": "Statistics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1kneV04iPnu0KoM5IpJqhn1FkPlOm5eiS/preview"
+  },
+  {
+    "title": "Sequence and Series",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1CnObvSeGL4sPJEW1ydrq1fYpjHn9b3s4/preview"
+  },
+  {
+    "title": "Parabola",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1EC-4HpukuNu5jBhk-Ekf9P4b5fKU1TFK/preview"
+  },
+  {
+    "title": "Permutations and Combinations",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1FssII3UsFdnteC_6J5JlILHYdVC-CwSS/preview"
+  },
+  {
+    "title": "Probability",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1N1owiFz59z9Ih-kgJQe_rilkT1Rv6d49/preview"
+  },
+  {
+    "title": "Indefinite Integration",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1NOLqiyf3npr7cbwzAPDCxC8tfO1sbnxg/preview"
+  },
+  {
+    "title": "Method of Differentiation",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1mUDCicnGGFjv-VyRX43HWdCjXqbpubkN/preview"
+  },
+  {
+    "title": "Limits of Functions",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1r5CELVSgL8866Z0sn1V_td22gKj6-Y4N/preview"
+  },
+  {
+    "title": "Inverse Trigonometric Functions",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Q2o8tUHgcqoaDJYIdx4IFEpJaoDKWKvl/preview"
+  },
+  {
+    "title": "Ellipse",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/15nmyGSQPQZjWMYQW8x2pe6rr7Ywc8IQt/preview"
+  },
+  {
+    "title": "Matrices",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1qmoH9CWPX_exlAH7KMw5bppf9uICbQzh/preview"
+  },
+  {
+    "title": "Hyperbola",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/10vHMNktdnwTaOpHZbM6x1dSW3gwWgkgp/preview"
+  },
+  {
+    "title": "Functions",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1Px5udxyuU7xFKfBUJCrdIpI4rHcD0bBb/preview"
+  },
+  {
+    "title": "Differential Equations",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/13ixDOTQW7EqN5PRR3Q62eFxqynJmUdjz/preview"
+  },
+  {
+    "title": "Definite Integration",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/15bC23CdicajXvYOqD63P3CK1FbhJnH-H/preview"
+  },
+  {
+    "title": "Determinants",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1l6yLP7BDbp-CYpQL_QYxmVMtx3sCDa_x/preview"
+  },
+  {
+    "title": "Continuity",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/19MSiJbuHaG5q55YXACkQp6TqdGejNtnA/preview"
+  },
+  {
+    "title": "Complex Numbers",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1T4bIAYU3e090-KkZ8S17mXKK7CmrWQuw/preview"
+  },
+  {
+    "title": "Circle",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/15IYo4nh4ATXfW3HUx7Hhes_UNb7zN4KG/preview"
+  },
+  {
+    "title": "Application of Derivatives",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/1N0lzDqNtZpNj8C7CjXpUKdBRMNKE8i6E/preview"
+  },
+  {
+    "title": "Binomial Theorem",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/18QE38LYmH2p9DAGqIcF9KUYd4-E55feP/preview"
+  },
+  {
+    "title": "Application of Integrals",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Maths",
+      "PYQ Practice Sheet"
+    ],
+    "url": "https://drive.google.com/file/d/15E8faSr0ISRJKiO1V3xiTzZDvYGWuP_T/preview"
+  },
+  {
+    "title": "Vectors",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Maths"
+    ],
+    "url": "https://drive.google.com/file/d/1wHw2-kyCrWj_Ebb3mtDvYamYdNnRW2Zz/preview"
+  },
+  {
+    "title": "lemh2ps",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1NVeefKO0zI35pCkFEM8HxTkPIF6ls1Qa/preview"
+  },
+  {
+    "title": "lemh2an",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1PgE4DJcAnjWN44qidaYZ4VByknXfc-IJ/preview"
+  },
+  {
+    "title": "lemh207",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1YHR1ucRUFNxbaphVXHUjQnjsEigP3wgs/preview"
+  },
+  {
+    "title": "lemh205",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1UDESW2L1CWukH-zV1q0UAj_bAVgOaO7C/preview"
+  },
+  {
+    "title": "lemh204",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1SYm0gv1cs2p7z0oWV95ew4fg53BYhfF2/preview"
+  },
+  {
+    "title": "lemh203",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1YXPqwq48kGKFhWR-Pqt1FPmHoP4onVdn/preview"
+  },
+  {
+    "title": "lemh201",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1VyFbprG4Gs7VHZPPpd2UW-SfT76NM_Na/preview"
+  },
+  {
+    "title": "lemh206",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1ahT17UZ8iNmHiYBz3gYDw5dC8ACyl5hW/preview"
+  },
+  {
+    "title": "lemh202",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 2"
+    ],
+    "url": "https://drive.google.com/file/d/1fiU00ebQKSVsDS0eCAAEd7tITaUxyhZY/preview"
+  },
+  {
+    "title": "lemh1ps",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/12LGiB9vJ49IzKv9TkSTWQPxl0FzghY25/preview"
+  },
+  {
+    "title": "lemh1an",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1_21xoWVJrnBFWz9QR8OG3gWXD_xMQ2iQ/preview"
+  },
+  {
+    "title": "lemh1a2",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1OwSXEdYv8qWZkJTjJ4kNlu2e9in9owTA/preview"
+  },
+  {
+    "title": "lemh106",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1cy4Av0hOZ-6liar5K8C8gXhJDvNad3GB/preview"
+  },
+  {
+    "title": "lemh105",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/17iwpoY1OXL0MjiZO5FE8wsY1ay8Xg5uI/preview"
+  },
+  {
+    "title": "lemh104",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/19e6nuG_jJTqw7LNIYesA4Kfffhi1lTF3/preview"
+  },
+  {
+    "title": "lemh103",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1yKKdnnQm4wFoIPIINwsKEC40kiKFbPNc/preview"
+  },
+  {
+    "title": "lemh102",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1GHL3q6VC798AaAvRq70PyFsFnOU-D2xA/preview"
+  },
+  {
+    "title": "lemh101",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/1ndg-kZi1i4l0gwKRB1IaZdqO-OQvXiCZ/preview"
+  },
+  {
+    "title": "lemh1a1",
+    "folders": [
+      "IIT-JEE",
+      "NCERT",
+      "Maths",
+      "Part 1"
+    ],
+    "url": "https://drive.google.com/file/d/10FREAlf39oTb4tOedhWFiCdAvfKarRcs/preview"
+  },
+  {
+    "title": "13 shm formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/16z2FkUbqgrnv32ytb6fcPrKjmz9pq8VO/preview"
+  },
+  {
+    "title": "14 waves and sound formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1RXYUeg2kJ4CWQzHcwtQkS6nTWid1ZI2p/preview"
+  },
+  {
+    "title": "12 heat part2 formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1QuZjt9UxSv-Jpmqm7CV_KVkSe5xrWc1y/preview"
+  },
+  {
+    "title": "11 heat part1 formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1V-Rdu4br80W-P9Wr6hG3XlPLzEUkZtW4/preview"
+  },
+  {
+    "title": "08 gravitation formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1_AZlobvgIpkUyA3WEYM61goL-VKwhDqb/preview"
+  },
+  {
+    "title": "03 circular motion formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1q8m3HH1jY66yZSH2EBzRR20CiobFMUoc/preview"
+  },
+  {
+    "title": "09 elasticity formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1lgD28oYyXeyKCRU1Qk-RZXV8aU_gdqU8/preview"
+  },
+  {
+    "title": "10 fluid mechanics formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1ZGZep5uwF2ZW7gi-BHa2UVI1P4QHFW9A/preview"
+  },
+  {
+    "title": "07 rotational motion formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1iM6rebm4oJoybHdfcuk9GZoSiBMljKYJ/preview"
+  },
+  {
+    "title": "04 laws of motion formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1Ld1VKZ9jigr96tpL8x8W2bMuM8QfX3A9/preview"
+  },
+  {
+    "title": "05 work power energy formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1X86KAw4G6Oqf74FL9bIk9pNuU2_FELSv/preview"
+  },
+  {
+    "title": "06 centre of mass collision formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1s_y9g5xYeOV_Ahb2eZSVCC15F5nCO00O/preview"
+  },
+  {
+    "title": "02 motion in 2d formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1fLfmzQPR9XTTjp253bzMKwnHbq4Is393/preview"
+  },
+  {
+    "title": "01 kinematics formula sheets quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1wQXGZqGZYLlJXUfWqBpyIZV3n6NLFO3W/preview"
+  },
+  {
+    "title": "Ray Optics and Optical Instruments",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1qQof9ASIRtzJblbY43QrNJvACTDR-Kks/preview"
+  },
+  {
+    "title": " Electromagnetic Waves",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1K5nKNJvmhOR9SD8tpafbPEbycZnViZH-/preview"
+  },
+  {
+    "title": "Wave Optics",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1YAboImiU4AUQizOY_WXzLAeF5RkT3yRk/preview"
+  },
+  {
+    "title": "Current Electricity",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1RlMBn2bg7ZbdrsRNPKX_g9gFbJUbUOBz/preview"
+  },
+  {
+    "title": "Semiconductor",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/109DQYpJjLZDDtvtvOQw45Yon23Sgxeh7/preview"
+  },
+  {
+    "title": "Electromagnetic Induction",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/14AuMa5nysapR8iPj_N-MGKKTp5mNCG8f/preview"
+  },
+  {
+    "title": "Nuclei",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1wuiDjy6Nu20ePfYmoRI-6LcYLyVs2saR/preview"
+  },
+  {
+    "title": "Electric Charges and Fields",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1vcuivhDSUwV7IyRkTQ6zNYXUaBuQPS4X/preview"
+  },
+  {
+    "title": "Atoms",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/19tCJqo_WBs3fvDGeb38YmsaqNnr3aAQH/preview"
+  },
+  {
+    "title": "Magnetism & Matter",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/16r7gVTJ-D4oz7ThZz2gT83qPYT8baB5g/preview"
+  },
+  {
+    "title": "Electric Potential and Capacitance",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1Y_N3BEpZ2ysSpUmszOixDFGeGAyPlkiw/preview"
+  },
+  {
+    "title": "Moving Charges & Magnetism",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1EAvLgEDA09Ai-TgvufcBmULa6hPp-hJY/preview"
+  },
+  {
+    "title": "Dual Nature Of Matter & Radiation",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1n5jud1YOGqgOXNkD25ClK2lVRULvlv7-/preview"
+  },
+  {
+    "title": "Alternating Current",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "Physics",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1TUv3kZd1lMx6UlxTEETodjlXlg77XwYz/preview"
+  },
+  {
+    "title": "26 biomolecules revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1QBgphGjOkYTdQA0coellTLo8Pz-96ehk/preview"
+  },
+  {
+    "title": "27 polymer revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/13RZljDbxIeQLSjEX6CTSJWuGY_g97olX/preview"
+  },
+  {
+    "title": "24 carboxylic acid revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1kAV6t1-iLZgi_p_ji2RTMDNYcGaKeFbb/preview"
+  },
+  {
+    "title": "28 salt analysis revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/12MoZrFnI3H3tRMELwG7Kvbe7xyGkdInC/preview"
+  },
+  {
+    "title": "25 amines revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1RBP5LMEY1dOozkL-YL4yvblRK4UJBkM7/preview"
+  },
+  {
+    "title": "19 d block coordination compounds revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1P_qJxa1-G0JCI7nFn5UXN0iiqXV0AQ1c/preview"
+  },
+  {
+    "title": "18 chemical kinetics revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1rxj4G6bWhz21gPsBciTbdIp2GUv8RIpI/preview"
+  },
+  {
+    "title": "16 solutions revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 12"
+    ],
+    "url": "https://drive.google.com/file/d/1_7YyvZHRNB-J8vrkqngBW8c4H11eFdo0/preview"
+  },
+  {
+    "title": "12 p block revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1Tjx8FtE5VDvd_Mb7IpKviUkRjkSzZr8e/preview"
+  },
+  {
+    "title": "06 thermochemistry revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1rUPPjZ5RfOjJet43oXuh9NUhKSYpyW94/preview"
+  },
+  {
+    "title": "08 ionic equilibrium revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1nGrorCii_uYjZs1Fu7gIixqYqYZjCraw/preview"
+  },
+  {
+    "title": "11 s block revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1t9gTx261fZkbpp6i7dtlCBnwiC_3HJ7J/preview"
+  },
+  {
+    "title": "03 periodic table revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/16NrJh57agj4qXCzN1bXbcCrkBOZ7ZY20/preview"
+  },
+  {
+    "title": "10 hydrogen revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1kfWPfhoX8T7xvVDZQntYJq9p64tTrxBX/preview"
+  },
+  {
+    "title": "07 chemical equilibrium revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1TRpTytTWUdJwMgV_JlUo38RhoR1SvMCs/preview"
+  },
+  {
+    "title": "09 redox reaction revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1SG-K3623_LaYy01n8hgYnW721LN3McMY/preview"
+  },
+  {
+    "title": "05 gaseous state revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1U07Bl58NCHgAPcY0jvLVD3K99kutqS3F/preview"
+  },
+  {
+    "title": "01 stoichiometry revision notes quizrr",
+    "folders": [
+      "IIT-JEE",
+      "MATHANGO",
+      "CHEMISTRY",
+      "Short Notes",
+      "Class 11"
+    ],
+    "url": "https://drive.google.com/file/d/1y7sJnjsCAqDcMxOXFIVH4YFPRTT8bhs_/preview"
+  },
+  {
+    "title": "6. Fluid Mechanics Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1reSFdxhTtEJ2KZ6HLBu5FbxAXYxi85ww/preview"
+  },
+  {
+    "title": "5. Gravitation DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1_KTu6LLuf5_3h_KbiMS5vfNjJUkp-y8S/preview"
+  },
+  {
+    "title": "5. Gravitation Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/15DuFGdtMq-nhCA2DYsXUeNocDInn-dmy/preview"
+  },
+  {
+    "title": "4. Rigid Body Dynamics Part 2 DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1LP6qlVsJ4vTcNxNZqTvV0IpDqAoHIqbJ/preview"
+  },
+  {
+    "title": "4. Rigid Body Dynamics Part 2 Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1-JQC42JlSI-E3EcX55ngOogisf7VKlY6/preview"
+  },
+  {
+    "title": "1. System of Particles and Centre of Mass Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1zRAf1bp3X9K7TwJ2MdQbN3X0LrCPzvKO/preview"
+  },
+  {
+    "title": "2. Impulse and Collision Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1_LuIwREYRW9KACCetHckJ7QMJK6r-Glu/preview"
+  },
+  {
+    "title": "2. Impulse and Collision DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1T-K5MvSmfEVYnPFLVgyb_LgsFqnfsuK2/preview"
+  },
+  {
+    "title": "3. Rigid Body Dynamics Part 1 Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1sVtYSnckbS18hybwVrnEQ292xRyTxbl8/preview"
+  },
+  {
+    "title": "3. Rigid Body Dynamics Part 1 DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1sLiJEA0CqDEyIhdkMb2YF4s1MFpjW3On/preview"
+  },
+  {
+    "title": "7. Elasticity Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1jYGhS6vdkq7ZxwOSALqJM_BsaI0Fwiv1/preview"
+  },
+  {
+    "title": "1. System of Particles and Centre of Mass DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Mechanics-2"
+    ],
+    "url": "https://drive.google.com/file/d/1Yg9HT1L_qWtA1f5W0ilFxLHh9-mTVCh0/preview"
+  },
+  {
+    "title": "1. Geometrical Optics Part 1 Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1fTPaLB8OpXfkSFsQSvjkUmSqleIAfsD3/preview"
+  },
+  {
+    "title": "2. Geometrical Optics Part 2 Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1S60p2H-bo2QfSxE-1XW23KYSWjrwHTZ_/preview"
+  },
+  {
+    "title": "1. Geometrical Optics Part 1 DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1DcVtqUklk4yj3toHbBB0EvnZn_Biedui/preview"
+  },
+  {
+    "title": "2. Geometrical Optics Part 2 DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/18yatiD2fRZzqFzLWWDmyvNtQgg-PuIgV/preview"
+  },
+  {
+    "title": "3. Wave Optics Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/15SwsVZbA8sL1mr8WJ2rFPjNQbnwAv-nn/preview"
+  },
+  {
+    "title": "4. Diffraction and Polarization Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1_gAbo0TDc8-kYVBJuFx8XQtnYpV51In1/preview"
+  },
+  {
+    "title": "5. Dual Nature of Radiation and Matter Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1JxYQdqbXUsL5BYMwKF_3iFdR3Tm6cJ97/preview"
+  },
+  {
+    "title": "6. Atomic Physics Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/17Memr8aj7w68xq-3Gs0ndwpLf1vG9XnC/preview"
+  },
+  {
+    "title": "5. Dual Nature of Radiation and Matter DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1sgm5cxhAU9YSbD9Bb9hQyYgtxXkpmsBS/preview"
+  },
+  {
+    "title": "7. Nuclear Physics Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1rxuR3pjlWFZWRHdLA5ZtPDG6ooFBE4ie/preview"
+  },
+  {
+    "title": "6. Atomic Physics DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1N2byzAA13sZKMYGO2OB83U8jr4SluUzV/preview"
+  },
+  {
+    "title": "8. Semiconductor Devices and Digital Circuits Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1IYfuoGYIRdZbkIGanC_HR9oRZxYp_8tk/preview"
+  },
+  {
+    "title": "3. Wave Optics DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1reKWRN3K_HNh34YvLRkTJsImG1Ff3kM6/preview"
+  },
+  {
+    "title": "9. Communication Systems DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1ILM2ohUeOARzaWHBGZzUXlu9wjmaqH9x/preview"
+  },
+  {
+    "title": "8. Semiconductor Devices and Digital Circuits DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1H0fNrNF479-30QFVUT49mjg-GamYgvPy/preview"
+  },
+  {
+    "title": "9. Communication Systems Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1zLn2RX_f_l5oxblkj4KB5y8dW9ffZjK5/preview"
+  },
+  {
+    "title": "7. Nuclear Physics DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/12f4aMMt2rLtY_S2hSZSB8ZLtsEwRQhKk/preview"
+  },
+  {
+    "title": "4. Diffraction and Polarization DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Optics and Modern Physics"
+    ],
+    "url": "https://drive.google.com/file/d/1xG2OpOYX71VCyW7fSFrQtwuGpWa6UEmf/preview"
+  },
+  {
+    "title": "8. Sound Waves and Doppler Effect DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/15R0z2N5rdIFpPxI-uJAdrBb8A7KXqwYp/preview"
+  },
+  {
+    "title": "8. Sound Waves and Doppler Effect Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1ixD356gnZ78M7_rLuX__HrjGXMfTz4BN/preview"
+  },
+  {
+    "title": "7. Superposition and Standing Waves DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/173Et4hqDK69ID1jvCo9ZZr6ZqB9nGwQl/preview"
+  },
+  {
+    "title": "7. Superposition and Standing Waves Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1Rixk4Yjw0dqaljiYrU4C_3dP4nWxwNI4/preview"
+  },
+  {
+    "title": "6. Travelling Waves DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1P8lG-t-V1LrToAXSNAggvyROV6nyMicC/preview"
+  },
+  {
+    "title": "6. Travelling Waves Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1tyZN1JMvibbD6rudXpbjSoWpkUcIi2fv/preview"
+  },
+  {
+    "title": "5. Linear and Angular Simple Harmonic Motion DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/12ZFiwjq-9_FRfMJcpPHzbP3uB0G4lr6f/preview"
+  },
+  {
+    "title": "5. Linear and Angular Simple Harmonic Motion Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/18gk-5aKfcXBN3In8I5IMOjfaxwNjMakc/preview"
+  },
+  {
+    "title": "4. Thermodynamics DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1P2S9Cc-nlf8aQ8iXzIlvc3pcH5VZ5yB1/preview"
+  },
+  {
+    "title": "4. Thermodynamics Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1j7Zote9_whKTXt6i1dlrLTEhDzGKEQdM/preview"
+  },
+  {
+    "title": "3. Kinetic Theory of Gases DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1JUI_opR6DWoQJolp3gATo9xvxpUo3E2O/preview"
+  },
+  {
+    "title": "3. Kinetic Theory of Gases Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1ZhbAziz2UmKOUi2vg0fM3q06zLVT21jg/preview"
+  },
+  {
+    "title": "2. Transmission of Heat DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1W6TEE_CsSxv1TiGz9GH0BiuvXdk9IzFj/preview"
+  },
+  {
+    "title": "2. Transmission of Heat Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1eX3i9zoNJw_7BbEISNS6ARMKs9etioWw/preview"
+  },
+  {
+    "title": "1. Thermometry, Thermal Expansion and Calorimetry DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1NGba48DbqdPR8LjaKHnPBJCHsJ5_RyAl/preview"
+  },
+  {
+    "title": "1. Thermometry, Thermal Expansion and Calorimetry Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Waves and Thermodynamics"
+    ],
+    "url": "https://drive.google.com/file/d/1mG2hxyq-A4hT8FGrHCjcZNq_FwUwVJMO/preview"
+  },
+  {
+    "title": "4. Line and Plane DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1pt9sbIX2EwNLjBWcCuu2b-OAkas6NVtx/preview"
+  },
+  {
+    "title": "4. Line and Plane Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1YzU7aB81fOkrHy-6511uuDXozwQAWva4/preview"
+  },
+  {
+    "title": "3. Different Products of Vectors DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1e7R2nh7cryg_kNetIwyd3jx7OgRU6WYV/preview"
+  },
+  {
+    "title": "3. Different Products of Vectors Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1YhAftPtIGxX8mGJe-IsPB8rZ4s1cPQMo/preview"
+  },
+  {
+    "title": "2. Introduction to Vectors DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/10L_aHvzu8fB_1y94Bbh-ctyS3NY5GJb2/preview"
+  },
+  {
+    "title": "2. Introduction to Vectors Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/10xKCyK9ZKk37gkjQJTAq4yK1jrIq_8fw/preview"
+  },
+  {
+    "title": "1. Introduction to 3D Geometry DPP",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1uWIpzaf27196785Ei825wGukOWSv3fkC/preview"
+  },
+  {
+    "title": "1. Introduction to 3D Geometry Chapter",
+    "folders": [
+      "IIT-JEE",
+      "PUBLICATIONS",
+      "Cengage",
+      "Physics",
+      "Vectors and 3-D Geometry"
+    ],
+    "url": "https://drive.google.com/file/d/1gz63I_zy1sCHlheXHoEFfaKJ_RyWbmTt/preview"
+  },
+  {
+    "title": "oxygen containing compounds module",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1E08lLzQq16n7u8kUghrnv0EUbBV-901O/preview"
+  },
+  {
+    "title": "oxygen containing compound exercise",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1TkKZUc_5iOJJtQg4c2rBEYCaXb2IEMSo/preview"
+  },
+  {
+    "title": "Nitrogen containig compounds module",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/11RdlkiRWSbrd-exLIWdWYaJxbRmplffN/preview"
+  },
+  {
+    "title": "halogen derivatives module",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1yK5ykhwt5yYS9U_AMvhNNxJ9fJJVZmeX/preview"
+  },
+  {
+    "title": "Nitrogen containig compounds exercise",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1-VktD_epsEUVOaRTKlOlhk3vsvGAd3xL/preview"
+  },
+  {
+    "title": "06 chemistry hint & solutions",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1n1dqXLyZyDGuZfuYjDKq451IcWsRFxTz/preview"
+  },
+  {
+    "title": "halogen derivatives ex",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1ZygWleoYeh6xfgznRt2YQRdgBHWqiORe/preview"
+  },
+  {
+    "title": "Biomolecule Polymer Chemistry In Daily life",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/17SviClhxcg6V3lX7aKvEdN-UOcAyYgK2/preview"
+  },
+  {
+    "title": "ALLEN ORGANIC CHEMISTRY RACE-2021",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Organic Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1x3dlpe66E7bW3Ze7I5f2JUlnQSxWotxc/preview"
+  },
+  {
+    "title": "SOLUTIONS THEORY",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/19s4NDQ5cg09E5iBdvTHQtBNIym6bBcrV/preview"
+  },
+  {
+    "title": "mole Concept",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1P-G2HqL-dx6UyVWMZ6S-PxPxW0s_1Scp/preview"
+  },
+  {
+    "title": "chemical kinetics ",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1vEQozwasZlUqtlI0VhYkWfp14WuPvleH/preview"
+  },
+  {
+    "title": "SOLUTIONS EXERCISE",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1-HSJqJQ4oeUoSxkXQZwzmNVU_YZ3fYUd/preview"
+  },
+  {
+    "title": "ALLEN PHYSICAL CHEMISTRY RACE-2021",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1vkNxHFSzTyVKz2Ko7FiOumLuDWN1vXww/preview"
+  },
+  {
+    "title": "ALLEN PHYSICAL CHEMISTRY RACE SOLUTIONS-2021",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Physical Chemistry"
+    ],
+    "url": "https://drive.google.com/file/d/1bpgLHm7Rznwnht9cISyLZLTgAY_id76-/preview"
+  },
+  {
+    "title": "metallurgy module,",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Inorganic Chemistry Module"
+    ],
+    "url": "https://drive.google.com/file/d/1V8ID273jxAb5Al1C_ze2Sr2yjugJIjxe/preview"
+  },
+  {
+    "title": "D and F block",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Inorganic Chemistry Module"
+    ],
+    "url": "https://drive.google.com/file/d/1813hvw5_Ng6tKdcR-3RZ0qdeOTj8zW5W/preview"
+  },
+  {
+    "title": "metallurgy exercise",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Inorganic Chemistry Module"
+    ],
+    "url": "https://drive.google.com/file/d/1EUqegjHOCBM3FG3CSRDK42UTCpA7awRa/preview"
+  },
+  {
+    "title": "05 chemistry hint & solutions",
+    "folders": [
+      "IIT-JEE",
+      "COACHINGS",
+      "ALLEN",
+      "Allen Chemistry",
+      "Allen",
+      "Inorganic Chemistry Module"
+    ],
+    "url": "https://drive.google.com/file/d/1d7QskOcxCUCoz7V1QpnWEwuTJXGFADfM/preview"
+  }
+];
