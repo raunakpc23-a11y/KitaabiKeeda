@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Study Library</title>
-    <!-- Links to your separate CSS file -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="theme-amoled">
 
-    <!-- External Data Sources -->
-    <script src="data.js?v=30"></script>
-    <script src="lectures.js?v=30"></script>
-    <script src="mocktests.js?v=30"></script>
+    <script src="data.js?v=31"></script>
+    <script src="lectures.js?v=31"></script>
+    <script src="mocktests.js?v=31"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -47,10 +45,11 @@
             </div>
         </div>
 
+        <!-- SLEEK SEGMENTED CONTROL -->
         <div class="mode-selector">
-            <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
-            <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
-            <button class="mode-btn" data-root="LECTURES">📺 Lectures</button>
+            <button class="mode-btn active" data-root="CLASS 10">Class 10</button>
+            <button class="mode-btn" data-root="IIT-JEE">IIT-JEE</button>
+            <button class="mode-btn" data-root="LECTURES">Lectures</button>
             <button class="mode-btn" data-root="SIMULATOR">Simulator</button>
         </div>
 
@@ -66,18 +65,15 @@
                 <div class="search-wrapper">
                     <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
                 </div>
-                <!-- LOCAL FILE UPLOADER BUTTON -->
+                <!-- UNIFIED TOGGLE & UPLOAD -->
+                <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
                 <label class="local-file-btn" title="Open any PDF/file from your device">
-                    📂 Open File
+                    📂
                     <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
                 </label>
             </div>
-
-            <div class="tree-controls">
-                <span id="expand-all">Expand All</span>
-                <span id="collapse-all">Collapse All</span>
-            </div>
         </div>
+        
         <div class="book-list" id="book-list"></div>
     </div>
 
@@ -129,7 +125,6 @@
             </div>
 
             <div class="pomo-modal-body">
-                <!-- TAB 1: FOCUS SETTINGS & TASKS -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
                         <label>Focus Duration:</label>
@@ -176,7 +171,6 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: OTHER SETTINGS & THEME -->
                 <div class="pomo-tab-content" id="tab-other">
                     <div class="pomo-setting-group">
                         <label>Dark / Light Mode Shade Preset:</label>
@@ -297,8 +291,8 @@
 
     </div>
 
-    <!-- Your External JavaScript Files -->
-    <script src="ai.js?v=30"></script>
-    <script src="script.js?v=30"></script>
+    <!-- External JavaScript Files -->
+    <script src="ai.js?v=31"></script>
+    <script src="script.js?v=31"></script>
 </body>
 </html>
