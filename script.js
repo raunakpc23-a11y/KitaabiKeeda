@@ -28,10 +28,8 @@ const defaultSettings = {
 let savedData = {};
 try { savedData = JSON.parse(localStorage.getItem('pomo_settings')) || {}; } catch(e) {}
 
-// Merges your old saved data with the new default features seamlessly
 let pomoSettings = { ...defaultSettings, ...savedData };
 
-// Failsafe: Ensures active modules always exist so the UI never breaks
 if (!pomoSettings.activeModules || !Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
     pomoSettings.activeModules = ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'];
 }
@@ -79,6 +77,9 @@ const chatClose = document.getElementById('chat-close-btn');
 const chatBody = document.getElementById('chat-body');
 const chatInput = document.getElementById('chat-input');
 const chatSend = document.getElementById('chat-send-btn');
+
+const desktopSidebarToggle = document.getElementById('desktop-sidebar-toggle');
+const sidebar = document.getElementById('sidebar');
 
 // ==========================================
 // 3. INITIALIZATION & DATA LOADING
@@ -646,10 +647,71 @@ document.getElementById('next-btn').onclick = () => {
 };
 
 // ==========================================
-// 6. AI COPILOT CHAT BINDINGS
+// 6. DESKTOP SIDEBAR TOGGLE & HOTKEYS
+// ==========================================
+desktopSidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    desktopSidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        desktopSidebarToggle.click();
+    }
+    if (e.ctrlKey && e.key === ' ') {
+        e.preventDefault();
+        chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
+    }
+    if (e.key === 'Escape') {
+        modalOverlay.classList.remove('open');
+        musicModalOverlay.classList.remove('open');
+        chatWindow.classList.remove('open');
+        document.getElementById('notes-panel').classList.remove('open');
+    }
+});
+
+// ==========================================
+// 7. NOTES AUTO-SAVE & EXPORT
+// ==========================================
+const notesArea = document.getElementById('notes-area');
+const notesCopyBtn = document.getElementById('notes-copy-btn');
+const notesDlBtn = document.getElementById('notes-dl-btn');
+
+notesArea.value = localStorage.getItem('quick_notes') || '';
+
+notesArea.addEventListener('input', () => {
+    localStorage.setItem('quick_notes', notesArea.value);
+});
+
+notesCopyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(notesArea.value).then(() => {
+        notesCopyBtn.textContent = '✅';
+        setTimeout(() => notesCopyBtn.textContent = '📋', 2000);
+    });
+});
+
+notesDlBtn.addEventListener('click', () => {
+    const blob = new Blob([notesArea.value], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Study_Notes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// ==========================================
+// 8. AI COPILOT CHAT BINDINGS & MEMORY
 // ==========================================
 chatFab.onclick = () => chatWindow.classList.add('open');
 chatClose.onclick = () => chatWindow.classList.remove('open');
+
+let savedChat = localStorage.getItem('ai_chat_history');
+if (savedChat) {
+    chatBody.innerHTML = savedChat;
+    chatBody.scrollTop = chatBody.scrollHeight;
+}
 
 function handleNavigateToResource(bookIndex) {
     const book = masterLibrary[bookIndex];
@@ -673,6 +735,10 @@ function appendAIMessage(htmlContent, isUser, id = null) {
     msgDiv.innerHTML = htmlContent;
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
+    
+    if(!htmlContent.includes('typing-indicator')) {
+        localStorage.setItem('ai_chat_history', chatBody.innerHTML);
+    }
 }
 
 async function handleChatSubmit() {
