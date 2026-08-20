@@ -7,14 +7,25 @@ setTimeout(() => {
     filterAndRender();
 }, 300);
 
+// --- ALL AVAILABLE MODULES ---
+const ALL_MODULES = [
+    { id: 'CLASS 10', label: '🎓 Class 10' },
+    { id: 'IIT-JEE', label: '⚡ IIT-JEE' },
+    { id: 'LECTURES', label: '📺 Lectures' },
+    { id: 'SIMULATOR', label: '⏱️ Simulator' },
+    { id: 'PAST PAPERS', label: '📄 Past Papers' },
+    { id: 'FLASHCARDS', label: '📇 Flashcards' }
+];
+
 let pomoSettings = JSON.parse(localStorage.getItem('pomo_settings')) || {
-    enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes'
+    enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
+    aiEnabled: 'yes', activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
+    fontSize: 'font-medium', autoStart: 'no', volume: 0.5
 };
 let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
 
-if (pomoSettings.themeShade) {
-    document.body.className = pomoSettings.themeShade;
-}
+// INITIALIZE THEME & FONT
+document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize}`;
 
 let pomoSeconds = pomoSettings.focusTime * 60;
 let pomoInterval = null;
@@ -35,17 +46,19 @@ const pomoHighlightText = document.getElementById('pomo-highlight-text');
 
 // Settings Modal Elements
 const modalOverlay = document.getElementById('pomo-modal-overlay');
-document.getElementById('pomo-open-settings').onclick = () => modalOverlay.classList.add('open');
+document.getElementById('pomo-open-settings').onclick = () => {
+    renderModuleCheckboxes();
+    modalOverlay.classList.add('open');
+};
 document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
 modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-// Music Modal Elements
+// Music Modal
 const musicModalOverlay = document.getElementById('music-modal-overlay');
 document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
 document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
 musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
 
-// Music Presets
 const musicPresets = {
     'spotify-lofi': 'https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0',
     'spotify-focus': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
@@ -82,21 +95,15 @@ window.applyCustomMusic = () => {
     }
 };
 
-// --- LOCAL FILE UPLOADER ---
+// Local File Upload
 document.getElementById('local-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const objectUrl = URL.createObjectURL(file);
-    const localBook = {
-        title: file.name,
-        folders: ["MY LOCAL FILES", file.name],
-        url: objectUrl
-    };
-
-    loadBook(localBook, { classList: { add: ()=>{}, remove: ()=>{} } });
+    loadBook({ title: file.name, folders: ["MY LOCAL FILES", file.name], url: objectUrl }, { classList: { add: ()=>{}, remove: ()=>{} } });
 });
 
+// Tab Switching
 window.switchPomoTab = (evt, tabId) => {
     document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
@@ -104,22 +111,93 @@ window.switchPomoTab = (evt, tabId) => {
     document.getElementById(tabId).classList.add('active');
 };
 
-document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade || 'theme-amoled';
+// Populate Settings
+document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
 document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
 document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
 document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
-document.getElementById('pomo-setting-rate').value = pomoSettings.quoteRate || 30;
+document.getElementById('pomo-setting-rate').value = pomoSettings.quoteRate;
 document.getElementById('pomo-setting-sound').value = pomoSettings.sound;
 document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
 document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
 document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
-document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask || 'yes';
+document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask;
+document.getElementById('pomo-setting-ai').value = pomoSettings.aiEnabled || 'yes';
+document.getElementById('pomo-setting-fontsize').value = pomoSettings.fontSize || 'font-medium';
+document.getElementById('pomo-setting-autostart').value = pomoSettings.autoStart || 'no';
+document.getElementById('pomo-setting-volume').value = pomoSettings.volume || 0.5;
+
+function renderModuleCheckboxes() {
+    const grid = document.getElementById('module-checkbox-grid');
+    grid.innerHTML = '';
+    ALL_MODULES.forEach(mod => {
+        let isChecked = pomoSettings.activeModules.includes(mod.id) ? 'checked' : '';
+        let label = document.createElement('label');
+        label.innerHTML = `<input type="checkbox" value="${mod.id}" class="mod-checkbox" ${isChecked}> ${mod.label}`;
+        grid.appendChild(label);
+    });
+
+    document.querySelectorAll('.mod-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+            let checkedBoxes = document.querySelectorAll('.mod-checkbox:checked');
+            if (checkedBoxes.length > 4) {
+                e.preventDefault();
+                e.target.checked = false;
+                alert("You can only select a maximum of 4 modules for the top navigation.");
+            }
+        });
+    });
+}
+
+function renderDynamicTopNav() {
+    const selectorBox = document.getElementById('dynamic-mode-selector');
+    selectorBox.innerHTML = '';
+    
+    // Sort selected modules to maintain order
+    let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
+    
+    // Fallback if empty
+    if(selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
+
+    // Ensure currentRoot is valid
+    if (!pomoSettings.activeModules.includes(currentRoot)) {
+        currentRoot = selectedMods[0].id;
+    }
+
+    selectedMods.forEach(mod => {
+        let btn = document.createElement('button');
+        btn.className = `mode-btn ${mod.id === currentRoot ? 'active' : ''}`;
+        btn.setAttribute('data-root', mod.id);
+        btn.textContent = mod.label.split(' ')[1] || mod.label; // Clean label
+
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRoot = mod.id;
+            searchBar.value = ''; 
+            filterAndRender();
+        });
+
+        selectorBox.appendChild(btn);
+    });
+    filterAndRender();
+}
 
 function applyPomoSettingsUI() {
     pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
     pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
     pomoLogoIcon.textContent = pomoSettings.icon;
     
+    // Update AI Button Visibility
+    const aiBtn = document.getElementById('chat-fab-btn');
+    const chatWin = document.getElementById('chat-window');
+    if(pomoSettings.aiEnabled === 'no') {
+        aiBtn.style.display = 'none';
+        chatWin.classList.remove('open');
+    } else {
+        aiBtn.style.display = 'flex';
+    }
+
     if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
         let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
         pomoHighlightText.textContent = firstIncomplete.text;
@@ -132,7 +210,6 @@ function applyPomoSettingsUI() {
         pomoStatusText.textContent = isFocusMode ? 'Focus Session' : 'Break Time';
     }
 }
-applyPomoSettingsUI();
 
 function playAlertSound(type) {
     if (type === 'none') return;
@@ -142,7 +219,8 @@ function playAlertSound(type) {
         const gain = ctx.createGain();
         osc.type = type === 'chime' ? 'sine' : 'square';
         osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        // Apply Master Volume
+        gain.gain.setValueAtTime(parseFloat(pomoSettings.volume), ctx.currentTime);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
@@ -161,9 +239,22 @@ document.getElementById('pomo-save-settings').onclick = () => {
     pomoSettings.icon = document.getElementById('pomo-setting-icon').value;
     pomoSettings.bubbles = document.getElementById('pomo-setting-bubbles').value;
     pomoSettings.highlightTask = document.getElementById('pomo-setting-highlight').value;
+    pomoSettings.aiEnabled = document.getElementById('pomo-setting-ai').value;
+    pomoSettings.fontSize = document.getElementById('pomo-setting-fontsize').value;
+    pomoSettings.autoStart = document.getElementById('pomo-setting-autostart').value;
+    pomoSettings.volume = document.getElementById('pomo-setting-volume').value;
+
+    // Save Active Modules
+    let checkedModules = Array.from(document.querySelectorAll('.mod-checkbox:checked')).map(cb => cb.value);
+    if(checkedModules.length > 0) {
+        pomoSettings.activeModules = checkedModules;
+    }
 
     localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-    document.body.className = pomoSettings.themeShade;
+    
+    // Apply UI Global Updates
+    document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize}`;
+    renderDynamicTopNav();
     applyPomoSettingsUI();
     
     if(!isPomoRunning) {
@@ -212,20 +303,14 @@ const focusQuotes = [
     "One concept at a time. You've got this! 🎯",
     "Distractions out. Equations in. 🚀",
     "Pain of discipline < Pain of regret. Keep pushing! 🔥",
-    "Master the fundamentals, and the complex problems will fall. 🧠",
-    "Excellence is not an act, but a daily habit. 📈",
-    "Build your future one correct answer at a time. 🌟",
-    "Sweat more in practice, bleed less in the exam. ⚙️",
-    "Stay hungry for knowledge, ruthless with doubts. 🦁"
+    "Master the fundamentals, and the complex problems will fall. 🧠"
 ];
 
 const breakQuotes = [
     "Time to stretch your legs and hydrate! ☕",
     "Great focus! Rest your eyes for a moment. 🌿",
     "Breathe in, breathe out. Relax. 🧘‍♂️",
-    "Almost ready for the next sprint! 🔋",
-    "Step away from the screen. Give your brain a breather. 🌳",
-    "Hydration check! Drink a glass of water right now. 💧"
+    "Almost ready for the next sprint! 🔋"
 ];
 
 function rotateQuote() {
@@ -250,7 +335,7 @@ function updatePomoDisplay() {
     pomoTimeDisplay.textContent = `${m}:${s}`;
 }
 
-pomoToggleBtn.onclick = () => {
+function toggleTimer() {
     if (isPomoRunning) {
         clearInterval(pomoInterval);
         clearInterval(quoteInterval);
@@ -280,23 +365,30 @@ pomoToggleBtn.onclick = () => {
                 if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
                 if (isFocusMode) {
-                    alert("Focus Session Complete! Time for a break.");
                     pomoSeconds = pomoSettings.breakTime * 60;
                     pomoStatusText.textContent = "Break Time";
                     isFocusMode = false;
                     pomoBubble.textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
                 } else {
-                    alert("Break over! Back to focus.");
                     pomoSeconds = pomoSettings.focusTime * 60;
                     pomoStatusText.textContent = "Focus Session";
                     isFocusMode = true;
                     pomoBubble.textContent = focusQuotes[Math.floor(Math.random() * focusQuotes.length)];
                 }
                 updatePomoDisplay();
+
+                // Auto-Start Flow Handling
+                if(pomoSettings.autoStart === 'yes') {
+                    toggleTimer(); // instantly restart
+                } else {
+                    alert(isFocusMode ? "Break over! Back to focus." : "Focus Session Complete! Time for a break.");
+                }
             }
         }, 1000);
     }
-};
+}
+
+pomoToggleBtn.onclick = toggleTimer;
 
 pomoResetBtn.onclick = () => {
     clearInterval(pomoInterval);
@@ -311,14 +403,16 @@ pomoResetBtn.onclick = () => {
     updatePomoDisplay();
 };
 
+// --- INITIALIZE UI ON LOAD ---
+applyPomoSettingsUI();
 updatePomoDisplay();
+renderDynamicTopNav(); // This injects your chosen 4 modules
 
-// --- LIBRARY NAVIGATION LOGIC ---
 let currentRoot = "CLASS 10"; 
 let currentSubject = "All";
 let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
 let searchTimeout;
-let isTreeExpanded = false; // Unified toggle state
+let isTreeExpanded = false; 
 
 const bookListElement = document.getElementById('book-list');
 const searchBar = document.getElementById('search-bar');
@@ -335,16 +429,6 @@ function toggleMobileMenu() {
 document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
 document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
 
-document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentRoot = btn.getAttribute('data-root');
-        searchBar.value = ''; 
-        filterAndRender();
-    });
-});
-
 document.querySelectorAll('.subj-chip').forEach(chip => {
     chip.addEventListener('click', () => {
         document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
@@ -356,11 +440,11 @@ document.querySelectorAll('.subj-chip').forEach(chip => {
 
 themeToggle.addEventListener('click', () => {
     if (document.body.classList.contains('theme-light')) {
-        document.body.className = 'theme-amoled';
+        document.body.className = `theme-amoled ${pomoSettings.fontSize}`;
         pomoSettings.themeShade = 'theme-amoled';
         themeToggle.textContent = '☀️';
     } else {
-        document.body.className = 'theme-light';
+        document.body.className = `theme-light ${pomoSettings.fontSize}`;
         pomoSettings.themeShade = 'theme-light';
         themeToggle.textContent = '🌙';
     }
@@ -383,7 +467,6 @@ searchBar.addEventListener('input', () => {
     searchTimeout = setTimeout(filterAndRender, 250); 
 });
 
-// Unified Folder Toggle Logic
 document.getElementById('folder-toggle-btn').addEventListener('click', () => {
     isTreeExpanded = !isTreeExpanded;
     document.querySelectorAll('#book-list details').forEach(d => d.open = isTreeExpanded);
@@ -407,7 +490,7 @@ function filterAndRender() {
 function renderTree(booksArray) {
     bookListElement.innerHTML = ''; 
     if (booksArray.length === 0) {
-        bookListElement.innerHTML = '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px; text-align:center;">No files found.</div>'; return;
+        bookListElement.innerHTML = '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px; text-align:center;">No files found for this module.</div>'; return;
     }
 
     const fileTree = { _files: [], _isFolder: true };
@@ -547,7 +630,7 @@ document.getElementById('next-btn').onclick = () => {
     if(idx !== -1 && items[idx + 1]) items[idx + 1].click();
 };
 
-// --- AI COPILOT LOGIC & INTERFACE ---
+// --- AI COPILOT LOGIC BINDINGS ---
 const chatFab = document.getElementById('chat-fab-btn');
 const chatWindow = document.getElementById('chat-window');
 const chatClose = document.getElementById('chat-close-btn');
@@ -562,6 +645,7 @@ function handleNavigateToResource(bookIndex) {
     const book = masterLibrary[bookIndex];
     if (!book) return;
 
+    // Intelligent root switching
     const rootCategory = book.folders ? book.folders[0].toUpperCase() : 'CLASS 10';
     document.querySelectorAll('.mode-btn').forEach(btn => {
         if (btn.getAttribute('data-root') === rootCategory) {
@@ -590,37 +674,41 @@ async function handleChatSubmit() {
     chatInput.value = '';
 
     const typingId = 'typing-' + Date.now();
-    appendAIMessage('<span class="typing-indicator">Searching...</span>', false, typingId);
+    appendAIMessage('<span class="typing-indicator">Typing... 💅🏾</span>', false, typingId);
 
     try {
-        // CALL THE EXTERNAL AI ENGINE
-        const result = await processAIQuery(val, masterLibrary);
-        
-        const typingEl = document.getElementById(typingId);
-        if(typingEl) typingEl.remove();
+        if (typeof processAIQuery !== 'undefined') {
+            const result = await processAIQuery(val, masterLibrary);
+            const typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
 
-        if (result.type === 'fact') {
-            appendAIMessage(result.reply, false);
-        } else if (result.type === 'navigation') {
-            let prefix = result.prefix ? `<p style="margin-bottom:8px;">${result.prefix}</p>` : `📍 <strong>Found ${result.matches.length} matching material(s):</strong>`;
-            let cardHtml = `${prefix}<div class="chat-nav-card">`;
-            result.matches.forEach((b) => {
-                const globalIdx = masterLibrary.indexOf(b);
-                const isVid = (b.url && b.url.includes("youtube")) || b.playlist;
-                cardHtml += `
-                    <button class="nav-shortcut-btn" onclick="handleNavigateToResource(${globalIdx})">
-                        <span>${isVid ? '▶️' : '📄'} ${b.title}</span>
-                        <span style="opacity:0.6; font-size:0.9em;">Open ➔</span>
-                    </button>
-                `;
-            });
-            cardHtml += `</div>`;
-            appendAIMessage(cardHtml, false);
+            if (result.type === 'fact') {
+                appendAIMessage(result.reply, false);
+            } else if (result.type === 'navigation') {
+                let prefix = result.prefix ? `<p style="margin-bottom:8px;">${result.prefix}</p>` : `📍 <strong>Found ${result.matches.length} matches:</strong>`;
+                let cardHtml = `${prefix}<div class="chat-nav-card">`;
+                result.matches.forEach((b) => {
+                    const globalIdx = masterLibrary.indexOf(b);
+                    const isVid = (b.url && b.url.includes("youtube")) || b.playlist;
+                    cardHtml += `
+                        <button class="nav-shortcut-btn" onclick="handleNavigateToResource(${globalIdx})">
+                            <span>${isVid ? '▶️' : '📄'} ${b.title}</span>
+                            <span style="opacity:0.6; font-size:0.9em;">Open ➔</span>
+                        </button>
+                    `;
+                });
+                cardHtml += `</div>`;
+                appendAIMessage(cardHtml, false);
+            }
+        } else {
+            const typingEl = document.getElementById(typingId);
+            if(typingEl) typingEl.remove();
+            appendAIMessage("Oops, ai.js is missing! Ensure it is linked properly.", false);
         }
     } catch(e) {
         const typingEl = document.getElementById(typingId);
         if(typingEl) typingEl.remove();
-        appendAIMessage("Oops, my brain disconnected. Please try again.", false);
+        appendAIMessage("Oops, my brain disconnected. Try again.", false);
         console.error("AI Error:", e);
     }
 }
