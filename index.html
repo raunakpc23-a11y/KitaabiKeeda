@@ -402,7 +402,7 @@
             document.getElementById('fullscreen-btn').style.display = 'flex';
             document.getElementById('notes-toggle-btn').style.display = 'flex';
             
-            let finalUrl = book.url;
+            let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
 
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
