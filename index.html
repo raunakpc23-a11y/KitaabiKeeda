@@ -137,7 +137,9 @@
 </head>
 <body>
 
-    <script src="data.js"></script>
+    <!-- 🔴 FIXED: BOTH files are now imported properly -->
+    <script src="data.js?v=2"></script>
+    <script src="lectures.js?v=2"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -147,7 +149,6 @@
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
-        <!-- NEW: Added Lectures Button -->
         <div class="mode-selector">
             <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
@@ -201,7 +202,6 @@
                 <p class="placeholder-text" id="placeholder">Choose a PDF or Video from the tree structure on the left.</p>
             </div>
             <div id="viewer-wrapper">
-                <!-- NEW: Iframe permissions upgraded to allow YouTube fullscreen & autoplay -->
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn" title="Previous File">◀ Prev</button>
@@ -221,6 +221,23 @@
     </div>
 
     <script>
+        // 🔴 FIXED: Error catching & Smart Merging logic applied here
+        let loadAttempts = 0;
+        let mergeInterval = setInterval(() => {
+            loadAttempts++;
+            if (typeof allBooks !== 'undefined' && typeof lectureVideos !== 'undefined') {
+                const alreadyMerged = allBooks.some(b => b.folders[0] === "LECTURES");
+                if (!alreadyMerged) {
+                    allBooks.push(...lectureVideos);
+                    if (currentRoot === "LECTURES") filterAndRender();
+                }
+                clearInterval(mergeInterval);
+            } else if (loadAttempts > 20) {
+                if (typeof lectureVideos === 'undefined') console.error("Could not load lectures.js");
+                clearInterval(mergeInterval);
+            }
+        }, 100);
+
         window.onerror = function(message) {
             if(message.includes("allBooks is not defined")) {
                 document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> data.js file is missing or not loaded correctly.</div>`;
@@ -408,7 +425,6 @@
             const div = document.createElement('div'); div.className = 'book-item';
             const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
 
-            // NEW: Automatically detect if link is a YouTube video
             if (book.url.includes("youtube.com") || book.url.includes("youtu.be")) {
                 content.classList.add('is-video');
             }
@@ -461,7 +477,6 @@
             document.getElementById('fullscreen-btn').style.display = 'flex';
             document.getElementById('notes-toggle-btn').style.display = 'flex';
             
-            // Handle Download button logic (Only show for Drive links, not YouTube)
             const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if(match && !book.url.includes("youtube")) {
                 downloadBtn.style.display = 'flex';
