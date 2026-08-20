@@ -8,9 +8,9 @@
 </head>
 <body class="theme-amoled">
 
-    <script src="data.js?v=26"></script>
-    <script src="lectures.js?v=26"></script>
-    <script src="mocktests.js?v=26"></script>
+    <script src="data.js?v=27"></script>
+    <script src="lectures.js?v=27"></script>
+    <script src="mocktests.js?v=27"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -18,6 +18,7 @@
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
             <div class="header-controls-group">
+                <button class="icon-btn-header" id="music-open-btn" title="Open Music Player (Spotify / YT Music)">🎵</button>
                 <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
                 <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌙</button>
             </div>
@@ -58,15 +59,58 @@
                 <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
                 <button class="subj-chip" data-subj="Maths">Maths</button>
             </div>
-            <div class="search-wrapper">
-                <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+            
+            <div class="search-row">
+                <div class="search-wrapper">
+                    <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+                </div>
+                <!-- LOCAL FILE UPLOADER BUTTON -->
+                <label class="local-file-btn" title="Open any PDF/file from your device">
+                    📂 Open File
+                    <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
+                </label>
             </div>
+
             <div class="tree-controls">
                 <span id="expand-all">Expand All</span>
                 <span id="collapse-all">Collapse All</span>
             </div>
         </div>
         <div class="book-list" id="book-list"></div>
+    </div>
+
+    <!-- MUSIC PLAYER MODAL -->
+    <div class="pomo-modal-overlay" id="music-modal-overlay">
+        <div class="pomo-modal music-modal">
+            <div class="pomo-modal-header">
+                <span>🎵 Focus Music (Spotify & YT Music)</span>
+                <button class="icon-btn" id="music-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
+            </div>
+            <div class="pomo-modal-body">
+                <div class="pomo-setting-group">
+                    <label>Study Music Presets:</label>
+                    <select id="music-preset-select" onchange="changeMusicPreset(this.value)">
+                        <option value="spotify-lofi">Spotify: Lofi Study Beats</option>
+                        <option value="spotify-focus">Spotify: Deep Focus Instrumental</option>
+                        <option value="spotify-classical">Spotify: Classical Essentials</option>
+                        <option value="yt-lofi">YouTube: Lofi Girl Live Stream</option>
+                        <option value="custom">Custom Spotify / YouTube URL</option>
+                    </select>
+                </div>
+
+                <div class="pomo-setting-group" id="custom-music-group" style="display:none;">
+                    <label>Paste Spotify Playlist/Track or YouTube URL:</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="custom-music-url" placeholder="https://open.spotify.com/playlist/...">
+                        <button class="primary-btn" onclick="applyCustomMusic()" style="padding: 6px 12px; font-size: 0.8em;">Apply</button>
+                    </div>
+                </div>
+
+                <div class="music-iframe-wrapper">
+                    <iframe id="music-frame" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- POMODORO SETTINGS & TASKS MODAL -->
