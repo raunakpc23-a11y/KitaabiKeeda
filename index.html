@@ -142,8 +142,8 @@
 </head>
 <body>
 
-    <script src="data.js?v=3"></script>
-    <script src="lectures.js?v=3"></script>
+    <script src="data.js?v=4"></script>
+    <script src="lectures.js?v=4"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -483,10 +483,9 @@
             const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             let finalUrl = book.url;
 
+            // 🔴 REMOVED THE CODE THAT WAS HIDING THE YOUTUBE MENU BAR
             if(book.url.includes("youtube.com")) {
                 downloadBtn.style.display = 'none';
-                // Automatically hide related videos & branding for a cleaner look
-                finalUrl += (finalUrl.includes('?') ? '&' : '?') + 'rel=0&modestbranding=1';
             } else if(match) {
                 downloadBtn.style.display = 'flex';
                 downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
@@ -498,10 +497,8 @@
             notesArea.oninput = function() { localStorage.setItem('notes_' + book.title, this.value); };
 
             viewerWrapper.style.display = 'block';
-            
-            // Re-trigger animation
             viewerWrapper.style.animation = 'none';
-            viewerWrapper.offsetHeight; /* trigger reflow */
+            viewerWrapper.offsetHeight; 
             viewerWrapper.style.animation = null;
 
             floatingNav.style.display = 'flex';
