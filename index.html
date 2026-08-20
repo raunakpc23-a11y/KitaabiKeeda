@@ -137,9 +137,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=12"></script>
-    <script src="lectures.js?v=12"></script>
-    <script src="mocktests.js?v=12"></script>
+    <script src="data.js?v=13"></script>
+    <script src="lectures.js?v=13"></script>
+    <script src="mocktests.js?v=13"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -218,19 +218,28 @@
     </div>
 
     <script>
-        let loadAttempts = 0;
-        let mergeInterval = setInterval(() => {
-            loadAttempts++;
-            if (typeof allBooks !== 'undefined' && typeof lectureVideos !== 'undefined' && typeof mockTests !== 'undefined') {
-                const alreadyMerged = allBooks.some(b => b.folders[0] === "LECTURES");
-                if (!alreadyMerged) {
-                    allBooks.push(...lectureVideos);
-                    allBooks.push(...mockTests);
-                    filterAndRender();
-                }
-                clearInterval(mergeInterval);
+        // --- BULLETPROOF DATA LOADING FIX ---
+        if (typeof window.allBooks === 'undefined') {
+            window.allBooks = [];
+        }
+
+        setTimeout(() => {
+            // Safely merge lectures if file exists
+            if (typeof lectureVideos !== 'undefined') {
+                const hasLectures = window.allBooks.some(b => b.folders && b.folders[0] === "LECTURES");
+                if (!hasLectures) window.allBooks.push(...lectureVideos);
             }
-        }, 100);
+            
+            // Safely merge mock tests if file exists
+            if (typeof mockTests !== 'undefined') {
+                const hasTests = window.allBooks.some(b => b.folders && b.folders[0] === "SIMULATOR");
+                if (!hasTests) window.allBooks.push(...mockTests);
+            }
+            
+            // Render the sidebar once everything is merged
+            filterAndRender();
+        }, 200);
+        // ------------------------------------
 
         let currentRoot = "CLASS 10"; 
         let currentSubject = "All";
@@ -309,11 +318,11 @@
             const query = searchBar.value.toLowerCase();
             
             const filteredBooks = allBooks.filter(book => {
-                const searchString = book.title + " " + book.folders.join(" ");
+                const searchString = book.title + " " + (book.folders ? book.folders.join(" ") : "");
                 const matchesSearch = searchString.toLowerCase().includes(query);
                 const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
                 
-                let matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                let matchesRoot = book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
                 return matchesRoot && matchesSearch && matchesSubject;
             });
             renderTree(filteredBooks);
@@ -394,19 +403,16 @@
             
             let finalUrl = book.url;
 
-            // --- FIXED: READS INDIVIDUAL TITLE FROM PLAYLIST OBJECTS ---
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url;
-                    // Extracts the exact 'title' value from each video object in lectures.js
                     opt.textContent = vid.title || `Lecture ${index + 1}`;
                     playlistDropdown.appendChild(opt);
                 });
                 playlistDropdown.style.display = 'block';
                 
-                // Load first video by default and sync header title
                 bookFrame.src = book.playlist[0].url;
                 document.getElementById('current-book-title').textContent = book.playlist[0].title;
                 
@@ -419,7 +425,6 @@
                 playlistDropdown.style.display = 'none';
             }
 
-            // --- BUTTON LOGIC ---
             if (currentRoot === "SIMULATOR") {
                 downloadBtn.style.display = 'flex';
                 downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
