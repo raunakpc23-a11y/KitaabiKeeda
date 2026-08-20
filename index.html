@@ -8,9 +8,9 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <script src="data.js?v=32"></script>
-    <script src="lectures.js?v=32"></script>
-    <script src="mocktests.js?v=32"></script>
+    <script src="data.js?v=34"></script>
+    <script src="lectures.js?v=34"></script>
+    <script src="mocktests.js?v=34"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -46,9 +46,7 @@
         </div>
 
         <!-- DYNAMIC SEGMENTED CONTROL -->
-        <div class="mode-selector" id="dynamic-mode-selector">
-            <!-- Buttons injected via JavaScript based on Settings -->
-        </div>
+        <div class="mode-selector" id="dynamic-mode-selector"></div>
 
         <div class="search-container">
             <div class="subject-filters" id="subject-filters">
@@ -77,7 +75,7 @@
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
-                <span>🎵 Focus Music</span>
+                <span>🎵 Focus Music (Spotify & YT Music)</span>
                 <button class="icon-btn" id="music-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
             </div>
             <div class="pomo-modal-body">
@@ -123,7 +121,6 @@
             </div>
 
             <div class="pomo-modal-body">
-                
                 <!-- TAB 1: FOCUS & FLOW -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
@@ -223,9 +220,7 @@
                     </div>
                     <div class="pomo-setting-group" style="margin-top: 8px;">
                         <label>Top Navigation Modules (Select Max 4):</label>
-                        <div class="module-checkbox-grid" id="module-checkbox-grid">
-                            <!-- Injected by JS -->
-                        </div>
+                        <div class="module-checkbox-grid" id="module-checkbox-grid"></div>
                     </div>
                 </div>
 
@@ -273,6 +268,7 @@
             <div class="reader-header-info">
                 <div class="title-row">
                     <button id="mobile-menu-btn" class="icon-btn" title="Open Menu">☰</button>
+                    <button id="desktop-sidebar-toggle" class="icon-btn" title="Toggle Sidebar (Ctrl+B)">◀</button>
                     <h2 id="current-book-title">Select a file</h2>
                 </div>
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
@@ -301,13 +297,17 @@
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
                 <span>📝 Quick Notes</span>
-                <button class="icon-btn" id="close-notes-btn">✖</button>
+                <div>
+                    <button class="icon-btn" id="notes-copy-btn" title="Copy to Clipboard" style="font-size: 1em;">📋</button>
+                    <button class="icon-btn" id="notes-dl-btn" title="Download Notes" style="font-size: 1em;">💾</button>
+                    <button class="icon-btn" id="close-notes-btn" style="font-size: 1em;">✖</button>
+                </div>
             </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here..."></textarea>
+            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save!"></textarea>
         </div>
         
         <!-- AI COPILOT CHAT -->
-        <button class="chat-fab" id="chat-fab-btn" title="AI Navigator & Copilot">🤖</button>
+        <button class="chat-fab" id="chat-fab-btn" title="AI Navigator & Copilot (Ctrl+Space)">🤖</button>
         <div class="chat-window" id="chat-window">
             <div class="chat-header">
                 <span>🧭 AI Study Copilot</span>
@@ -329,7 +329,7 @@
 
     </div>
 
-    <script src="ai.js?v=32"></script>
-    <script src="script.js?v=32"></script>
+    <script src="ai.js?v=34"></script>
+    <script src="script.js?v=34"></script>
 </body>
 </html>
