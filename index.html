@@ -137,10 +137,9 @@
 </head>
 <body>
 
-    <!-- Loading all data files with fresh cache-busting version -->
-    <script src="data.js?v=9"></script>
-    <script src="lectures.js?v=9"></script>
-    <script src="mocktests.js?v=9"></script>
+    <script src="data.js?v=10"></script>
+    <script src="lectures.js?v=10"></script>
+    <script src="mocktests.js?v=10"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -188,7 +187,6 @@
                     <h2 id="current-book-title">Select a file</h2>
                 </div>
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
-                <!-- Dynamic Playlist Dropdown Menu -->
                 <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
             <div class="header-actions">
@@ -396,21 +394,24 @@
             
             let finalUrl = book.url;
 
-            // --- BULLETPROOF PLAYLIST DROPDOWN POPULATION ---
+            // --- BULLETPROOF AUTO-NAMING DROPDOWN ---
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url;
-                    // Directly map the exact "title" key from your lectures.js objects
-                    opt.textContent = vid.title || `Lecture ${index + 1}`;
+                    
+                    // SMART TITLE GENERATOR: Combines the Course Title with the Video Index
+                    // Result: "Physics One-Shots (Part 1)", "Physics One-Shots (Part 2)", etc.
+                    opt.textContent = `${book.title} (Part ${index + 1})`;
+                    
                     playlistDropdown.appendChild(opt);
                 });
                 playlistDropdown.style.display = 'block';
                 
-                // Load the first video by default
+                // Load first video by default
                 bookFrame.src = book.playlist[0].url;
-                document.getElementById('current-book-title').textContent = book.playlist[0].title;
+                document.getElementById('current-book-title').textContent = `${book.title} (Part 1)`;
                 
                 playlistDropdown.onchange = (e) => {
                     bookFrame.src = e.target.value;
