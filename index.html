@@ -104,7 +104,7 @@
         .breadcrumb { color: #64748b; font-size: 0.83em; margin-top: 4px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .header-actions { display: flex; gap: 8px; align-items: center; }
-        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; text-decoration: none; }
         .icon-btn:hover { background-color: var(--border-color); }
         .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
         .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
@@ -142,8 +142,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=4"></script>
-    <script src="lectures.js?v=4"></script>
+    <!-- Load both data files with a version bump for cache busting -->
+    <script src="data.js?v=5"></script>
+    <script src="lectures.js?v=5"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -195,7 +196,8 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="download-btn" class="icon-btn" title="Download File" style="display:none;">⬇️</button>
+                <!-- Download / Start Exam Button -->
+                <button id="download-btn" class="icon-btn" style="display:none;"></button>
                 <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
@@ -225,6 +227,7 @@
     </div>
 
     <script>
+        // Data Load Tracker & Error Catcher
         let loadAttempts = 0;
         let mergeInterval = setInterval(() => {
             loadAttempts++;
@@ -243,10 +246,11 @@
 
         window.onerror = function(message) {
             if(message.includes("allBooks is not defined")) {
-                document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> data.js file is missing or not loaded correctly.</div>`;
+                document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> A data file is missing or not loaded correctly.</div>`;
             } return false;
         };
 
+        // UI State
         let currentRoot = "CLASS 10"; 
         let currentSubject = "All";
         let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
@@ -267,6 +271,7 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
 
+        // Mobile Menu
         function toggleMobileMenu() {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('open');
@@ -274,6 +279,7 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
         sidebarOverlay.addEventListener('click', toggleMobileMenu);
 
+        // Sidebar Actions
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -293,6 +299,7 @@
             });
         });
 
+        // Theme
         if (localStorage.getItem('dark-mode') === 'enabled') {
             document.body.classList.add('dark-mode');
             themeToggle.textContent = '☀️';
@@ -304,6 +311,7 @@
             themeToggle.textContent = isDark ? '☀️' : '🌙';
         });
 
+        // Utilities
         document.getElementById('fullscreen-btn').addEventListener('click', () => {
             if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
             else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
@@ -329,6 +337,7 @@
             document.querySelectorAll('#book-list details').forEach(d => d.open = false);
         });
 
+        // Search logic
         searchBar.addEventListener('input', () => {
             clearSearchBtn.style.display = searchBar.value.length > 0 ? 'block' : 'none';
             clearTimeout(searchTimeout);
@@ -349,6 +358,7 @@
             document.getElementById('progress-text').textContent = `${pct}% Completed`;
         }
 
+        // Render Functions
         function filterAndRender() {
             if (typeof allBooks === 'undefined') return;
             updateProgress();
@@ -483,12 +493,25 @@
             const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             let finalUrl = book.url;
 
-            // 🔴 REMOVED THE CODE THAT WAS HIDING THE YOUTUBE MENU BAR
+            // SMART EXAM DETECTOR
+            const isMockTest = book.folders.join(" ").toUpperCase().includes("SQP") || book.folders.join(" ").toUpperCase().includes("TEST");
+
+            // LOGIC FOR BUTTONS (YouTube vs Mock Test vs Standard PDF)
             if(book.url.includes("youtube.com")) {
                 downloadBtn.style.display = 'none';
             } else if(match) {
                 downloadBtn.style.display = 'flex';
-                downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
+                if (isMockTest) {
+                    downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.65em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
+                    downloadBtn.title = 'Open NTA Simulator';
+                    downloadBtn.className = 'icon-btn primary-btn';
+                    downloadBtn.onclick = () => window.open(`simulator.html?url=${encodeURIComponent(book.url)}&title=${encodeURIComponent(book.title)}`, '_blank');
+                } else {
+                    downloadBtn.innerHTML = '⬇️';
+                    downloadBtn.title = 'Download File';
+                    downloadBtn.className = 'icon-btn';
+                    downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
+                }
             } else { 
                 downloadBtn.style.display = 'none'; 
             }
