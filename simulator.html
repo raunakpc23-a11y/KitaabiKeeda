@@ -3,281 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JEE NTA Exam Simulator</title>
+    <title>NTA CBT Simulator</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-        body { display: flex; flex-direction: column; height: 100vh; background-color: #f4f4f4; overflow: hidden; }
-
-        /* NTA Header */
-        .header { background-color: #1e5ba9; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
-        .header h1 { font-size: 1.2rem; }
-        .timer-box { font-size: 1.1rem; font-weight: bold; background: #fff; color: #1e5ba9; padding: 5px 15px; border-radius: 4px; border: 2px solid #fff; }
-        .timer-box.warning { background: #e53e3e; color: white; border-color: #e53e3e; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-
-        /* Main Layout */
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-
-        /* Left Side: PDF Viewer */
-        .pdf-section { flex: 1; display: flex; flex-direction: column; border-right: 2px solid #ccc; background: #fff; }
-        .pdf-header { background: #e2e8f0; padding: 10px; font-weight: bold; font-size: 0.9rem; color: #2d3748; display: flex; justify-content: space-between; }
-        #mock-frame { flex: 1; border: none; width: 100%; }
-
-        /* Right Side: NTA Palette */
-        .palette-section { width: 340px; display: flex; flex-direction: column; background: #ebf8ff; }
-        .user-info { padding: 15px; background: #fff; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 50px; height: 50px; background: #ccc; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; display: flex; height: 100vh; background-color: #f4f6f8; }
         
-        .palette-stats { padding: 10px; background: #fff; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.75rem; border-bottom: 1px solid #cbd5e1; }
-        .stat-item { display: flex; align-items: center; gap: 5px; }
-
-        /* NTA Button Shapes */
-        .nta-btn { width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; color: black; font-weight: bold; font-size: 0.8rem; border-radius: 4px; border: 1px solid #999; }
-        .status-not-visited { background: #e2e8f0; }
-        .status-not-answered { background: #e53e3e; color: white; border-radius: 0 0 10px 10px; border: none; }
-        .status-answered { background: #48bb78; color: white; border-radius: 10px 10px 0 0; border: none; }
-        .status-review { background: #805ad5; color: white; border-radius: 50%; border: none; }
-        .status-review-ans { background: #805ad5; color: white; border-radius: 50%; border: none; position: relative; }
-        .status-review-ans::after { content: ''; position: absolute; bottom: 2px; right: 2px; width: 8px; height: 8px; background: #48bb78; border-radius: 50%; border: 1px solid white; }
-
-        .grid-container { padding: 15px; flex: 1; overflow-y: auto; background: #ebf8ff; }
-        .question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        .grid-btn { cursor: pointer; transition: transform 0.1s; }
-        .grid-btn:hover { transform: scale(1.1); }
-        .grid-btn.active-q { border: 2px solid #2b6cb0; box-shadow: 0 0 8px rgba(43,108,176,0.6); }
-
-        /* Bottom Action Bar */
-        .action-bar { padding: 15px; background: #fff; border-top: 1px solid #ccc; display: flex; flex-direction: column; gap: 10px; }
-        .options-area { display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #eee; }
-        .option-label { display: flex; align-items: center; gap: 5px; font-weight: bold; cursor: pointer; }
-        .option-label input { transform: scale(1.2); cursor: pointer; }
-
-        .btn-row { display: flex; gap: 5px; justify-content: space-between; }
-        .action-btn { padding: 8px 10px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 4px; font-size: 0.8rem; font-weight: bold; flex: 1; transition: 0.2s; }
-        .action-btn:hover { background: #f4f4f4; }
-        .btn-save { background: #48bb78; color: white; border: none; }
-        .btn-save:hover { background: #38a169; }
-        .btn-review { background: #ed8936; color: white; border: none; }
-        .btn-review:hover { background: #dd6b20; }
-        .btn-submit { background: #2b6cb0; color: white; border: none; margin-top: 5px; width: 100%; padding: 10px; }
-        .btn-submit:hover { background: #1e4e8c; }
-
-        @media (max-width: 900px) {
-            .main-container { flex-direction: column; }
-            .pdf-section { height: 50vh; flex: none; }
-            .palette-section { width: 100%; flex: 1; }
-            .palette-stats { display: none; } /* Hide stats on mobile to save space */
-        }
+        /* Left Sidebar: Folder Tree */
+        #sidebar { width: 250px; background: #fff; border-right: 1px solid #ddd; overflow-y: auto; padding: 10px; }
+        .folder-tree ul { list-style-type: none; padding-left: 15px; margin: 5px 0; }
+        .folder { cursor: pointer; font-weight: bold; margin-top: 8px; user-select: none; color: #333; }
+        .file { cursor: pointer; padding-left: 20px; color: #0056b3; margin-top: 5px; font-size: 14px; }
+        .file:hover { text-decoration: underline; background: #f0f8ff; }
+        .hidden { display: none; }
+        
+        /* Center: PDF Viewer */
+        #main-panel { flex-grow: 1; display: flex; flex-direction: column; }
+        #top-bar { height: 50px; background: #007bff; color: white; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; }
+        #pdf-frame { flex-grow: 1; width: 100%; border: none; }
+        .toggle-btn { background: #ffc107; border: none; padding: 8px 15px; font-weight: bold; cursor: pointer; border-radius: 4px; display: none; }
+        
+        /* Right Sidebar: CBT OMR Palette */
+        #cbt-panel { width: 300px; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; }
+        .cbt-header { padding: 15px; background: #e9ecef; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; }
+        #question-palette { flex-grow: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-content: start; }
+        .q-btn { padding: 10px; text-align: center; background: #e0e0e0; border: 1px solid #ccc; border-radius: 5px; cursor: pointer; }
+        .q-btn.answered { background: #28a745; color: white; border-color: #28a745; }
+        .q-btn.review { background: #17a2b8; color: white; border-color: #17a2b8; }
+        
+        #action-bar { padding: 15px; border-top: 1px solid #ddd; background: #f8f9fa; display: flex; justify-content: space-between; }
+        .btn { padding: 8px 12px; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        .btn-save { background: #28a745; color: white; }
+        .btn-review { background: #17a2b8; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>JEE Mock Test Simulator</h1>
-        <div class="timer-box" id="timer">03:00:00</div>
+    <!-- Left: Folder Tree -->
+    <div id="sidebar">
+        <h3 style="margin-top: 0;">Test Library</h3>
+        <div id="folder-tree"></div>
     </div>
 
-    <div class="main-container">
-        <!-- PDF Section -->
-        <div class="pdf-section">
-            <div class="pdf-header">
-                <span id="test-title">Loading Mock Test...</span>
-                <span>Scroll PDF to read questions</span>
+    <!-- Center: Test Viewer -->
+    <div id="main-panel">
+        <div id="top-bar">
+            <h3 id="test-title">Select a test from the library</h3>
+            <div>
+                <span id="timer" style="margin-right: 20px; font-size: 18px; font-weight: bold;">03:00:00</span>
+                <button id="toggle-key-btn" class="toggle-btn" onclick="togglePdf()">Show Answer Key</button>
             </div>
-            <!-- Default mock test URL if none provided -->
-            <iframe id="mock-frame" src=""></iframe>
         </div>
+        <iframe id="pdf-frame" src=""></iframe>
+    </div>
 
-        <!-- OMR / Palette Section -->
-        <div class="palette-section">
-            <div class="user-info">
-                <div class="avatar">👤</div>
-                <div>
-                    <h3 style="font-size: 0.9rem;">Candidate Name</h3>
-                    <p style="font-size: 0.8rem; color: #666;">JEE Main Paper 1</p>
-                </div>
-            </div>
-
-            <div class="palette-stats">
-                <div class="stat-item"><div class="nta-btn status-answered" id="c-ans">0</div> Answered</div>
-                <div class="stat-item"><div class="nta-btn status-not-answered" id="c-notans">0</div> Not Answered</div>
-                <div class="stat-item"><div class="nta-btn status-not-visited" id="c-notvis">90</div> Not Visited</div>
-                <div class="stat-item"><div class="nta-btn status-review" id="c-rev">0</div> Mark for Review</div>
-                <div class="stat-item" style="grid-column: span 2;"><div class="nta-btn status-review-ans" id="c-revans">0</div> Answered & Marked for Review</div>
-            </div>
-
-            <div class="grid-container">
-                <h4 style="margin-bottom: 10px; font-size: 0.9rem;">Question Palette:</h4>
-                <div class="question-grid" id="q-grid">
-                    <!-- Buttons generated by JS -->
-                </div>
-            </div>
-
-            <div class="action-bar">
-                <div style="font-size: 0.85rem; font-weight: bold; color: #2b6cb0;">Current Question: <span id="current-q-label">1</span></div>
-                
-                <div class="options-area" id="options-area">
-                    <label class="option-label"><input type="radio" name="q-option" value="A"> A</label>
-                    <label class="option-label"><input type="radio" name="q-option" value="B"> B</label>
-                    <label class="option-label"><input type="radio" name="q-option" value="C"> C</label>
-                    <label class="option-label"><input type="radio" name="q-option" value="D"> D</label>
-                </div>
-
-                <div class="btn-row">
-                    <button class="action-btn btn-save" onclick="saveAndNext()">Save & Next</button>
-                    <button class="action-btn" onclick="clearResponse()">Clear</button>
-                </div>
-                <div class="btn-row">
-                    <button class="action-btn btn-review" onclick="markReviewAndNext()">Mark for Review & Next</button>
-                </div>
-                <button class="action-btn btn-submit" onclick="submitTest()">Submit Test</button>
-            </div>
+    <!-- Right: Digital OMR -->
+    <div id="cbt-panel">
+        <div class="cbt-header">Question Palette</div>
+        <div id="question-palette">
+            <!-- Buttons generated by JS -->
+        </div>
+        <div id="action-bar">
+            <button class="btn btn-review" onclick="markReview()">Mark Review</button>
+            <button class="btn btn-save" onclick="saveAnswer()">Save & Next</button>
         </div>
     </div>
+
+    <!-- Load your data file -->
+    <script src="mocktests.js"></script>
 
     <script>
-        const TOTAL_QUESTIONS = 90; // Standard JEE Main
-        let currentQ = 1;
-        
-        // Status map: 0=Not Visited, 1=Answered, 2=Not Answered, 3=Review, 4=Review+Answered
-        let qStatus = new Array(TOTAL_QUESTIONS + 1).fill(0);
-        let qAnswers = new Array(TOTAL_QUESTIONS + 1).fill(null);
+        let currentTest = null;
+        let isShowingKey = false;
+        let activeQuestion = 1;
 
-        const grid = document.getElementById('q-grid');
-        const optionsArea = document.getElementsByName('q-option');
-
-        // Capture URL parameters to load the right PDF
-        const urlParams = new URLSearchParams(window.location.search);
-        const pdfUrl = urlParams.get('url');
-        const testTitle = urlParams.get('title');
-
-        if (pdfUrl) {
-            document.getElementById('mock-frame').src = pdfUrl;
-            document.getElementById('test-title').textContent = testTitle || "Mock Test";
-        } else {
-            document.getElementById('test-title').textContent = "No Test Selected. Go back to Library.";
-        }
-
-        // Initialize Grid
-        function initGrid() {
-            grid.innerHTML = '';
-            for(let i = 1; i <= TOTAL_QUESTIONS; i++) {
-                let btn = document.createElement('div');
-                btn.className = 'nta-btn grid-btn status-not-visited';
-                btn.id = `qbtn-${i}`;
-                btn.textContent = i;
-                btn.onclick = () => jumpToQuestion(i);
-                grid.appendChild(btn);
-            }
-            updateGridUI();
-        }
-
-        function updateGridUI() {
-            let counts = [0, 0, 0, 0, 0];
-            for(let i = 1; i <= TOTAL_QUESTIONS; i++) {
-                let btn = document.getElementById(`qbtn-${i}`);
-                btn.className = 'nta-btn grid-btn';
-                if(i === currentQ) btn.classList.add('active-q');
-                
-                counts[qStatus[i]]++;
-
-                if(qStatus[i] === 0) btn.classList.add('status-not-visited');
-                if(qStatus[i] === 1) btn.classList.add('status-answered');
-                if(qStatus[i] === 2) btn.classList.add('status-not-answered');
-                if(qStatus[i] === 3) btn.classList.add('status-review');
-                if(qStatus[i] === 4) btn.classList.add('status-review-ans');
-            }
-
-            document.getElementById('c-notvis').textContent = counts[0];
-            document.getElementById('c-ans').textContent = counts[1];
-            document.getElementById('c-notans').textContent = counts[2];
-            document.getElementById('c-rev').textContent = counts[3];
-            document.getElementById('c-revans').textContent = counts[4];
-
-            document.getElementById('current-q-label').textContent = currentQ;
-
-            // Load saved answer for radio buttons
-            optionsArea.forEach(opt => {
-                opt.checked = (opt.value === qAnswers[currentQ]);
+        // 1. Build the Folder Tree
+        function buildFolderTree(data) {
+            const tree = {};
+            data.forEach(item => {
+                let current = tree;
+                item.folders.forEach(folder => {
+                    if (!current[folder]) current[folder] = { _files: [] };
+                    current = current[folder];
+                });
+                current._files.push(item);
             });
+            return tree;
         }
 
-        function getSelectedOption() {
-            let selected = null;
-            optionsArea.forEach(opt => { if(opt.checked) selected = opt.value; });
-            return selected;
-        }
-
-        function jumpToQuestion(num) {
-            // If leaving a not-visited question without answering, mark it as not-answered
-            if (qStatus[currentQ] === 0 && currentQ !== num) {
-                qStatus[currentQ] = 2; 
-            }
-            currentQ = num;
-            updateGridUI();
-        }
-
-        function saveAndNext() {
-            let ans = getSelectedOption();
-            if (ans) {
-                qAnswers[currentQ] = ans;
-                qStatus[currentQ] = 1; // Answered
-            } else {
-                qStatus[currentQ] = 2; // Not Answered
-            }
-            if (currentQ < TOTAL_QUESTIONS) currentQ++;
-            updateGridUI();
-        }
-
-        function markReviewAndNext() {
-            let ans = getSelectedOption();
-            if (ans) {
-                qAnswers[currentQ] = ans;
-                qStatus[currentQ] = 4; // Answered & Review
-            } else {
-                qStatus[currentQ] = 3; // Review without answer
-            }
-            if (currentQ < TOTAL_QUESTIONS) currentQ++;
-            updateGridUI();
-        }
-
-        function clearResponse() {
-            qAnswers[currentQ] = null;
-            qStatus[currentQ] = 2; // Not Answered
-            optionsArea.forEach(opt => opt.checked = false);
-            updateGridUI();
-        }
-
-        function submitTest() {
-            let confirmed = confirm("Are you sure you want to submit the test? You cannot change your answers after submission.");
-            if(confirmed) {
-                let score = qAnswers.filter(a => a !== null).length;
-                alert(`Test Submitted!\nYou attempted ${score} out of ${TOTAL_QUESTIONS} questions.\n(Note: Automatic grading requires an answer key setup).`);
-                window.close(); // or redirect to main page
-            }
-        }
-
-        // Timer Logic (3 Hours)
-        let timeInSeconds = 3 * 60 * 60;
-        const timerEl = document.getElementById('timer');
-
-        setInterval(() => {
-            if(timeInSeconds <= 0) {
-                timerEl.textContent = "00:00:00";
-                return;
-            }
-            timeInSeconds--;
-            let h = Math.floor(timeInSeconds / 3600);
-            let m = Math.floor((timeInSeconds % 3600) / 60);
-            let s = timeInSeconds % 60;
-            timerEl.textContent = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        function renderTree(node, container) {
+            const ul = document.createElement('ul');
+            ul.className = "folder-tree";
             
-            if (timeInSeconds < 300) { // Last 5 minutes
-                timerEl.classList.add('warning');
+            for (const key in node) {
+                if (key === '_files') {
+                    node[key].forEach(file => {
+                        const li = document.createElement('li');
+                        li.className = 'file';
+                        li.innerHTML = `📄 ${file.title || "Combined Paper"}`;
+                        li.onclick = (e) => {
+                            e.stopPropagation();
+                            loadTest(file);
+                        };
+                        ul.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.className = 'folder';
+                    li.innerHTML = `📁 ${key}`;
+                    const childContainer = document.createElement('div');
+                    childContainer.className = 'hidden';
+                    renderTree(node[key], childContainer);
+                    
+                    li.onclick = (e) => {
+                        e.stopPropagation();
+                        childContainer.classList.toggle('hidden');
+                        li.innerHTML = childContainer.classList.contains('hidden') ? `📁 ${key}` : `📂 ${key}`;
+                    };
+                    ul.appendChild(li);
+                    ul.appendChild(childContainer);
+                }
             }
-        }, 1000);
+            container.appendChild(ul);
+        }
 
-        initGrid();
+        // Initialize Folder Tree
+        const treeContainer = document.getElementById('folder-tree');
+        renderTree(buildFolderTree(mockTests), treeContainer);
+
+        // 2. Load the Test into the Iframe
+        function loadTest(test) {
+            currentTest = test;
+            isShowingKey = false;
+            document.getElementById('test-title').innerText = test.title || "Mock Test";
+            
+            const pdfFrame = document.getElementById('pdf-frame');
+            const toggleBtn = document.getElementById('toggle-key-btn');
+
+            // Handle Combined vs Separate Files logic
+            if (test.questionUrl !== "" && test.answerKeyUrl !== "") {
+                // Separate files: Load question, show toggle button
+                pdfFrame.src = test.questionUrl;
+                toggleBtn.style.display = "block";
+                toggleBtn.innerText = "Show Answer Key";
+            } else if (test.questionUrl !== "") {
+                // Only questions exist
+                pdfFrame.src = test.questionUrl;
+                toggleBtn.style.display = "none";
+            } else if (test.answerKeyUrl !== "") {
+                // Combined file (questionUrl is empty, but answerKey exists)
+                pdfFrame.src = test.answerKeyUrl;
+                toggleBtn.style.display = "none"; // No need to toggle, everything is in one PDF
+            }
+
+            // Reset Palette
+            generatePalette(75); // Standard JEE Main length
+        }
+
+        // 3. Toggle between Question and Answer Key (If split files)
+        function togglePdf() {
+            if (!currentTest) return;
+            const pdfFrame = document.getElementById('pdf-frame');
+            const toggleBtn = document.getElementById('toggle-key-btn');
+
+            if (isShowingKey) {
+                pdfFrame.src = currentTest.questionUrl;
+                toggleBtn.innerText = "Show Answer Key";
+            } else {
+                pdfFrame.src = currentTest.answerKeyUrl;
+                toggleBtn.innerText = "Back to Questions";
+            }
+            isShowingKey = !isShowingKey;
+        }
+
+        // 4. Generate CBT Question Palette
+        function generatePalette(totalQuestions) {
+            const palette = document.getElementById('question-palette');
+            palette.innerHTML = "";
+            for (let i = 1; i <= totalQuestions; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'q-btn';
+                btn.id = `qbtn-${i}`;
+                btn.innerText = i;
+                btn.onclick = () => setActiveQuestion(i);
+                palette.appendChild(btn);
+            }
+            setActiveQuestion(1);
+        }
+
+        function setActiveQuestion(num) {
+            if(document.getElementById(`qbtn-${activeQuestion}`)) {
+                document.getElementById(`qbtn-${activeQuestion}`).style.border = "1px solid #ccc";
+            }
+            activeQuestion = num;
+            document.getElementById(`qbtn-${activeQuestion}`).style.border = "2px solid #000";
+        }
+
+        function saveAnswer() {
+            document.getElementById(`qbtn-${activeQuestion}`).className = 'q-btn answered';
+            if(activeQuestion < 75) setActiveQuestion(activeQuestion + 1);
+        }
+
+        function markReview() {
+            document.getElementById(`qbtn-${activeQuestion}`).className = 'q-btn review';
+            if(activeQuestion < 75) setActiveQuestion(activeQuestion + 1);
+        }
     </script>
 </body>
 </html>
