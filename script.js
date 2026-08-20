@@ -313,7 +313,6 @@ pomoResetBtn.onclick = () => {
 
 updatePomoDisplay();
 
-// --- LIBRARY NAVIGATION LOGIC ---
 let currentRoot = "CLASS 10"; 
 let currentSubject = "All";
 let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
@@ -545,7 +544,7 @@ document.getElementById('next-btn').onclick = () => {
     if(idx !== -1 && items[idx + 1]) items[idx + 1].click();
 };
 
-// --- AI STUDY NAVIGATOR & DIRECT COPILOT LOGIC ---
+// --- AI COPILOT LOGIC & INTERFACE ---
 const chatFab = document.getElementById('chat-fab-btn');
 const chatWindow = document.getElementById('chat-window');
 const chatClose = document.getElementById('chat-close-btn');
@@ -556,59 +555,10 @@ const chatSend = document.getElementById('chat-send-btn');
 chatFab.onclick = () => chatWindow.classList.add('open');
 chatClose.onclick = () => chatWindow.classList.remove('open');
 
-// Quick Facts / Knowledge Base for Instant Answers
-const factsKnowledgeBase = [
-    { keys: ["ohm's law", "ohms law"], reply: "⚡ <strong>Ohm's Law:</strong> $V = IR$. Voltage ($V$) equals Current ($I$) multiplied by Resistance ($R$)." },
-    { keys: ["quadratic formula", "quadratic"], reply: "📐 <strong>Quadratic Formula:</strong> For $ax^2 + bx + c = 0$, $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$." },
-    { keys: ["kinetic energy"], reply: "🏃 <strong>Kinetic Energy:</strong> $KE = \\frac{1}{2}mv^2$, where $m$ is mass and $v$ is velocity." },
-    { keys: ["gravitational force", "gravity formula", "newton gravity"], reply: "🪐 <strong>Newton's Law of Gravitation:</strong> $F = G \\frac{m_1 m_2}{r^2}$." },
-    { keys: ["snell's law", "snells law", "refraction"], reply: "🔍 <strong>Snell's Law:</strong> $n_1 \\sin(\\theta_1) = n_2 \\sin(\\theta_2)$." },
-    { keys: ["ideal gas", "gas equation"], reply: "🧪 <strong>Ideal Gas Law:</strong> $PV = nRT$." },
-    { keys: ["simulator", "cbt"], reply: "⏱️ You can click the <strong>Simulator</strong> tab above to launch full 3-hour NTA JEE Mock Tests with OMR palettes and countdown timers!" },
-    { keys: ["pomodoro", "timer"], reply: "🍅 The <strong>Pomodoro Timer</strong> is located at the top of the sidebar. You can customize focus durations, themes, and alert sounds using the ⚙️ icon." },
-    { keys: ["music", "spotify", "songs"], reply: "🎵 Click the <strong>🎵</strong> icon in the header to open background lofi beats or stream custom Spotify/YouTube links while studying." }
-];
-
-function processAIQuery(query) {
-    const qLower = query.toLowerCase().trim();
-
-    // 1. Check knowledge base for direct factual answers
-    for (let item of factsKnowledgeBase) {
-        if (item.keys.some(k => qLower.includes(k))) {
-            return { type: 'fact', reply: item.reply };
-        }
-    }
-
-    // 2. Search masterLibrary for pinpoint resource routing
-    const words = qLower.replace(/find|show|me|where|are|the|open|search|pdf|video/gi, '').trim().split(' ').filter(w => w.length > 2);
-    
-    let matches = [];
-    if (words.length > 0) {
-        matches = masterLibrary.filter(book => {
-            const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
-            return words.every(w => meta.includes(w)) || words.some(w => meta.includes(w));
-        });
-    }
-
-    if (matches.length > 0) {
-        return {
-            type: 'navigation',
-            matches: matches.slice(0, 4) // Top 4 matches
-        };
-    }
-
-    // 3. Fallback response
-    return {
-        type: 'fact',
-        reply: `I couldn't find an exact file or formula for "<em>${query}</em>". Try searching for specific chapters (e.g. <em>Electrostatics</em>, <em>Carbon</em>, <em>Calculus</em>, or <em>Mock Test</em>).`
-    };
-}
-
 function handleNavigateToResource(bookIndex) {
     const book = masterLibrary[bookIndex];
     if (!book) return;
 
-    // Switch to the correct mode category if applicable
     const rootCategory = book.folders ? book.folders[0].toUpperCase() : 'CLASS 10';
     document.querySelectorAll('.mode-btn').forEach(btn => {
         if (btn.getAttribute('data-root') === rootCategory) {
@@ -616,32 +566,41 @@ function handleNavigateToResource(bookIndex) {
         }
     });
 
-    // Auto-load the book
     loadBook(book, { classList: { add: ()=>{}, remove: ()=>{} } });
     chatWindow.classList.remove('open');
 }
 
-function appendAIMessage(htmlContent, isUser) {
+function appendAIMessage(htmlContent, isUser, id = null) {
     const msgDiv = document.createElement('div');
     msgDiv.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+    if (id) msgDiv.id = id;
     msgDiv.innerHTML = htmlContent;
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-function handleChatSubmit() {
+async function handleChatSubmit() {
     const val = chatInput.value.trim();
     if (!val) return;
 
     appendAIMessage(val, true);
     chatInput.value = '';
 
-    setTimeout(() => {
-        const result = processAIQuery(val);
+    const typingId = 'typing-' + Date.now();
+    appendAIMessage('<span class="typing-indicator">Searching...</span>', false, typingId);
+
+    try {
+        // CALL THE EXTERNAL AI ENGINE
+        const result = await processAIQuery(val, masterLibrary);
+        
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+
         if (result.type === 'fact') {
             appendAIMessage(result.reply, false);
         } else if (result.type === 'navigation') {
-            let cardHtml = `📍 <strong>Found ${result.matches.length} matching material(s):</strong><div class="chat-nav-card">`;
+            let prefix = result.prefix ? `<p style="margin-bottom:8px;">${result.prefix}</p>` : `📍 <strong>Found ${result.matches.length} matching material(s):</strong>`;
+            let cardHtml = `${prefix}<div class="chat-nav-card">`;
             result.matches.forEach((b) => {
                 const globalIdx = masterLibrary.indexOf(b);
                 const isVid = (b.url && b.url.includes("youtube")) || b.playlist;
@@ -655,7 +614,12 @@ function handleChatSubmit() {
             cardHtml += `</div>`;
             appendAIMessage(cardHtml, false);
         }
-    }, 400);
+    } catch(e) {
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+        appendAIMessage("Oops, my brain disconnected. Please try again.", false);
+        console.error("AI Error:", e);
+    }
 }
 
 chatSend.onclick = handleChatSubmit;
