@@ -396,19 +396,22 @@
             
             let finalUrl = book.url;
 
-            // --- UPGRADED PLAYLIST DROPDOWN LOGIC ---
+// --- UPGRADED PLAYLIST DROPDOWN LOGIC ---
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url;
-                    // Safely extracts title or name property from your playlist items
-                    let itemTitle = vid.title || vid.name || `Lecture ${index + 1}`;
-                    opt.textContent = `${index + 1}. ${itemTitle}`;
+                    // Forcefully grab the title from your lectures.js objects
+                    let itemTitle = vid.title || `Lecture ${index + 1}`;
+                    opt.textContent = itemTitle; 
                     playlistDropdown.appendChild(opt);
                 });
                 playlistDropdown.style.display = 'block';
-                finalUrl = book.playlist[0].url; 
+                
+                // Load first video and set header title
+                bookFrame.src = book.playlist[0].url;
+                document.getElementById('current-book-title').textContent = book.playlist[0].title;
                 
                 playlistDropdown.onchange = (e) => {
                     bookFrame.src = e.target.value;
