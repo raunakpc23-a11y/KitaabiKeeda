@@ -37,9 +37,9 @@
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
 
-        /* Big Category & Progress */
-        .mode-selector { display: flex; gap: 12px; padding: 16px 20px 6px 20px; background-color: var(--sidebar-bg); }
-        .mode-btn { flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.9em; cursor: pointer; transition: all 0.25s; text-align: center; }
+        /* Big Category Buttons - Updated to 3 Buttons */
+        .mode-selector { display: flex; gap: 8px; padding: 16px 16px 6px 16px; background-color: var(--sidebar-bg); }
+        .mode-btn { flex: 1; padding: 10px 4px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.85em; cursor: pointer; transition: all 0.25s; text-align: center; }
         .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
         .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); }
 
@@ -50,7 +50,6 @@
 
         /* Filters & Search */
         .search-container { padding: 8px 20px 12px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
-        
         .subject-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
         .subject-filters::-webkit-scrollbar { display: none; }
         .subj-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--sidebar-text); font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
@@ -62,12 +61,13 @@
         .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
         .clear-search-btn { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: #a0aec0; font-size: 1.2em; display: none; padding: 4px; }
         .clear-search-btn:hover { color: #e53e3e; }
+        
         .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
         .tree-controls span:hover { text-decoration: underline; }
 
         .book-list { flex-grow: 1; overflow-y: auto; padding: 14px 16px; list-style: none; }
         
-        /* Nested Directory Tree UI */
+        /* Directory Tree */
         details { margin-bottom: 4px; }
         summary { padding: 9px 12px; cursor: pointer; font-weight: 600; border-radius: 8px; display: flex; align-items: center; background-color: var(--folder-bg); user-select: none; transition: background 0.2s, color 0.2s; font-size: 0.91em; color: var(--sidebar-text); border: 1px solid transparent; }
         summary:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--border-color); }
@@ -84,8 +84,11 @@
         .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25); }
         
         .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
-        .book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
         
+        /* Dynamic Icons (PDF vs Video) */
+        .book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
+        .book-item-content.is-video::before { content: "▶️"; }
+
         .book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
         .check-done { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
         .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0 4px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
@@ -93,7 +96,7 @@
         .fav-star.is-fav { opacity: 1; color: #ecc94b; text-shadow: 0 0 8px rgba(236, 201, 75, 0.5); }
         .book-item.active .fav-star { color: white; text-shadow: none; }
 
-        /* Main Reader Workspace */
+        /* Main Workspace */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; position: relative; overflow: hidden; }
         .reader-header { padding: 16px 24px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); gap: 15px; }
         .reader-header-info { display: flex; align-items: center; gap: 15px; overflow: hidden; flex-grow: 1; }
@@ -108,7 +111,6 @@
         .primary-btn:active { transform: scale(0.96); }
         #mobile-menu-btn { display: none; }
 
-        /* Reader Area & Floating Controls */
         .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
         .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; text-align: center; }
         .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
@@ -118,7 +120,6 @@
         .floating-nav button { background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; transition: transform 0.2s; font-weight: bold; }
         .floating-nav button:hover { transform: scale(1.2); }
 
-        /* Quick Notes Slide-out */
         .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.05); transition: right 0.3s ease; display: flex; flex-direction: column; z-index: 10; }
         .notes-panel.open { right: 0; }
         .notes-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
@@ -146,9 +147,11 @@
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
+        <!-- NEW: Added Lectures Button -->
         <div class="mode-selector">
             <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
+            <button class="mode-btn" data-root="LECTURES">📺 Lectures</button>
         </div>
         
         <div class="progress-wrapper">
@@ -164,7 +167,7 @@
                 <button class="subj-chip" data-subj="Maths">Maths</button>
             </div>
             <div class="search-wrapper">
-                <input type="text" id="search-bar" class="search-input" placeholder="Search files... (Press '/' to focus)">
+                <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
                 <button id="clear-search-btn" class="clear-search-btn" title="Clear Search">✖</button>
             </div>
             <div class="tree-controls">
@@ -187,7 +190,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button id="download-btn" class="icon-btn" title="Download PDF" style="display:none;">⬇️</button>
+                <button id="download-btn" class="icon-btn" title="Download File" style="display:none;">⬇️</button>
                 <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
@@ -195,10 +198,11 @@
         
         <div class="reader-container">
             <div class="placeholder-container" id="placeholder-box">
-                <p class="placeholder-text" id="placeholder">Choose a PDF file from the tree structure on the left to begin reading.</p>
+                <p class="placeholder-text" id="placeholder">Choose a PDF or Video from the tree structure on the left.</p>
             </div>
             <div id="viewer-wrapper">
-                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" loading="lazy"></iframe>
+                <!-- NEW: Iframe permissions upgraded to allow YouTube fullscreen & autoplay -->
+                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn" title="Previous File">◀ Prev</button>
                     <span style="opacity: 0.5;">|</span>
@@ -217,14 +221,12 @@
     </div>
 
     <script>
-        // Error Catcher
         window.onerror = function(message) {
             if(message.includes("allBooks is not defined")) {
                 document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> data.js file is missing or not loaded correctly.</div>`;
             } return false;
         };
 
-        // State Tracking
         let currentRoot = "CLASS 10"; 
         let currentSubject = "All";
         let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
@@ -232,7 +234,6 @@
         let recentBooks = JSON.parse(localStorage.getItem('library-recent')) || [];
         let searchTimeout;
 
-        // Elements
         const bookListElement = document.getElementById('book-list');
         const searchBar = document.getElementById('search-bar');
         const clearSearchBtn = document.getElementById('clear-search-btn');
@@ -243,16 +244,16 @@
         const downloadBtn = document.getElementById('download-btn');
         const notesPanel = document.getElementById('notes-panel');
         const notesArea = document.getElementById('notes-area');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-        // Mobile Menu
         function toggleMobileMenu() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebar-overlay').classList.toggle('open');
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('open');
         }
         document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
-        document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
+        sidebarOverlay.addEventListener('click', toggleMobileMenu);
 
-        // UI Interactions
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -272,6 +273,17 @@
             });
         });
 
+        if (localStorage.getItem('dark-mode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('dark-mode', isDark ? 'enabled' : 'disabled');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        });
+
         document.getElementById('fullscreen-btn').addEventListener('click', () => {
             if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
             else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
@@ -284,7 +296,19 @@
             notesPanel.classList.remove('open');
         });
 
-        // Search
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchBar && document.activeElement !== notesArea) {
+                e.preventDefault(); searchBar.focus();
+            }
+        });
+
+        document.getElementById('expand-all').addEventListener('click', () => {
+            document.querySelectorAll('#book-list details').forEach(d => d.open = true);
+        });
+        document.getElementById('collapse-all').addEventListener('click', () => {
+            document.querySelectorAll('#book-list details').forEach(d => d.open = false);
+        });
+
         searchBar.addEventListener('input', () => {
             clearSearchBtn.style.display = searchBar.value.length > 0 ? 'block' : 'none';
             clearTimeout(searchTimeout);
@@ -295,7 +319,6 @@
             filterAndRender();
         });
 
-        // Core Functions
         function updateProgress() {
             if (typeof allBooks === 'undefined') return;
             const rootBooks = allBooks.filter(b => b.folders[0].toUpperCase() === currentRoot.toUpperCase());
@@ -324,7 +347,6 @@
         function renderTree(booksArray, isSearching) {
             bookListElement.innerHTML = ''; 
 
-            // Render Recent
             const localRecent = recentBooks.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
             if (localRecent.length > 0 && !isSearching) {
                 const rDet = document.createElement('details'); rDet.open = true;
@@ -335,7 +357,6 @@
                 rDet.appendChild(rCont); bookListElement.appendChild(rDet);
             }
 
-            // Render Favorites
             const rootFavs = favorites.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
             if (rootFavs.length > 0 && !isSearching) {
                 const fDet = document.createElement('details'); fDet.open = true;
@@ -347,7 +368,7 @@
             }
 
             if (booksArray.length === 0) {
-                bookListElement.innerHTML += '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px;">No files found.</div>'; return;
+                bookListElement.innerHTML += '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px;">No files or videos found.</div>'; return;
             }
 
             const fileTree = { _files: [], _isFolder: true };
@@ -387,9 +408,13 @@
             const div = document.createElement('div'); div.className = 'book-item';
             const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
 
+            // NEW: Automatically detect if link is a YouTube video
+            if (book.url.includes("youtube.com") || book.url.includes("youtu.be")) {
+                content.classList.add('is-video');
+            }
+
             const actions = document.createElement('div'); actions.className = 'book-actions';
             
-            // Completion Checkbox
             const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
             check.checked = completedBooks.includes(book.title);
             check.onclick = (e) => {
@@ -399,7 +424,6 @@
                 updateProgress();
             };
 
-            // Favorite Star
             const star = document.createElement('button'); star.className = 'fav-star';
             const isFav = favorites.includes(book.title); star.textContent = isFav ? '★' : '☆'; if (isFav) star.classList.add('is-fav');
             star.onclick = (e) => {
@@ -417,7 +441,6 @@
         }
 
         function loadBook(book, clickedElement) {
-            // Update UI Tracking
             document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
             document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
             clickedElement.classList.add('active');
@@ -427,27 +450,24 @@
                 parent = parent.parentElement;
             }
 
-            // Update Recent
             recentBooks = recentBooks.filter(t => t !== book.title);
             recentBooks.unshift(book.title);
             if(recentBooks.length > 5) recentBooks.pop();
             localStorage.setItem('library-recent', JSON.stringify(recentBooks));
 
-            // Load Content
             document.getElementById('current-book-title').textContent = book.title;
             document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
             document.getElementById('placeholder-box').style.display = 'none';
             document.getElementById('fullscreen-btn').style.display = 'flex';
             document.getElementById('notes-toggle-btn').style.display = 'flex';
             
-            // Setup Download
+            // Handle Download button logic (Only show for Drive links, not YouTube)
             const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            if(match) {
+            if(match && !book.url.includes("youtube")) {
                 downloadBtn.style.display = 'flex';
                 downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
             } else { downloadBtn.style.display = 'none'; }
 
-            // Setup Notes
             notesArea.value = localStorage.getItem('notes_' + book.title) || '';
             notesArea.oninput = function() { localStorage.setItem('notes_' + book.title, this.value); };
 
@@ -456,10 +476,9 @@
             bookFrame.src = book.url; 
             localStorage.setItem('last-opened-book', book.title);
 
-            if (window.innerWidth <= 800) toggleMobileMenu(); // Close menu on mobile
+            if (window.innerWidth <= 800) toggleMobileMenu(); 
         }
 
-        // Prev/Next Navigation
         function navigateBook(direction) {
             const items = Array.from(document.querySelectorAll('#book-list .book-item'));
             const currentIndex = items.findIndex(item => item.classList.contains('active'));
@@ -468,7 +487,6 @@
         document.getElementById('prev-btn').onclick = () => navigateBook(-1);
         document.getElementById('next-btn').onclick = () => navigateBook(1);
 
-        // Boot Init
         setTimeout(() => {
             if (typeof allBooks !== 'undefined') {
                 filterAndRender();
