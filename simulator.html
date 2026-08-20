@@ -5,112 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NTA CBT Simulator</title>
     <style>
-        * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        body { display: flex; height: 100vh; background-color: #f4f4f4; overflow: hidden; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        body { display: flex; height: 100vh; background-color: #f4f6f8; overflow: hidden; }
 
         /* Top Header */
-        .header { position: absolute; top: 0; width: 100%; height: 50px; background: #007bff; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .header-title { font-weight: bold; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
-        .timer { font-size: 1.2em; font-weight: bold; font-family: monospace; background: #0056b3; padding: 5px 10px; border-radius: 4px; }
-        
-        .failsafe-btn { background: #ffc107; color: #000; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; text-decoration: none; font-size: 13px; margin-right: 10px; cursor: pointer; }
-        .failsafe-btn:hover { background: #e0a800; }
+        .header { height: 55px; background: #007bff; color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; width: 100%; position: absolute; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-title { font-weight: 600; font-size: 1.1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+        .header-actions { display: flex; gap: 12px; align-items: center; }
+        .timer { font-size: 1.3em; font-weight: bold; font-family: monospace; background: #0056b3; padding: 6px 12px; border-radius: 6px; }
+        .btn-top { background: #ffc107; color: #000; border: none; padding: 8px 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 13px; }
+        .btn-top:hover { background: #e0a800; }
 
-        /* Main Workspace */
-        .workspace { display: flex; width: 100%; margin-top: 50px; height: calc(100vh - 50px); }
+        /* Workspace */
+        .workspace { display: flex; width: 100%; margin-top: 55px; height: calc(100vh - 55px); }
 
         /* Left: PDF Viewer */
-        .pdf-section { flex-grow: 1; display: flex; flex-direction: column; background: #fff; border-right: 2px solid #ccc; }
-        iframe { flex-grow: 1; width: 100%; border: none; }
-
-        /* Right: OMR & Palette */
-        .omr-section { width: 340px; background: #eef2f5; display: flex; flex-direction: column; flex-shrink: 0; }
+        .pdf-section { flex-grow: 1; display: flex; flex-direction: column; background: #e9ecef; position: relative; }
+        iframe { flex-grow: 1; width: 100%; border: none; display: none; }
         
-        /* Action Area (A, B, C, D) */
-        .action-area { padding: 20px; background: #fff; border-bottom: 2px solid #ddd; }
-        .question-label { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; display: inline-block; }
-        .options-grid { display: flex; gap: 10px; margin-bottom: 20px; }
-        .option-btn { flex: 1; height: 45px; border: 2px solid #ccc; background: #fff; font-size: 1.2em; font-weight: bold; border-radius: 5px; cursor: pointer; transition: all 0.1s; }
-        .option-btn:hover { background: #f0f0f0; }
-        .option-btn.selected { background: #007bff; color: white; border-color: #0056b3; }
+        /* The COMING SOON Fallback Screen */
+        #coming-soon { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fff; text-align: center; padding: 20px; }
+        #coming-soon h2 { color: #475569; font-size: 2em; margin-bottom: 10px; }
+        #coming-soon p { color: #94a3b8; font-size: 1.1em; }
 
-        /* Control Buttons */
+        /* Right: OMR Panel */
+        .omr-section { width: 360px; background: #fff; display: flex; flex-direction: column; flex-shrink: 0; border-left: 1px solid #ddd; box-shadow: -2px 0 10px rgba(0,0,0,0.03); }
+        
+        .action-area { padding: 20px; border-bottom: 1px solid #eee; }
+        .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #007bff; }
+        .q-label { font-size: 1.3em; font-weight: bold; color: #2d3748; }
+        .clear-btn { background: none; border: none; color: #dc3545; cursor: pointer; font-weight: bold; font-size: 0.9em; text-decoration: underline; }
+
+        /* MCQ Options */
+        .options-grid { display: flex; gap: 10px; margin-bottom: 15px; }
+        .opt-btn { flex: 1; height: 45px; border: 2px solid #cbd5e1; background: #fff; font-size: 1.2em; font-weight: bold; border-radius: 8px; cursor: pointer; color: #475569; transition: 0.1s; }
+        .opt-btn.selected { background: #007bff; color: white; border-color: #007bff; box-shadow: 0 4px 10px rgba(0,123,255,0.3); }
+        
+        /* Numerical Input */
+        .numerical-input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .numerical-input-group label { font-size: 0.85em; font-weight: 600; color: #64748b; }
+        .num-input { padding: 12px; font-size: 1.1em; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; font-weight: bold; }
+        .num-input:focus { border-color: #007bff; }
+
+        /* Main Controls */
         .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { padding: 10px; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; color: white; text-align: center; }
-        .btn-save { background: #28a745; }
-        .btn-save:hover { background: #218838; }
-        .btn-clear { background: #dc3545; }
-        .btn-clear:hover { background: #c82333; }
-        .btn-review { background: #17a2b8; grid-column: span 2; }
+        .btn-action { padding: 12px; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; color: white; font-size: 0.95em; transition: 0.1s; }
+        .btn-save { background: #10b981; }
+        .btn-review { background: #8b5cf6; }
+        .btn-next { background: #64748b; grid-column: span 2; }
 
         /* Question Palette */
-        .palette-area { flex-grow: 1; overflow-y: auto; padding: 15px; background: #fff; }
-        .palette-title { font-size: 0.9em; font-weight: bold; margin-bottom: 10px; color: #555; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .palette-area { flex-grow: 1; overflow-y: auto; padding: 20px; background: #f8fafc; }
+        .palette-title { font-size: 0.9em; font-weight: bold; margin-bottom: 15px; color: #64748b; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         
-        .q-node { height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background: #f8f9fa; color: #333; transition: transform 0.1s; }
-        .q-node:hover { background: #e2e6ea; }
-        .q-node.active { border: 2px solid #000; transform: scale(1.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .q-node { height: 45px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; cursor: pointer; border: 1px solid #cbd5e1; background: #fff; color: #475569; transition: transform 0.1s; font-size: 1.1em; }
+        .q-node.active { border: 2px solid #0f172a; transform: scale(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         
-        /* NTA Colors */
-        .q-node.answered { background: #28a745; color: white; border-color: #218838; }
-        .q-node.not-answered { background: #dc3545; color: white; border-color: #c82333; }
-        .q-node.review { background: #6f42c1; color: white; border-color: #59339d; }
-        .q-node.answered-review { background: #6f42c1; color: white; border-color: #59339d; position: relative; }
-        .q-node.answered-review::after { content: "✓"; position: absolute; bottom: -5px; right: -5px; background: #28a745; border-radius: 50%; font-size: 10px; width: 14px; height: 14px; display: flex; align-items: center; justify-content: center; }
-
+        /* NTA Status Colors */
+        .q-node.ans { background: #10b981; color: white; border-color: #059669; }
+        .q-node.not-ans { background: #ef4444; color: white; border-color: #b91c1c; }
+        .q-node.rev { background: #8b5cf6; color: white; border-color: #7c3aed; }
+        .q-node.ans-rev { background: #8b5cf6; color: white; border-color: #7c3aed; position: relative; }
+        .q-node.ans-rev::after { content: "✓"; position: absolute; bottom: -6px; right: -6px; background: #10b981; border-radius: 50%; font-size: 10px; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
     </style>
 </head>
 <body>
 
-    <!-- Top Bar -->
     <div class="header">
-        <div class="header-title" id="test-title">Loading...</div>
-        <div>
-            <a id="new-tab-btn" class="failsafe-btn" href="#" target="_blank">Pop Out PDF</a>
-            <button id="toggle-key-btn" class="failsafe-btn" onclick="togglePdf()">Show Solutions</button>
+        <div class="header-title" id="test-title">JEE Simulator</div>
+        <div class="header-actions">
+            <a id="new-tab-btn" class="btn-top" href="#" target="_blank">Pop-out Paper</a>
+            <button id="toggle-key-btn" class="btn-top" onclick="togglePdf()">Show Solutions</button>
             <span class="timer" id="timer">03:00:00</span>
         </div>
     </div>
 
     <div class="workspace">
-        <!-- Left: Paper -->
         <div class="pdf-section">
+            <!-- Fallback UI -->
+            <div id="coming-soon">
+                <h2>🚧 COMING SOON</h2>
+                <p id="missing-text">The PDF for this section is currently unassigned or missing.</p>
+            </div>
+            <!-- Standard UI -->
             <iframe id="pdf-frame" src=""></iframe>
         </div>
 
-        <!-- Right: OMR Panel -->
         <div class="omr-section">
-            
             <div class="action-area">
-                <div class="question-label" id="current-q-label">Question 1</div>
+                <div class="q-header">
+                    <div class="q-label" id="current-q-label">Q. 1</div>
+                    <button class="clear-btn" onclick="clearResponse()">Clear Response</button>
+                </div>
                 
+                <!-- MCQ -->
                 <div class="options-grid" id="options-container">
-                    <button class="option-btn" onclick="selectOption('A')">A</button>
-                    <button class="option-btn" onclick="selectOption('B')">B</button>
-                    <button class="option-btn" onclick="selectOption('C')">C</button>
-                    <button class="option-btn" onclick="selectOption('D')">D</button>
+                    <button class="opt-btn" onclick="setMCQ('A')">A</button>
+                    <button class="opt-btn" onclick="setMCQ('B')">B</button>
+                    <button class="opt-btn" onclick="setMCQ('C')">C</button>
+                    <button class="opt-btn" onclick="setMCQ('D')">D</button>
+                </div>
+
+                <!-- Numerical -->
+                <div class="numerical-input-group">
+                    <label>Or enter Numerical Value (Section B):</label>
+                    <input type="number" id="num-input" class="num-input" placeholder="e.g. 14 or -5" oninput="setNum(this.value)">
                 </div>
 
                 <div class="controls">
-                    <button class="btn btn-save" onclick="saveNext()">Save & Next</button>
-                    <button class="btn btn-clear" onclick="clearResponse()">Clear</button>
-                    <button class="btn btn-review" onclick="markReview()">Mark for Review & Next</button>
+                    <button class="btn-action btn-save" onclick="save(true, false)">Save & Next</button>
+                    <button class="btn-action btn-review" onclick="save(false, true)">Review & Next</button>
+                    <button class="btn-action btn-next" onclick="nextSkip()">Skip & Next</button>
                 </div>
             </div>
 
             <div class="palette-area">
-                <div class="palette-title">Question Palette:</div>
-                <div class="grid" id="palette">
-                    <!-- Javascript generates buttons here -->
-                </div>
+                <div class="palette-title">Question Palette (90 Questions)</div>
+                <div class="grid" id="palette"></div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // 1. Grab URLs from index.html
         const urlParams = new URLSearchParams(window.location.search);
         const qUrl = urlParams.get('qUrl') || '';
         const aUrl = urlParams.get('aUrl') || '';
@@ -118,121 +135,128 @@
 
         let isShowingKey = false;
         let activeQ = 1;
-        const totalQ = 90; // Standard JEE Length
-        let userAnswers = {}; // Stores { questionNumber: 'A', status: 'answered' }
+        const totalQ = 90;
+        let data = {}; 
 
-        // Initialize PDF
         window.onload = function() {
-            const pdfFrame = document.getElementById('pdf-frame');
-            const newTabBtn = document.getElementById('new-tab-btn');
-            const toggleBtn = document.getElementById('toggle-key-btn');
+            // Load whichever URL exists first
+            loadIframe(qUrl || aUrl);
 
-            let initialSrc = qUrl || aUrl;
-            pdfFrame.src = initialSrc;
-            newTabBtn.href = initialSrc;
-
-            if(qUrl && aUrl) {
-                toggleBtn.style.display = 'inline-block';
-            } else {
-                toggleBtn.style.display = 'none';
+            // Hide toggle button if we don't have BOTH URLs
+            if(!qUrl || !aUrl) {
+                document.getElementById('toggle-key-btn').style.display = 'none';
             }
 
+            for(let i=1; i<=totalQ; i++) data[i] = { ans: null, status: 'unvisited' };
             buildPalette();
-            goToQuestion(1);
+            loadQ(1);
         };
 
-        function togglePdf() {
-            const pdfFrame = document.getElementById('pdf-frame');
-            const toggleBtn = document.getElementById('toggle-key-btn');
+        // --- NEW FAILSAFE IFRAME LOADER ---
+        function loadIframe(url) {
+            const frame = document.getElementById('pdf-frame');
+            const placeholder = document.getElementById('coming-soon');
             const newTabBtn = document.getElementById('new-tab-btn');
 
+            if (url && url.trim() !== '' && url !== 'null' && url !== 'undefined') {
+                frame.src = url;
+                frame.style.display = 'block';
+                placeholder.style.display = 'none';
+                newTabBtn.href = url;
+                newTabBtn.style.display = 'inline-block';
+            } else {
+                frame.src = ''; // Prevents 404 Error
+                frame.style.display = 'none';
+                placeholder.style.display = 'flex';
+                newTabBtn.style.display = 'none';
+            }
+        }
+
+        function togglePdf() {
             isShowingKey = !isShowingKey;
             let targetUrl = isShowingKey ? aUrl : qUrl;
             
-            pdfFrame.src = targetUrl;
-            newTabBtn.href = targetUrl;
-            toggleBtn.innerText = isShowingKey ? "Back to Paper" : "Show Solutions";
+            loadIframe(targetUrl);
+            
+            let btnText = isShowingKey ? "Back to Paper" : "Show Solutions";
+            document.getElementById('toggle-key-btn').innerText = btnText;
+            
+            let msg = isShowingKey ? "Solution Key" : "Question Paper";
+            document.getElementById('missing-text').innerText = `The ${msg} for this test is currently unassigned or missing.`;
         }
 
-        // --- OMR ENGINE ---
-
         function buildPalette() {
-            const palette = document.getElementById('palette');
-            for(let i = 1; i <= totalQ; i++) {
-                userAnswers[i] = { option: null, status: 'unvisited' };
+            const pal = document.getElementById('palette');
+            for(let i=1; i<=totalQ; i++) {
                 let btn = document.createElement('div');
                 btn.className = 'q-node';
                 btn.id = `qbtn-${i}`;
                 btn.innerText = i;
-                btn.onclick = () => goToQuestion(i);
-                palette.appendChild(btn);
+                btn.onclick = () => loadQ(i);
+                pal.appendChild(btn);
             }
         }
 
-        function goToQuestion(num) {
-            // Mark previous as 'not-answered' if it was merely visited
-            if(userAnswers[activeQ].status === 'unvisited') {
-                userAnswers[activeQ].status = 'not-answered';
-                updateNodeUI(activeQ);
-            }
-
-            // Remove active state from old
+        function loadQ(num) {
+            if(data[activeQ].status === 'unvisited') updateStatus(activeQ, 'not-ans');
             document.getElementById(`qbtn-${activeQ}`).classList.remove('active');
             
-            // Set new active
             activeQ = num;
             document.getElementById(`qbtn-${activeQ}`).classList.add('active');
             document.getElementById('current-q-label').innerText = `Question ${num}`;
 
-            // Restore options UI for this question
-            const currentSelected = userAnswers[activeQ].option;
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                if(btn.innerText === currentSelected) {
-                    btn.classList.add('selected');
+            document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('num-input').value = '';
+
+            let ans = data[activeQ].ans;
+            if (ans) {
+                if (['A','B','C','D'].includes(ans)) {
+                    document.querySelectorAll('.opt-btn').forEach(b => { if(b.innerText === ans) b.classList.add('selected'); });
                 } else {
-                    btn.classList.remove('selected');
+                    document.getElementById('num-input').value = ans;
                 }
+            }
+        }
+
+        function setMCQ(opt) {
+            data[activeQ].ans = opt;
+            document.getElementById('num-input').value = ''; 
+            document.querySelectorAll('.opt-btn').forEach(b => {
+                b.classList.toggle('selected', b.innerText === opt);
             });
         }
 
-        function selectOption(opt) {
-            userAnswers[activeQ].option = opt;
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                if(btn.innerText === opt) btn.classList.add('selected');
-            });
+        function setNum(val) {
+            data[activeQ].ans = val.toString() || null;
+            document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
         }
 
         function clearResponse() {
-            userAnswers[activeQ].option = null;
-            userAnswers[activeQ].status = 'not-answered';
-            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
-            updateNodeUI(activeQ);
+            data[activeQ].ans = null;
+            updateStatus(activeQ, 'not-ans');
+            loadQ(activeQ); 
         }
 
-        function saveNext() {
-            if(userAnswers[activeQ].option) {
-                userAnswers[activeQ].status = 'answered';
-            } else {
-                userAnswers[activeQ].status = 'not-answered';
-            }
-            updateNodeUI(activeQ);
-            if(activeQ < totalQ) goToQuestion(activeQ + 1);
+        function save(isSave, isReview) {
+            let hasAns = data[activeQ].ans !== null && data[activeQ].ans !== "";
+            let status = 'not-ans';
+            
+            if (isSave && hasAns) status = 'ans';
+            if (isReview && !hasAns) status = 'rev';
+            if (isReview && hasAns) status = 'ans-rev';
+
+            updateStatus(activeQ, status);
+            if(activeQ < totalQ) loadQ(activeQ + 1);
         }
 
-        function markReview() {
-            if(userAnswers[activeQ].option) {
-                userAnswers[activeQ].status = 'answered-review';
-            } else {
-                userAnswers[activeQ].status = 'review';
-            }
-            updateNodeUI(activeQ);
-            if(activeQ < totalQ) goToQuestion(activeQ + 1);
+        function nextSkip() {
+            if(data[activeQ].status === 'unvisited') updateStatus(activeQ, 'not-ans');
+            if(activeQ < totalQ) loadQ(activeQ + 1);
         }
 
-        function updateNodeUI(num) {
-            let node = document.getElementById(`qbtn-${num}`);
-            node.className = `q-node active ${userAnswers[num].status}`;
+        function updateStatus(num, status) {
+            data[num].status = status;
+            document.getElementById(`qbtn-${num}`).className = `q-node active ${status}`;
         }
     </script>
 </body>
