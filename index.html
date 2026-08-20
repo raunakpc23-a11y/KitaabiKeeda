@@ -60,6 +60,7 @@
         .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
+        .header-controls-group { display: flex; align-items: center; gap: 4px; }
 
         /* POMODORO WIDGET */
         .pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
@@ -76,8 +77,9 @@
         .pomo-controls { display: flex; gap: 6px; align-items: center; }
         .pomo-btn { background: var(--sidebar-bg); border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85em; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; color: var(--text-color); }
         .pomo-btn:hover { background: var(--highlight); border-color: var(--highlight-text); transform: scale(1.05); }
-        .pomo-gear { background: none; border: none; cursor: pointer; font-size: 1.1em; opacity: 0.6; transition: opacity 0.2s, transform 0.2s; padding: 2px; }
-        .pomo-gear:hover { opacity: 1; transform: rotate(45deg); }
+        
+        .pomo-gear-sidebar { background: none; border: none; cursor: pointer; font-size: 1.1em; opacity: 0.6; transition: opacity 0.2s, transform 0.2s; padding: 2px; }
+        .pomo-gear-sidebar:hover { opacity: 1; transform: rotate(45deg); }
 
         .pomo-bubble { background: var(--highlight); border: 1px solid rgba(56, 189, 248, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; transition: opacity 0.3s ease; }
 
@@ -204,16 +206,19 @@
 </head>
 <body>
 
-    <script src="data.js?v=23"></script>
-    <script src="lectures.js?v=23"></script>
-    <script src="mocktests.js?v=23"></script>
+    <script src="data.js?v=24"></script>
+    <script src="lectures.js?v=24"></script>
+    <script src="mocktests.js?v=24"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
-            <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌙</button>
+            <div class="header-controls-group">
+                <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
+                <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌙</button>
+            </div>
         </div>
 
         <!-- POMODORO WIDGET -->
@@ -229,7 +234,6 @@
                 <div class="pomo-controls">
                     <button class="pomo-btn" id="pomo-toggle" title="Start/Pause">▶️</button>
                     <button class="pomo-btn" id="pomo-reset" title="Reset">🔄</button>
-                    <button class="pomo-gear" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
                 </div>
             </div>
             <div class="pomo-bubble" id="pomo-bubble">Let's lock in and conquer some problems! 💪</div>
@@ -465,7 +469,6 @@
         document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
         modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-        // Tab Switching Logic
         window.switchPomoTab = (evt, tabId) => {
             document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
@@ -473,7 +476,6 @@
             document.getElementById(tabId).classList.add('active');
         };
 
-        // Populate Form Values
         document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade || 'theme-amoled';
         document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
         document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
@@ -490,7 +492,6 @@
             pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
             pomoLogoIcon.textContent = pomoSettings.icon;
             
-            // Highlight main task banner update
             if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
                 let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
                 pomoHighlightText.textContent = firstIncomplete.text;
