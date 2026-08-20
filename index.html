@@ -30,34 +30,39 @@
         body.dark-mode ::-webkit-scrollbar-thumb { background: #374151; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(49, 130, 206, 0); } 100% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0); } }
 
         /* Sidebar & Header */
         .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .sidebar-header h2 { font-size: 1.2em; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
+        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* Pomodoro Widget Styling */
-        .pomodoro-widget { display: flex; align-items: center; gap: 6px; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75em; font-weight: 600; }
-        .pomodoro-display { font-family: monospace; font-size: 1em; font-weight: bold; color: var(--highlight-text); }
-        .pomo-btn { background: none; border: none; cursor: pointer; font-size: 0.9em; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; color: var(--text-color); }
-        .pomo-btn:hover { background: var(--border-color); }
+        /* --- REFINED POMODORO WIDGET --- */
+        .pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        .pomodoro-card { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; transition: all 0.3s ease; }
+        .pomodoro-card.running { border-color: var(--highlight-text); animation: pulseGlow 2s infinite; }
+        .pomo-info { display: flex; flex-direction: column; gap: 2px; }
+        .pomo-status { font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; }
+        .pomodoro-display { font-family: monospace; font-size: 1.4em; font-weight: 800; color: var(--highlight-text); letter-spacing: -0.5px; }
+        .pomo-controls { display: flex; gap: 6px; align-items: center; }
+        .pomo-btn { background: var(--sidebar-bg); border: 1px solid var(--border-color); cursor: pointer; font-size: 0.9em; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; color: var(--text-color); }
+        .pomo-btn:hover { background: var(--highlight); border-color: var(--highlight-text); transform: scale(1.05); }
+        
+        /* Bubble Message Box */
+        .pomo-bubble { background: var(--highlight); border: 1px solid rgba(49, 130, 206, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; transition: opacity 0.3s ease; }
+        /* ---------------------------------- */
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
 
         /* Category Buttons */
-        .mode-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 16px 6px 16px; background-color: var(--sidebar-bg); }
+        .mode-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px 6px 16px; background-color: var(--sidebar-bg); }
         .mode-btn { flex: 1 1 calc(50% - 8px); padding: 10px 4px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.85em; cursor: pointer; transition: all 0.25s; text-align: center; }
         .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
         .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); }
 
-        .progress-wrapper { padding: 10px 20px; background-color: var(--sidebar-bg); }
-        .progress-bar { width: 100%; height: 6px; background-color: var(--border-color); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--highlight-text), var(--success)); width: 0%; transition: width 0.4s ease; }
-        .progress-text { font-size: 0.75em; font-weight: 600; color: #718096; margin-top: 4px; text-align: right; }
-
         /* Filters & Search */
-        .search-container { padding: 8px 20px 12px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
+        .search-container { padding: 12px 20px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
         .subject-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
         .subject-filters::-webkit-scrollbar { display: none; }
         .subj-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--sidebar-text); font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
@@ -143,25 +148,31 @@
 </head>
 <body>
 
-    <script src="data.js?v=14"></script>
-    <script src="lectures.js?v=14"></script>
-    <script src="mocktests.js?v=14"></script>
+    <script src="data.js?v=15"></script>
+    <script src="lectures.js?v=15"></script>
+    <script src="mocktests.js?v=15"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
-            
-            <!-- Pomodoro Widget Integrated cleanly into Header -->
-            <div class="pomodoro-widget">
-                <span id="pomo-label">🍅</span>
-                <span class="pomodoro-display" id="pomo-time">25:00</span>
-                <button class="pomo-btn" id="pomo-toggle" title="Start/Pause">▶️</button>
-                <button class="pomo-btn" id="pomo-reset" title="Reset">🔄</button>
-            </div>
-
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
+        </div>
+
+        <!-- REFINED, BIGGER POMODORO WIDGET -->
+        <div class="pomodoro-container">
+            <div class="pomodoro-card" id="pomo-card">
+                <div class="pomo-info">
+                    <span class="pomo-status" id="pomo-status-text">🍅 Focus Session</span>
+                    <span class="pomodoro-display" id="pomo-time">25:00</span>
+                </div>
+                <div class="pomo-controls">
+                    <button class="pomo-btn" id="pomo-toggle" title="Start/Pause">▶️</button>
+                    <button class="pomo-btn" id="pomo-reset" title="Reset">🔄</button>
+                </div>
+            </div>
+            <div class="pomo-bubble" id="pomo-bubble">Let's lock in and conquer some problems! 💪</div>
         </div>
 
         <div class="mode-selector">
@@ -169,11 +180,6 @@
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
             <button class="mode-btn" data-root="LECTURES">📺 Lectures</button>
             <button class="mode-btn" data-root="SIMULATOR">Simulator</button>
-        </div>
-        
-        <div class="progress-wrapper">
-            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-            <div class="progress-text" id="progress-text">0% Completed</div>
         </div>
 
         <div class="search-container">
@@ -243,7 +249,7 @@
             filterAndRender();
         }, 300);
 
-        // --- POMODORO STUDY TIMER WIDGET LOGIC ---
+        // --- POMODORO STUDY TIMER LOGIC & BUBBLE MESSAGES ---
         let pomoSeconds = 25 * 60;
         let pomoInterval = null;
         let isPomoRunning = false;
@@ -252,7 +258,28 @@
         const pomoTimeDisplay = document.getElementById('pomo-time');
         const pomoToggleBtn = document.getElementById('pomo-toggle');
         const pomoResetBtn = document.getElementById('pomo-reset');
-        const pomoLabel = document.getElementById('pomo-label');
+        const pomoStatusText = document.getElementById('pomo-status-text');
+        const pomoCard = document.getElementById('pomo-card');
+        const pomoBubble = document.getElementById('pomo-bubble');
+
+        const focusQuotes = [
+            "Let's lock in and conquer some problems! 💪",
+            "Deep work mode activated. Stay focused! ⚡",
+            "One concept at a time. You've got this! 🎯",
+            "Distractions out. Equations in. 🚀"
+        ];
+
+        const breakQuotes = [
+            "Time to stretch your legs and hydrate! ☕",
+            "Great focus! Rest your eyes for a moment. 🌿",
+            "Breathe in, breathe out. Relax. 🧘‍♂️",
+            "Almost ready for the next sprint! 🔋"
+        ];
+
+        function getRandomQuote(isFocus) {
+            const arr = isFocus ? focusQuotes : breakQuotes;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
 
         function updatePomoDisplay() {
             let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
@@ -265,9 +292,14 @@
                 clearInterval(pomoInterval);
                 isPomoRunning = false;
                 pomoToggleBtn.textContent = '▶️';
+                pomoCard.classList.remove('running');
+                pomoBubble.textContent = "Timer paused. Take your time!";
             } else {
                 isPomoRunning = true;
                 pomoToggleBtn.textContent = '⏸️';
+                pomoCard.classList.add('running');
+                pomoBubble.textContent = getRandomQuote(isFocusMode);
+
                 pomoInterval = setInterval(() => {
                     if (pomoSeconds > 0) {
                         pomoSeconds--;
@@ -276,17 +308,20 @@
                         clearInterval(pomoInterval);
                         isPomoRunning = false;
                         pomoToggleBtn.textContent = '▶️';
+                        pomoCard.classList.remove('running');
                         
                         if (isFocusMode) {
-                            alert("🍅 Pomodoro Session Complete! Take a 5-minute break.");
+                            alert("🍅 Focus Session Complete! Take a well-deserved 5-minute break.");
                             pomoSeconds = 5 * 60;
-                            pomoLabel.textContent = "☕";
+                            pomoStatusText.textContent = "☕ Break Time";
                             isFocusMode = false;
+                            pomoBubble.textContent = getRandomQuote(false);
                         } else {
-                            alert("⚡ Break over! Back to focus.");
+                            alert("⚡ Break over! Ready to dive back in?");
                             pomoSeconds = 25 * 60;
-                            pomoLabel.textContent = "🍅";
+                            pomoStatusText.textContent = "🍅 Focus Session";
                             isFocusMode = true;
+                            pomoBubble.textContent = getRandomQuote(true);
                         }
                         updatePomoDisplay();
                     }
@@ -298,9 +333,11 @@
             clearInterval(pomoInterval);
             isPomoRunning = false;
             isFocusMode = true;
-            pomoLabel.textContent = "🍅";
+            pomoStatusText.textContent = "🍅 Focus Session";
             pomoSeconds = 25 * 60;
             pomoToggleBtn.textContent = '▶️';
+            pomoCard.classList.remove('running');
+            pomoBubble.textContent = "Timer reset. Ready when you are!";
             updatePomoDisplay();
         };
 
