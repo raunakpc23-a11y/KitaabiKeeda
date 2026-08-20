@@ -37,20 +37,33 @@
         .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* --- REFINED POMODORO WIDGET --- */
-        .pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; }
+        /* --- POMODORO WIDGET --- */
+        .pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
         .pomodoro-card { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; transition: all 0.3s ease; }
         .pomodoro-card.running { border-color: var(--highlight-text); animation: pulseGlow 2s infinite; }
-        .pomo-info { display: flex; flex-direction: column; gap: 2px; }
+        .pomo-info { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
         .pomo-status { font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; }
         .pomodoro-display { font-family: monospace; font-size: 1.4em; font-weight: 800; color: var(--highlight-text); letter-spacing: -0.5px; }
         .pomo-controls { display: flex; gap: 6px; align-items: center; }
         .pomo-btn { background: var(--sidebar-bg); border: 1px solid var(--border-color); cursor: pointer; font-size: 0.9em; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; color: var(--text-color); }
         .pomo-btn:hover { background: var(--highlight); border-color: var(--highlight-text); transform: scale(1.05); }
-        
-        /* Bubble Message Box */
-        .pomo-bubble { background: var(--highlight); border: 1px solid rgba(49, 130, 206, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; transition: opacity 0.3s ease; }
-        /* ---------------------------------- */
+        .pomo-bubble { background: var(--highlight); border: 1px solid rgba(49, 130, 206, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; }
+
+        /* --- POMODORO MODAL SETTINGS & TASKS --- */
+        .pomo-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(3px); justify-content: center; align-items: center; }
+        .pomo-modal-overlay.open { display: flex; }
+        .pomo-modal { background: var(--sidebar-bg); border: 1px solid var(--border-color); width: 420px; max-width: 90%; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
+        .pomo-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1em; }
+        .pomo-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; }
+        .pomo-setting-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.9em; font-weight: 600; }
+        .pomo-setting-group select, .pomo-setting-group input[type="text"] { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--primary-bg); color: var(--text-color); outline: none; }
+        .pomo-tasks-container { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+        .pomo-task-input-row { display: flex; gap: 8px; }
+        .pomo-task-input-row input { flex-grow: 1; }
+        .pomo-task-list { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+        .pomo-task-item { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); padding: 6px 10px; border-radius: 6px; font-size: 0.85em; border: 1px solid var(--border-color); }
+        .pomo-task-item.completed span { text-decoration: line-through; opacity: 0.6; }
+        .pomo-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; background: var(--folder-bg); }
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
@@ -148,9 +161,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=15"></script>
-    <script src="lectures.js?v=15"></script>
-    <script src="mocktests.js?v=15"></script>
+    <script src="data.js?v=16"></script>
+    <script src="lectures.js?v=16"></script>
+    <script src="mocktests.js?v=16"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -160,10 +173,10 @@
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
-        <!-- REFINED, BIGGER POMODORO WIDGET -->
-        <div class="pomodoro-container">
+        <!-- POMODORO WIDGET -->
+        <div class="pomodoro-container" id="pomo-container">
             <div class="pomodoro-card" id="pomo-card">
-                <div class="pomo-info">
+                <div class="pomo-info" id="pomo-open-settings" title="Click to customize timer, sound, tasks & icons">
                     <span class="pomo-status" id="pomo-status-text">🍅 Focus Session</span>
                     <span class="pomodoro-display" id="pomo-time">25:00</span>
                 </div>
@@ -198,6 +211,88 @@
             </div>
         </div>
         <div class="book-list" id="book-list"></div>
+    </div>
+
+    <!-- POMODORO SETTINGS & TASKS MODAL -->
+    <div class="pomo-modal-overlay" id="pomo-modal-overlay">
+        <div class="pomo-modal">
+            <div class="pomo-modal-header">
+                <span>🍅 Pomodoro Hub & Settings</span>
+                <button class="icon-btn" id="pomo-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
+            </div>
+            <div class="pomo-modal-body">
+                <div class="pomo-setting-group">
+                    <label>Enable Pomodoro Widget in Sidebar:</label>
+                    <select id="pomo-setting-enable">
+                        <option value="yes">Enabled</option>
+                        <option value="no">Disabled (Hidden)</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Focus Duration:</label>
+                    <select id="pomo-setting-focus">
+                        <option value="15">15 Minutes</option>
+                        <option value="25" selected>25 Minutes (Standard)</option>
+                        <option value="45">45 Minutes (Deep Work)</option>
+                        <option value="60">60 Minutes (Marathon)</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Break Duration:</label>
+                    <select id="pomo-setting-break">
+                        <option value="5" selected>5 Minutes</option>
+                        <option value="10">10 Minutes</option>
+                        <option value="15">15 Minutes</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Alert Tone:</label>
+                    <select id="pomo-setting-sound">
+                        <option value="beep">Digital Beep</option>
+                        <option value="chime">Soft Chime</option>
+                        <option value="none">Mute (No Sound)</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Vibration Alert (Mobile/Supported Devices):</label>
+                    <select id="pomo-setting-vibrate">
+                        <option value="yes">Enabled</option>
+                        <option value="no" selected>Disabled</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Icon Style:</label>
+                    <select id="pomo-setting-icon">
+                        <option value="🍅" selected>🍅 Tomato</option>
+                        <option value="⚡">⚡ Lightning</option>
+                        <option value="🧠">🧠 Brain</option>
+                        <option value="🚀">🚀 Rocket</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Motivational Bubbles:</label>
+                    <select id="pomo-setting-bubbles">
+                        <option value="yes" selected>Show Bubbles</option>
+                        <option value="no">Hide Bubbles</option>
+                    </select>
+                </div>
+
+                <!-- Task Checklist inside Modal -->
+                <div class="pomo-tasks-container">
+                    <label style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">📝 Session Goal / Tasks:</label>
+                    <div class="pomo-task-input-row">
+                        <input type="text" id="pomo-new-task" placeholder="Add a task (e.g. Finish QFT 03)...">
+                        <button class="primary-btn" id="pomo-add-task-btn" style="padding: 6px 12px; font-size: 0.8em;">Add</button>
+                    </div>
+                    <div class="pomo-task-list" id="pomo-task-list">
+                        <!-- Tasks dynamically injected -->
+                    </div>
+                </div>
+            </div>
+            <div class="pomo-modal-footer">
+                <button class="primary-btn" id="pomo-save-settings" style="padding: 6px 16px; font-size: 0.85em;">Save Settings</button>
+            </div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -249,8 +344,13 @@
             filterAndRender();
         }, 300);
 
-        // --- POMODORO STUDY TIMER LOGIC & BUBBLE MESSAGES ---
-        let pomoSeconds = 25 * 60;
+        // --- POMODORO ADVANCED HUB LOGIC ---
+        let pomoSettings = JSON.parse(localStorage.getItem('pomo_settings')) || {
+            enabled: 'yes', focusTime: 25, breakTime: 5, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes'
+        };
+        let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
+
+        let pomoSeconds = pomoSettings.focusTime * 60;
         let pomoInterval = null;
         let isPomoRunning = false;
         let isFocusMode = true;
@@ -261,25 +361,104 @@
         const pomoStatusText = document.getElementById('pomo-status-text');
         const pomoCard = document.getElementById('pomo-card');
         const pomoBubble = document.getElementById('pomo-bubble');
+        const pomoContainer = document.getElementById('pomo-container');
 
-        const focusQuotes = [
-            "Let's lock in and conquer some problems! 💪",
-            "Deep work mode activated. Stay focused! ⚡",
-            "One concept at a time. You've got this! 🎯",
-            "Distractions out. Equations in. 🚀"
-        ];
+        // Modal Elements
+        const modalOverlay = document.getElementById('pomo-modal-overlay');
+        document.getElementById('pomo-open-settings').onclick = () => modalOverlay.classList.add('open');
+        document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
+        modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-        const breakQuotes = [
-            "Time to stretch your legs and hydrate! ☕",
-            "Great focus! Rest your eyes for a moment. 🌿",
-            "Breathe in, breathe out. Relax. 🧘‍♂️",
-            "Almost ready for the next sprint! 🔋"
-        ];
+        // Populate Form Values
+        document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
+        document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
+        document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
+        document.getElementById('pomo-setting-sound').value = pomoSettings.sound;
+        document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
+        document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
+        document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
 
-        function getRandomQuote(isFocus) {
-            const arr = isFocus ? focusQuotes : breakQuotes;
-            return arr[Math.floor(Math.random() * arr.length)];
+        function applyPomoSettingsUI() {
+            pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
+            pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
+            if(!isPomoRunning) {
+                pomoStatusText.textContent = `${pomoSettings.icon} ${isFocusMode ? 'Focus Session' : 'Break Time'}`;
+            }
         }
+        applyPomoSettingsUI();
+
+        // Audio Alerts using Web Audio API
+        function playAlertSound(type) {
+            if (type === 'none') return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type === 'chime' ? 'sine' : 'square';
+                osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime); // Notes
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + (type === 'chime' ? 0.8 : 0.4));
+            } catch(e) { console.log("Audio not supported"); }
+        }
+
+        // Save Settings Handler
+        document.getElementById('pomo-save-settings').onclick = () => {
+            pomoSettings.enabled = document.getElementById('pomo-setting-enable').value;
+            pomoSettings.focusTime = parseInt(document.getElementById('pomo-setting-focus').value);
+            pomoSettings.breakTime = parseInt(document.getElementById('pomo-setting-break').value);
+            pomoSettings.sound = document.getElementById('pomo-setting-sound').value;
+            pomoSettings.vibrate = document.getElementById('pomo-setting-vibrate').value;
+            pomoSettings.icon = document.getElementById('pomo-setting-icon').value;
+            pomoSettings.bubbles = document.getElementById('pomo-setting-bubbles').value;
+
+            localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
+            applyPomoSettingsUI();
+            
+            if(!isPomoRunning) {
+                pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
+                updatePomoDisplay();
+            }
+            modalOverlay.classList.remove('open');
+        };
+
+        // Task Management
+        function renderTasks() {
+            const listEl = document.getElementById('pomo-task-list');
+            listEl.innerHTML = '';
+            pomoTasks.forEach((t, idx) => {
+                let item = document.createElement('div');
+                item.className = `pomo-task-item ${t.done ? 'completed' : ''}`;
+                item.innerHTML = `
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex-grow:1;">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${idx})">
+                        <span>${t.text}</span>
+                    </label>
+                    <button onclick="deleteTask(${idx})" style="background:none; border:none; color:#e53e3e; cursor:pointer;">✕</button>
+                `;
+                listEl.appendChild(item);
+            });
+            localStorage.setItem('pomo_tasks', JSON.stringify(pomoTasks));
+        }
+
+        window.toggleTask = (idx) => { pomoTasks[idx].done = !pomoTasks[idx].done; renderTasks(); };
+        window.deleteTask = (idx) => { pomoTasks.splice(idx, 1); renderTasks(); };
+
+        document.getElementById('pomo-add-task-btn').onclick = () => {
+            let input = document.getElementById('pomo-new-task');
+            if(input.value.trim() !== '') {
+                pomoTasks.push({ text: input.value.trim(), done: false });
+                input.value = '';
+                renderTasks();
+            }
+        };
+        renderTasks();
+
+        // Timer Loop & Quotes
+        const focusQuotes = ["Let's lock in and conquer some problems! 💪", "Deep work mode activated. Stay focused! ⚡", "One concept at a time. You've got this! 🎯", "Distractions out. Equations in. 🚀"];
+        const breakQuotes = ["Time to stretch your legs and hydrate! ☕", "Great focus! Rest your eyes for a moment. 🌿", "Breathe in, breathe out. Relax. 🧘‍♂️", "Almost ready for the next sprint! 🔋"];
 
         function updatePomoDisplay() {
             let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
@@ -293,12 +472,12 @@
                 isPomoRunning = false;
                 pomoToggleBtn.textContent = '▶️';
                 pomoCard.classList.remove('running');
-                pomoBubble.textContent = "Timer paused. Take your time!";
+                pomoBubble.textContent = "Timer paused.";
             } else {
                 isPomoRunning = true;
                 pomoToggleBtn.textContent = '⏸️';
                 pomoCard.classList.add('running');
-                pomoBubble.textContent = getRandomQuote(isFocusMode);
+                pomoBubble.textContent = focusQuotes[Math.floor(Math.random() * focusQuotes.length)];
 
                 pomoInterval = setInterval(() => {
                     if (pomoSeconds > 0) {
@@ -310,18 +489,21 @@
                         pomoToggleBtn.textContent = '▶️';
                         pomoCard.classList.remove('running');
                         
+                        if (pomoSettings.sound !== 'none') playAlertSound(pomoSettings.sound);
+                        if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
                         if (isFocusMode) {
-                            alert("🍅 Focus Session Complete! Take a well-deserved 5-minute break.");
-                            pomoSeconds = 5 * 60;
-                            pomoStatusText.textContent = "☕ Break Time";
+                            alert("🍅 Focus Session Complete! Time for a break.");
+                            pomoSeconds = pomoSettings.breakTime * 60;
+                            pomoStatusText.textContent = `${pomoSettings.icon} Break Time`;
                             isFocusMode = false;
-                            pomoBubble.textContent = getRandomQuote(false);
+                            pomoBubble.textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
                         } else {
-                            alert("⚡ Break over! Ready to dive back in?");
-                            pomoSeconds = 25 * 60;
-                            pomoStatusText.textContent = "🍅 Focus Session";
+                            alert("⚡ Break over! Back to focus.");
+                            pomoSeconds = pomoSettings.focusTime * 60;
+                            pomoStatusText.textContent = `${pomoSettings.icon} Focus Session`;
                             isFocusMode = true;
-                            pomoBubble.textContent = getRandomQuote(true);
+                            pomoBubble.textContent = focusQuotes[Math.floor(Math.random() * focusQuotes.length)];
                         }
                         updatePomoDisplay();
                     }
@@ -333,8 +515,8 @@
             clearInterval(pomoInterval);
             isPomoRunning = false;
             isFocusMode = true;
-            pomoStatusText.textContent = "🍅 Focus Session";
-            pomoSeconds = 25 * 60;
+            pomoStatusText.textContent = `${pomoSettings.icon} Focus Session`;
+            pomoSeconds = pomoSettings.focusTime * 60;
             pomoToggleBtn.textContent = '▶️';
             pomoCard.classList.remove('running');
             pomoBubble.textContent = "Timer reset. Ready when you are!";
