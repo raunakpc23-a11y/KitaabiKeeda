@@ -1,0 +1,5 @@
+// mocktests.js
+const mockTests = [
+  // You will add your mock test PDFs here later.
+  // Make sure their folders start with "SIMULATOR"
+];
