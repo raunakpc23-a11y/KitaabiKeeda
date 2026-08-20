@@ -39,7 +39,7 @@
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
 
-        /* Big Category Buttons - Upgraded for 4 Tabs */
+        /* Category Buttons */
         .mode-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 16px 6px 16px; background-color: var(--sidebar-bg); }
         .mode-btn { flex: 1 1 calc(50% - 8px); padding: 10px 4px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.85em; cursor: pointer; transition: all 0.25s; text-align: center; }
         .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
@@ -61,8 +61,6 @@
         .search-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
         .search-input { width: 100%; padding: 10px 35px 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.9em; }
         .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
-        .clear-search-btn { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: #a0aec0; font-size: 1.2em; display: none; padding: 4px; }
-        .clear-search-btn:hover { color: #e53e3e; }
         
         .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
         .tree-controls span:hover { text-decoration: underline; }
@@ -91,36 +89,36 @@
 
         .book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
         .check-done { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
-        .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0 4px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
-        .fav-star:hover { opacity: 1; transform: scale(1.25); }
-        .fav-star.is-fav { opacity: 1; color: #ecc94b; text-shadow: 0 0 8px rgba(236, 201, 75, 0.5); }
-        .book-item.active .fav-star { color: white; text-shadow: none; }
 
         /* Main Workspace */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; position: relative; overflow: hidden; }
         .reader-header { padding: 16px 24px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); gap: 15px; }
-        .reader-header-info { display: flex; align-items: center; gap: 15px; overflow: hidden; flex-grow: 1; }
-        .reader-header-info h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .breadcrumb { color: #64748b; font-size: 0.83em; margin-top: 4px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .reader-header-info { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1; }
         
+        .title-row { display: flex; align-items: center; gap: 12px; }
+        .title-row h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .breadcrumb { color: #64748b; font-size: 0.83em; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        /* Playlist Dropdown UI */
+        .playlist-select { margin-top: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); font-weight: 600; font-size: 0.85em; width: 100%; max-width: 400px; outline: none; cursor: pointer; transition: all 0.2s; }
+        .playlist-select:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+
         .header-actions { display: flex; gap: 8px; align-items: center; }
-        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background-color: var(--border-color); }
         .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
         .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
-        .primary-btn:active { transform: scale(0.96); }
         #mobile-menu-btn { display: none; }
 
         .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
         .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; text-align: center; }
-        .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
         
         #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; background-color: #000; border: 1px solid var(--border-color); position: relative; animation: fadeIn 0.4s ease-out; }
         
-        .floating-nav { display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; gap: 20px; color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 10; align-items: center; }
-        .floating-nav button { background: none; border: none; color: white; font-size: 1.1em; cursor: pointer; transition: all 0.2s; font-weight: 600; letter-spacing: 0.5px; opacity: 0.9; }
-        .floating-nav button:hover { transform: scale(1.1); opacity: 1; color: #60a5fa; }
-        .floating-nav span { opacity: 0.3; font-size: 1.2em; }
+        .floating-nav { display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; gap: 20px; color: white; z-index: 10; align-items: center; }
+        .floating-nav button { background: none; border: none; color: white; font-size: 1.1em; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+        .floating-nav button:hover { transform: scale(1.1); color: #60a5fa; }
+        .floating-nav span { opacity: 0.3; }
 
         .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.05); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 10; }
         .notes-panel.open { right: 0; }
@@ -134,15 +132,15 @@
             .reader-container { padding: 5px; }
             .primary-btn span { display: none; }
             .notes-panel { width: 100%; right: -100%; }
-            .floating-nav { bottom: 15px; padding: 6px 12px; gap: 15px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Load data files (cache busted) -->
-    <script src="data.js?v=6"></script>
-    <script src="lectures.js?v=6"></script>
+    <!-- Loading all 3 data files -->
+    <script src="data.js?v=7"></script>
+    <script src="lectures.js?v=7"></script>
+    <script src="mocktests.js?v=7"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -152,12 +150,11 @@
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
-        <!-- NEW: 4 Mode Buttons for a clean 2x2 grid on Mobile -->
         <div class="mode-selector">
             <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
             <button class="mode-btn" data-root="LECTURES">📺 Lectures</button>
-            <button class="mode-btn" data-root="SIMULATOR">⏱️ Simulator</button>
+            <button class="mode-btn" data-root="SIMULATOR">Simulator</button> <!-- Emoji removed -->
         </div>
         
         <div class="progress-wrapper">
@@ -174,26 +171,25 @@
             </div>
             <div class="search-wrapper">
                 <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
-                <button id="clear-search-btn" class="clear-search-btn" title="Clear Search">✖</button>
             </div>
             <div class="tree-controls">
                 <span id="expand-all">Expand All</span>
                 <span id="collapse-all">Collapse All</span>
             </div>
         </div>
-        <div class="book-list" id="book-list">
-            <div class="placeholder-text" style="font-size: 0.9em; margin-top:20px; text-align:center;">Loading library...</div>
-        </div>
+        <div class="book-list" id="book-list"></div>
     </div>
 
     <div class="main-content">
         <div class="reader-header">
             <div class="reader-header-info">
-                <button id="mobile-menu-btn" class="icon-btn" title="Open Menu">☰</button>
-                <div>
+                <div class="title-row">
+                    <button id="mobile-menu-btn" class="icon-btn" title="Open Menu">☰</button>
                     <h2 id="current-book-title">Select a file</h2>
-                    <div id="current-book-breadcrumb" class="breadcrumb"></div>
                 </div>
+                <div id="current-book-breadcrumb" class="breadcrumb"></div>
+                <!-- NEW: Dynamic Playlist Dropdown Menu -->
+                <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
             <div class="header-actions">
                 <button id="download-btn" class="icon-btn" style="display:none;"></button>
@@ -204,14 +200,12 @@
         
         <div class="reader-container">
             <div class="placeholder-container" id="placeholder-box">
-                <p class="placeholder-text" id="placeholder">Choose a PDF or Video from the tree structure on the left.</p>
+                <p class="placeholder-text">Choose a PDF or Video from the tree structure on the left.</p>
             </div>
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
                 <div class="floating-nav" id="floating-nav">
-                    <button id="prev-btn" title="Previous File">◀ Prev</button>
-                    <span>|</span>
-                    <button id="next-btn" title="Next File">Next ▶</button>
+                    <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
         </div>
@@ -219,69 +213,54 @@
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
                 <span>📝 Quick Notes</span>
-                <button class="icon-btn" id="close-notes-btn" style="font-size: 1em; padding: 2px;">✖</button>
+                <button class="icon-btn" id="close-notes-btn">✖</button>
             </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They save automatically!"></textarea>
+            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here..."></textarea>
         </div>
     </div>
 
     <script>
-        // Data Load Tracker & Error Catcher
+        // Data Load Tracker
         let loadAttempts = 0;
         let mergeInterval = setInterval(() => {
             loadAttempts++;
-            if (typeof allBooks !== 'undefined' && typeof lectureVideos !== 'undefined') {
+            if (typeof allBooks !== 'undefined' && typeof lectureVideos !== 'undefined' && typeof mockTests !== 'undefined') {
                 const alreadyMerged = allBooks.some(b => b.folders[0] === "LECTURES");
                 if (!alreadyMerged) {
                     allBooks.push(...lectureVideos);
-                    if (currentRoot === "LECTURES") filterAndRender();
+                    allBooks.push(...mockTests); // Merge mock tests too
+                    filterAndRender();
                 }
-                clearInterval(mergeInterval);
-            } else if (loadAttempts > 20) {
-                if (typeof lectureVideos === 'undefined') console.error("Could not load lectures.js");
                 clearInterval(mergeInterval);
             }
         }, 100);
 
-        window.onerror = function(message) {
-            if(message.includes("allBooks is not defined")) {
-                document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> A data file is missing or not loaded correctly.</div>`;
-            } return false;
-        };
-
         let currentRoot = "CLASS 10"; 
         let currentSubject = "All";
-        let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
         let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
-        let recentBooks = JSON.parse(localStorage.getItem('library-recent')) || [];
         let searchTimeout;
 
         const bookListElement = document.getElementById('book-list');
         const searchBar = document.getElementById('search-bar');
-        const clearSearchBtn = document.getElementById('clear-search-btn');
         const themeToggle = document.getElementById('theme-toggle');
         const viewerWrapper = document.getElementById('viewer-wrapper');
         const bookFrame = document.getElementById('book-frame');
-        const floatingNav = document.getElementById('floating-nav');
+        const playlistDropdown = document.getElementById('playlist-dropdown');
         const downloadBtn = document.getElementById('download-btn');
-        const notesPanel = document.getElementById('notes-panel');
-        const notesArea = document.getElementById('notes-area');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
 
         function toggleMobileMenu() {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('open');
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
         }
         document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
-        sidebarOverlay.addEventListener('click', toggleMobileMenu);
+        document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
 
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentRoot = btn.getAttribute('data-root');
-                searchBar.value = ''; clearSearchBtn.style.display = 'none';
+                searchBar.value = ''; 
                 filterAndRender();
             });
         });
@@ -301,27 +280,24 @@
         }
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('dark-mode', isDark ? 'enabled' : 'disabled');
-            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('dark-mode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+            themeToggle.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
         });
 
         document.getElementById('fullscreen-btn').addEventListener('click', () => {
             if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
-            else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
         });
 
         document.getElementById('notes-toggle-btn').addEventListener('click', () => {
-            notesPanel.classList.toggle('open');
+            document.getElementById('notes-panel').classList.toggle('open');
         });
         document.getElementById('close-notes-btn').addEventListener('click', () => {
-            notesPanel.classList.remove('open');
+            document.getElementById('notes-panel').classList.remove('open');
         });
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== searchBar && document.activeElement !== notesArea) {
-                e.preventDefault(); searchBar.focus();
-            }
+        searchBar.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterAndRender, 250); 
         });
 
         document.getElementById('expand-all').addEventListener('click', () => {
@@ -331,29 +307,8 @@
             document.querySelectorAll('#book-list details').forEach(d => d.open = false);
         });
 
-        searchBar.addEventListener('input', () => {
-            clearSearchBtn.style.display = searchBar.value.length > 0 ? 'block' : 'none';
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(filterAndRender, 250); 
-        });
-        clearSearchBtn.addEventListener('click', () => {
-            searchBar.value = ''; clearSearchBtn.style.display = 'none'; searchBar.focus();
-            filterAndRender();
-        });
-
-        function updateProgress() {
-            if (typeof allBooks === 'undefined') return;
-            const rootBooks = allBooks.filter(b => b.folders[0].toUpperCase() === currentRoot.toUpperCase());
-            const total = rootBooks.length;
-            const completed = rootBooks.filter(b => completedBooks.includes(b.title)).length;
-            const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-            document.getElementById('progress-fill').style.width = pct + '%';
-            document.getElementById('progress-text').textContent = `${pct}% Completed`;
-        }
-
         function filterAndRender() {
             if (typeof allBooks === 'undefined') return;
-            updateProgress();
             const query = searchBar.value.toLowerCase();
             
             const filteredBooks = allBooks.filter(book => {
@@ -361,53 +316,24 @@
                 const matchesSearch = searchString.toLowerCase().includes(query);
                 const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
                 
-                // NEW: Virtual Root Logic for "Simulator" tab
-                let matchesRoot = false;
-                if (currentRoot === "SIMULATOR") {
-                    const upperStr = searchString.toUpperCase();
-                    matchesRoot = upperStr.includes("SQP") || upperStr.includes("TEST") || upperStr.includes("MOCK");
-                } else {
-                    matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
-                }
-
+                // STRICT ISOLATION: Simulator tab ONLY shows files from mocktests.js 
+                let matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                
                 return matchesRoot && matchesSearch && matchesSubject;
             });
-            renderTree(filteredBooks, query.length > 0 || currentSubject !== "All" || currentRoot === "SIMULATOR");
+            renderTree(filteredBooks);
         }
 
-        function renderTree(booksArray, isSearching) {
+        function renderTree(booksArray) {
             bookListElement.innerHTML = ''; 
-
-            const localRecent = recentBooks.filter(t => allBooks.find(b => b.title === t && (currentRoot === "SIMULATOR" || b.folders[0].toUpperCase() === currentRoot.toUpperCase())));
-            if (localRecent.length > 0 && !isSearching) {
-                const rDet = document.createElement('details'); rDet.open = true;
-                const rSum = document.createElement('summary'); rSum.textContent = `🕒 Recently Viewed`;
-                rDet.appendChild(rSum);
-                const rCont = document.createElement('div'); rCont.className = 'folder-contents';
-                localRecent.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) rCont.appendChild(createBookElement(b)); });
-                rDet.appendChild(rCont); bookListElement.appendChild(rDet);
-            }
-
-            const rootFavs = favorites.filter(t => allBooks.find(b => b.title === t && (currentRoot === "SIMULATOR" || b.folders[0].toUpperCase() === currentRoot.toUpperCase())));
-            if (rootFavs.length > 0 && !isSearching) {
-                const fDet = document.createElement('details'); fDet.open = true;
-                const fSum = document.createElement('summary'); fSum.textContent = `⭐ Favorites (${rootFavs.length})`;
-                fDet.appendChild(fSum);
-                const fCont = document.createElement('div'); fCont.className = 'folder-contents';
-                rootFavs.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) fCont.appendChild(createBookElement(b)); });
-                fDet.appendChild(fCont); bookListElement.appendChild(fDet);
-            }
-
             if (booksArray.length === 0) {
-                bookListElement.innerHTML += '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px;">No files or tests found.</div>'; return;
+                bookListElement.innerHTML = '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px; text-align:center;">No files found.</div>'; return;
             }
 
             const fileTree = { _files: [], _isFolder: true };
             booksArray.forEach(book => {
                 let currentLevel = fileTree;
-                // Simulator tab keeps original folders to show where they came from
-                const subFolders = currentRoot === "SIMULATOR" ? book.folders : book.folders.slice(1);
-                subFolders.forEach(folder => {
+                book.folders.slice(1).forEach(folder => {
                     if (!currentLevel[folder]) currentLevel[folder] = { _files: [], _isFolder: true };
                     currentLevel = currentLevel[folder];
                 });
@@ -434,39 +360,28 @@
                 if (nodeObj._files) nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
                 return container;
             }
-            bookListElement.appendChild(buildHTMLNode(fileTree, isSearching));
+            bookListElement.appendChild(buildHTMLNode(fileTree, searchBar.value.length > 0));
         }
 
         function createBookElement(book) {
             const div = document.createElement('div'); div.className = 'book-item';
             const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
 
-            if (book.url.includes("youtube.com") || book.url.includes("youtu.be")) {
+            // Mark as video if it has a youtube URL or a playlist array
+            if ((book.url && book.url.includes("youtube")) || book.playlist) {
                 content.classList.add('is-video');
             }
 
             const actions = document.createElement('div'); actions.className = 'book-actions';
-            
             const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
             check.checked = completedBooks.includes(book.title);
             check.onclick = (e) => {
                 e.stopPropagation();
                 if(check.checked) completedBooks.push(book.title); else completedBooks = completedBooks.filter(t => t !== book.title);
                 localStorage.setItem('library-completed', JSON.stringify(completedBooks));
-                updateProgress();
             };
-
-            const star = document.createElement('button'); star.className = 'fav-star';
-            const isFav = favorites.includes(book.title); star.textContent = isFav ? '★' : '☆'; if (isFav) star.classList.add('is-fav');
-            star.onclick = (e) => {
-                e.stopPropagation();
-                if (favorites.includes(book.title)) { favorites = favorites.filter(t => t !== book.title); star.textContent = '☆'; star.classList.remove('is-fav'); } 
-                else { favorites.push(book.title); star.textContent = '★'; star.classList.add('is-fav'); }
-                localStorage.setItem('library-favorites', JSON.stringify(favorites));
-                filterAndRender();
-            };
-
-            actions.appendChild(check); actions.appendChild(star);
+            
+            actions.appendChild(check);
             div.appendChild(content); div.appendChild(actions);
             div.onclick = () => loadBook(book, div);
             return div;
@@ -476,92 +391,74 @@
             document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
             document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
             clickedElement.classList.add('active');
-            let parent = clickedElement.parentElement;
-            while(parent && parent.id !== 'book-list') {
-                if (parent.tagName.toLowerCase() === 'details') { const sum = parent.querySelector('summary'); if (sum) sum.classList.add('active-path'); }
-                parent = parent.parentElement;
-            }
-
-            recentBooks = recentBooks.filter(t => t !== book.title);
-            recentBooks.unshift(book.title);
-            if(recentBooks.length > 5) recentBooks.pop();
-            localStorage.setItem('library-recent', JSON.stringify(recentBooks));
-
+            
             document.getElementById('current-book-title').textContent = book.title;
             document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
             document.getElementById('placeholder-box').style.display = 'none';
             document.getElementById('fullscreen-btn').style.display = 'flex';
             document.getElementById('notes-toggle-btn').style.display = 'flex';
             
-            const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-            
-            // 🔴 SMART EXAM DETECTOR
-            const upperStr = book.folders.join(" ").toUpperCase() + " " + book.title.toUpperCase();
-            const isMockTest = upperStr.includes("SQP") || upperStr.includes("TEST") || upperStr.includes("MOCK");
+            let finalUrl = book.url;
 
-            // 🔴 BUTTON LOGIC FOR SIMULATOR
-            if(book.url.includes("youtube.com") || book.url.includes("youtu.be")) {
-                downloadBtn.style.display = 'none';
-            } else if(match) {
-                downloadBtn.style.display = 'flex';
-                if (isMockTest || currentRoot === "SIMULATOR") {
-                    downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
-                    downloadBtn.title = 'Open NTA Simulator';
-                    downloadBtn.className = 'icon-btn primary-btn';
-                    downloadBtn.style.backgroundColor = '#e53e3e';
-                    downloadBtn.style.color = '#fff';
-                    downloadBtn.onclick = () => window.open(`simulator.html?url=${encodeURIComponent(book.url)}&title=${encodeURIComponent(book.title)}`, '_blank');
-                } else {
-                    downloadBtn.innerHTML = '⬇️';
-                    downloadBtn.title = 'Download File';
-                    downloadBtn.className = 'icon-btn';
-                    downloadBtn.style.backgroundColor = 'transparent';
-                    downloadBtn.style.color = 'inherit';
-                    downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
-                }
-            } else { 
-                downloadBtn.style.display = 'none'; 
+            // --- PLAYLIST DROPDOWN LOGIC ---
+            if (book.playlist && book.playlist.length > 0) {
+                playlistDropdown.innerHTML = '';
+                book.playlist.forEach((vid, index) => {
+                    let opt = document.createElement('option');
+                    opt.value = vid.url;
+                    opt.textContent = `Part ${index + 1}: ${vid.title}`;
+                    playlistDropdown.appendChild(opt);
+                });
+                playlistDropdown.style.display = 'block';
+                finalUrl = book.playlist[0].url; // Load first video by default
+                
+                playlistDropdown.onchange = (e) => {
+                    bookFrame.src = e.target.value;
+                };
+            } else {
+                playlistDropdown.style.display = 'none';
             }
 
-            notesArea.value = localStorage.getItem('notes_' + book.title) || '';
-            notesArea.oninput = function() { localStorage.setItem('notes_' + book.title, this.value); };
+            // --- BUTTON LOGIC ---
+            if (currentRoot === "SIMULATOR") {
+                downloadBtn.style.display = 'flex';
+                downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
+                downloadBtn.className = 'icon-btn primary-btn';
+                downloadBtn.style.backgroundColor = '#e53e3e';
+                downloadBtn.onclick = () => window.open(`simulator.html?url=${encodeURIComponent(book.url)}&title=${encodeURIComponent(book.title)}`, '_blank');
+            } else if (!finalUrl || finalUrl.includes("youtube")) {
+                downloadBtn.style.display = 'none';
+            } else {
+                downloadBtn.style.display = 'flex';
+                downloadBtn.innerHTML = '⬇️';
+                downloadBtn.className = 'icon-btn';
+                downloadBtn.style.backgroundColor = 'transparent';
+                const match = finalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (match) downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
+            }
 
             viewerWrapper.style.display = 'block';
             viewerWrapper.style.animation = 'none';
             viewerWrapper.offsetHeight; 
             viewerWrapper.style.animation = null;
 
-            floatingNav.style.display = 'flex';
-            bookFrame.src = book.url; 
+            document.getElementById('floating-nav').style.display = 'flex';
+            bookFrame.src = finalUrl; 
             localStorage.setItem('last-opened-book', book.title);
 
             if (window.innerWidth <= 800) toggleMobileMenu(); 
         }
 
-        function navigateBook(direction) {
+        document.getElementById('prev-btn').onclick = () => {
             const items = Array.from(document.querySelectorAll('#book-list .book-item'));
-            const currentIndex = items.findIndex(item => item.classList.contains('active'));
-            if(currentIndex !== -1 && items[currentIndex + direction]) items[currentIndex + direction].click();
-        }
-        document.getElementById('prev-btn').onclick = () => navigateBook(-1);
-        document.getElementById('next-btn').onclick = () => navigateBook(1);
-
-        setTimeout(() => {
-            if (typeof allBooks !== 'undefined') {
-                filterAndRender();
-                const lastBookTitle = localStorage.getItem('last-opened-book');
-                if (lastBookTitle && allBooks.length > 0) {
-                    const targetBook = allBooks.find(b => b.title === lastBookTitle);
-                    if (targetBook) {
-                        setTimeout(() => {
-                            document.querySelectorAll('.book-item').forEach(el => {
-                                if (el.querySelector('.book-item-content').textContent.trim() === targetBook.title) loadBook(targetBook, el);
-                            });
-                        }, 100);
-                    }
-                }
-            }
-        }, 50);
+            const idx = items.findIndex(i => i.classList.contains('active'));
+            if(idx > 0) items[idx - 1].click();
+        };
+        document.getElementById('next-btn').onclick = () => {
+            const items = Array.from(document.querySelectorAll('#book-list .book-item'));
+            const idx = items.findIndex(i => i.classList.contains('active'));
+            if(idx !== -1 && items[idx + 1]) items[idx + 1].click();
+        };
     </script>
 </body>
 </html>
