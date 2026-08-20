@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Study Library</title>
+    <style>
+        :root { 
+            --primary-bg: #f4f6f8; 
+            --sidebar-bg: #ffffff; 
+            --sidebar-text: #2d3748; 
+            --highlight: #ebf8ff; 
+            --highlight-text: #3182ce;
+            --text-color: #1a202c; 
+            --header-bg: #ffffff;
+            --reader-bg: #edf2f7;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --folder-bg: #f7fafc;
+        }
+
+        body.dark-mode {
+            --primary-bg: #0b0f19;
+            --sidebar-bg: #111827;
+            --sidebar-text: #e5e7eb;
+            --highlight: #1e3a8a;
+            --highlight-text: #60a5fa;
+            --text-color: #f3f4f6;
+            --header-bg: #111827;
+            --reader-bg: #0f172a;
+            --border-color: #1f2937;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --folder-bg: #1f2937;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        body { display: flex; height: 100vh; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; overflow: hidden; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #374151; }
+
+        /* Sidebar & Header */
+        .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 20; box-shadow: 4px 0 15px rgba(0,0,0,0.02); }
+        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
+
+        /* Big Category Switcher Buttons */
+        .mode-selector { display: flex; gap: 12px; padding: 16px 20px 6px 20px; background-color: var(--sidebar-bg); }
+        .mode-btn { 
+            flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 12px; 
+            background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.9em; 
+            cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); text-align: center;
+        }
+        .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
+        .mode-btn:active { transform: scale(0.96); }
+        .mode-btn.active { 
+            background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); 
+            box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); 
+        }
+
+        /* Search & Controls */
+        .search-container { padding: 12px 20px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 8px; }
+        .search-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.9em; }
+        .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+
+        .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 4px 2px; }
+        .tree-controls span:hover { text-decoration: underline; }
+
+        .book-list { flex-grow: 1; overflow-y: auto; padding: 14px 16px; list-style: none; }
+        
+        /* Nested Directory Tree UI */
+        details { margin-bottom: 4px; }
+        summary { padding: 9px 12px; cursor: pointer; font-weight: 600; border-radius: 8px; display: flex; align-items: center; background-color: var(--folder-bg); user-select: none; transition: background 0.2s, color 0.2s; font-size: 0.91em; color: var(--sidebar-text); border: 1px solid transparent; }
+        summary:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--border-color); }
+        summary::marker { display: none; content: ""; } 
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: "📁"; margin-right: 10px; font-size: 1.1em; }
+        details[open] > summary::before { content: "📂"; }
+        
+        .folder-contents { padding-left: 14px; margin-top: 4px; border-left: 2px dashed var(--border-color); margin-left: 14px; }
+        
+        /* File Items & Favorites Star */
+        .book-item { padding: 8px 10px 8px 12px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid transparent; }
+        .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
+        .book-item-content::before { content: "📄"; margin-right: 10px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
+        .book-item:hover { background-color: var(--highlight); color: var(--highlight-text); }
+        .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25); }
+        
+        .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 2px 6px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
+        .fav-star:hover { opacity: 1; transform: scale(1.25); }
+        .fav-star.is-fav { opacity: 1; color: #ecc94b; text-shadow: 0 0 8px rgba(236, 201, 75, 0.5); }
+        .book-item.active .fav-star { color: white; text-shadow: none; }
+
+        /* Main Reader Workspace */
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); }
+        .reader-header { padding: 16px 32px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .reader-header-info h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; }
+        .breadcrumb { color: #64748b; font-size: 0.83em; margin-top: 4px; font-family: monospace; }
+        
+        .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 28px; }
+        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; width: 100%; text-align: center; }
+        .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
+        
+        /* Action Buttons */
+        .icon-btn { background: none; border: none; color: inherit; font-size: 1.25em; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; }
+        .icon-btn:hover { background-color: var(--border-color); }
+        .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
+        .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
+        .primary-btn:active { transform: scale(0.96); }
+
+        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); display: none; background-color: white; border: 1px solid var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>📚 Study Library</h2>
+            <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
+        </div>
+
+        <!-- Big Section Switcher Buttons -->
+        <div class="mode-selector">
+            <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
+            <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search-bar" class="search-input" placeholder="Search files... (Press '/' to focus)">
+            <div class="tree-controls">
+                <span id="expand-all">Expand All</span>
+                <span id="collapse-all">Collapse All</span>
+            </div>
+        </div>
+        <div class="book-list" id="book-list">
+            <div class="placeholder-text" style="font-size: 0.9em; margin-top:20px;">Scanning repository...</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="reader-header">
+            <div class="reader-header-info">
+                <h2 id="current-book-title">Select a file</h2>
+                <div id="current-book-breadcrumb" class="breadcrumb"></div>
+            </div>
+            <button id="fullscreen-btn" class="icon-btn primary-btn" style="display: none;">⛶ Fullscreen</button>
+        </div>
+        <div class="reader-container">
+            <div class="placeholder-container" id="placeholder-box">
+                <p class="placeholder-text" id="placeholder">Choose a PDF file from the tree structure on the left to begin reading.</p>
+            </div>
+            <div id="viewer-wrapper">
+                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 🔴 UPDATE THESE DETAILS WITH YOUR GITHUB REPO INFO 🔴 ---
+        const githubUsername = 'raunakpc23-a11y'; 
+        const githubRepo = 'KitaabiKeeda';    
+        const githubBranch = 'main';            
+        // -------------------------------------------------------------
+
+        let allBooks = [
+            // CLASS 10 (11 Subfolders)
+            { title: "All In One Guide", folders: ["CLASS 10", "All In One"], url: "https://www.adobe.com/be_en/active-use/pdf/Alice_in_Wonderland.pdf" },
+            { title: "Allen Module", folders: ["CLASS 10", "Allen"], url: "https://www.planetebook.com/free-ebooks/frankenstein.pdf" },
+            { title: "Educart QB", folders: ["CLASS 10", "Educart QBs"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Educart SQP", folders: ["CLASS 10", "Educart SQP"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Maths Book", folders: ["CLASS 10", "Maths"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Oneshot Material", folders: ["CLASS 10", "Oneshot"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Oswaal QB", folders: ["CLASS 10", "Oswaal QB"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "PW QB", folders: ["CLASS 10", "PW QBs"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "R.S. Aggarwal", folders: ["CLASS 10", "R.S. Aggarwal"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Science MIQs", folders: ["CLASS 10", "Science MIQs"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Xamlidea", folders: ["CLASS 10", "Xamlidea"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> COACHINGS
+            { title: "Aakash Archive Note", folders: ["IIT-JEE", "COACHINGS", "AAKASH Archives"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Allen Physics Module", folders: ["IIT-JEE", "COACHINGS", "ALLEN", "Allen Physics Module"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Allen Chemistry Module", folders: ["IIT-JEE", "COACHINGS", "ALLEN", "Allen Chemistry"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Nucleas Physics Combined", folders: ["IIT-JEE", "COACHINGS", "NUCLEAS Modules", "Nucleas Physics all material combined"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Nucleas Maths Combined", folders: ["IIT-JEE", "COACHINGS", "NUCLEAS Modules", "Nucleas Maths all material combined"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "PW NSEP", folders: ["IIT-JEE", "COACHINGS", "PW"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "PW Old Test Series", folders: ["IIT-JEE", "COACHINGS", "PW"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "PW 47 Year JEE", folders: ["IIT-JEE", "COACHINGS", "PW", "47 Year JEE"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> EXTRAS
+            { title: "Concept Map Formula", folders: ["IIT-JEE", "EXTRAS", "Concept Maps"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Flashcards", folders: ["IIT-JEE", "EXTRAS", "Flashcards"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Formula Booklet", folders: ["IIT-JEE", "EXTRAS", "Formula BOOKLET"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Hack Books", folders: ["IIT-JEE", "EXTRAS", "Hack Books"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> MATHANGO
+            { title: "Mathongo Chemistry Notes", folders: ["IIT-JEE", "MATHANGO", "CHEMISTRY"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Mathongo English & LR", folders: ["IIT-JEE", "MATHANGO", "Mathongo English & LR Notes"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Mathongo Maths Module", folders: ["IIT-JEE", "MATHANGO", "Maths"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Mathongo Physics Module", folders: ["IIT-JEE", "MATHANGO", "Physics"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> NCERT
+            { title: "NCERT Chemistry", folders: ["IIT-JEE", "NCERT", "Chemistry"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "NCERT English", folders: ["IIT-JEE", "NCERT", "English"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "NCERT Maths Part 1", folders: ["IIT-JEE", "NCERT", "Maths", "Part 1"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "NCERT Maths Part 2", folders: ["IIT-JEE", "NCERT", "Maths", "Part 2"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "NCERT Physical Education", folders: ["IIT-JEE", "NCERT", "Physical Education"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "NCERT Physics", folders: ["IIT-JEE", "NCERT", "Physics"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> PUBLICATIONS
+            { title: "Arihant Exemplar", folders: ["IIT-JEE", "PUBLICATIONS", "Arihant NCERT Exemplar"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Cengage Calculus", folders: ["IIT-JEE", "PUBLICATIONS", "Cengage"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "SL Arora Physics", folders: ["IIT-JEE", "PUBLICATIONS", "SL Arora"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Wiley Physical Chem", folders: ["IIT-JEE", "PUBLICATIONS", "Wiley"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+
+            // IIT-JEE -> SUBJECTS
+            { title: "Inorganic Specials", folders: ["IIT-JEE", "SUBJECTS", "Inorganic Chemistry Special Books"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Maths Specials", folders: ["IIT-JEE", "SUBJECTS", "Maths Special"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+            { title: "Physics Specials", folders: ["IIT-JEE", "SUBJECTS", "Physics Specials"], url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
+        ];
+
+        let currentRoot = "CLASS 10"; 
+        let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
+
+        const bookListElement = document.getElementById('book-list');
+        const searchBar = document.getElementById('search-bar');
+        const themeToggle = document.getElementById('theme-toggle');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const viewerWrapper = document.getElementById('viewer-wrapper');
+        const bookFrame = document.getElementById('book-frame');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentRoot = btn.getAttribute('data-root');
+                searchBar.value = '';
+                filterAndRender();
+            });
+        });
+
+        if (localStorage.getItem('dark-mode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('dark-mode', isDark ? 'enabled' : 'disabled');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
+            else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === '/' && document.activeElement !== searchBar) {
+                e.preventDefault();
+                searchBar.focus();
+            }
+        });
+
+        document.getElementById('expand-all').addEventListener('click', () => {
+            document.querySelectorAll('#book-list details').forEach(d => d.open = true);
+        });
+        document.getElementById('collapse-all').addEventListener('click', () => {
+            document.querySelectorAll('#book-list details').forEach(d => d.open = false);
+        });
+
+        searchBar.addEventListener('input', () => {
+            filterAndRender();
+        });
+
+        function filterAndRender() {
+            const query = searchBar.value.toLowerCase();
+            const filteredBooks = allBooks.filter(book => {
+                const matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                const searchString = book.title + " " + book.folders.join(" ");
+                const matchesSearch = searchString.toLowerCase().includes(query);
+                return matchesRoot && matchesSearch;
+            });
+            renderTree(filteredBooks, query.length > 0);
+        }
+
+        // GitHub Repository Scanner API
+        async function buildLibraryFromGitHub() {
+            if (githubUsername === 'YOUR_USERNAME') {
+                filterAndRender();
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${githubUsername}/${githubRepo}/git/trees/${githubBranch}?recursive=1`);
+                const data = await response.json();
+                
+                if (!data.message || !data.message.includes("Not Found")) {
+                    let fetchedBooks = [];
+                    data.tree.forEach(item => {
+                        if (item.path.startsWith('books/') && item.path.toLowerCase().endswith('.pdf')) {
+                            const pathParts = item.path.split('/');
+                            const folders = pathParts.slice(1, pathParts.length - 1);
+                            const fileName = pathParts[pathParts.length - 1];
+                            
+                            fetchedBooks.push({
+                                title: fileName.replace('.pdf', '').replace(/_/g, ' '),
+                                folders: folders.map(f => f.replace(/_/g, ' ')),
+                                url: item.path
+                            });
+                        }
+                    });
+                    if (fetchedBooks.length > 0) {
+                        allBooks = fetchedBooks; // Switch to live repository data seamlessly
+                    }
+                }
+            } catch (error) {
+                console.warn("GitHub fetch failed. Using fallback layout.");
+            }
+
+            document.getElementById('placeholder').innerHTML = "Choose a PDF file from the tree structure on the left to begin reading.";
+            filterAndRender();
+
+            const lastBookTitle = localStorage.getItem('last-opened-book');
+            if (lastBookTitle) {
+                const targetBook = allBooks.find(b => b.title === lastBookTitle);
+                if (targetBook) {
+                    setTimeout(() => {
+                        document.querySelectorAll('.book-item').forEach(el => {
+                            if (el.querySelector('.book-item-content').textContent.trim() === targetBook.title) {
+                                loadBook(targetBook, el);
+                            }
+                        });
+                    }, 100);
+                }
+            }
+        }
+
+        function renderTree(booksArray, isSearching) {
+            bookListElement.innerHTML = ''; 
+
+            const rootFavorites = favorites.filter(favTitle => {
+                const b = allBooks.find(item => item.title === favTitle);
+                return b && b.folders[0].toUpperCase() === currentRoot.toUpperCase();
+            });
+
+            if (rootFavorites.length > 0 && !isSearching) {
+                const favDetails = document.createElement('details');
+                favDetails.open = true;
+                const favSummary = document.createElement('summary');
+                favSummary.textContent = `⭐ Favorites (${rootFavorites.length})`;
+                favDetails.appendChild(favSummary);
+
+                const favContents = document.createElement('div');
+                favContents.className = 'folder-contents';
+
+                rootFavorites.forEach(favTitle => {
+                    const book = allBooks.find(b => b.title === favTitle);
+                    if (book) {
+                        favContents.appendChild(createBookElement(book));
+                    }
+                });
+
+                favDetails.appendChild(favContents);
+                bookListElement.appendChild(favDetails);
+            }
+
+            if (booksArray.length === 0) {
+                if (bookListElement.children.length === 0) {
+                    bookListElement.innerHTML = '<div class="placeholder-text" style="font-size: 0.9em; margin-top:20px; text-align:center;">No files found in this section.</div>';
+                }
+                return;
+            }
+
+            const fileTree = { _files: [], _isFolder: true };
+            
+            booksArray.forEach(book => {
+                let currentLevel = fileTree;
+                const subFolders = book.folders.slice(1); 
+                subFolders.forEach(folder => {
+                    if (!currentLevel[folder]) currentLevel[folder] = { _files: [], _isFolder: true };
+                    currentLevel = currentLevel[folder];
+                });
+                currentLevel._files.push(book);
+            });
+
+            function buildHTMLNode(nodeObj, isOpen) {
+                const container = document.createElement('div');
+                const folderNames = Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort();
+                
+                folderNames.forEach(folderName => {
+                    const details = document.createElement('details');
+                    if (isOpen) details.open = true; 
+                    
+                    const summary = document.createElement('summary');
+                    summary.textContent = folderName;
+                    details.appendChild(summary);
+                    
+                    const contents = document.createElement('div');
+                    contents.className = 'folder-contents';
+                    contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
+                    
+                    details.appendChild(contents);
+                    container.appendChild(details);
+                });
+
+                if (nodeObj._files) {
+                    nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(book => {
+                        container.appendChild(createBookElement(book));
+                    });
+                }
+                
+                return container;
+            }
+
+            bookListElement.appendChild(buildHTMLNode(fileTree, isSearching));
+        }
+
+        function createBookElement(book) {
+            const div = document.createElement('div');
+            div.className = 'book-item';
+            
+            const content = document.createElement('div');
+            content.className = 'book-item-content';
+            content.textContent = book.title;
+
+            const star = document.createElement('button');
+            star.className = 'fav-star';
+            const isFav = favorites.includes(book.title);
+            star.textContent = isFav ? '★' : '☆';
+            if (isFav) star.classList.add('is-fav');
+
+            star.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (favorites.includes(book.title)) {
+                    favorites = favorites.filter(t => t !== book.title);
+                    star.textContent = '☆';
+                    star.classList.remove('is-fav');
+                } else {
+                    favorites.push(book.title);
+                    star.textContent = '★';
+                    star.classList.add('is-fav');
+                }
+                localStorage.setItem('library-favorites', JSON.stringify(favorites));
+                filterAndRender();
+            });
+
+            div.appendChild(content);
+            div.appendChild(star);
+            
+            div.addEventListener('click', () => loadBook(book, div));
+            return div;
+        }
+
+        function loadBook(book, clickedElement) {
+            document.querySelectorAll('.book-item').forEach(item => item.classList.remove('active'));
+            clickedElement.classList.add('active');
+
+            document.getElementById('current-book-title').textContent = book.title;
+            document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
+            
+            document.getElementById('placeholder-box').style.display = 'none';
+            fullscreenBtn.style.display = 'flex';
+            viewerWrapper.style.display = 'block';
+            
+            bookFrame.src = book.url; 
+            localStorage.setItem('last-opened-book', book.title);
+        }
+
+        buildLibraryFromGitHub();
+    </script>
+</body>
+</html>
