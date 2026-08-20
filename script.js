@@ -33,10 +33,71 @@ const pomoLogoIcon = document.getElementById('pomo-logo-icon');
 const pomoHighlightBox = document.getElementById('pomo-highlight-box');
 const pomoHighlightText = document.getElementById('pomo-highlight-text');
 
+// Settings Modal Elements
 const modalOverlay = document.getElementById('pomo-modal-overlay');
 document.getElementById('pomo-open-settings').onclick = () => modalOverlay.classList.add('open');
 document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
 modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
+
+// Music Modal Elements
+const musicModalOverlay = document.getElementById('music-modal-overlay');
+document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
+document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
+musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
+
+// Music Presets
+const musicPresets = {
+    'spotify-lofi': 'https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0',
+    'spotify-focus': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
+    'spotify-classical': 'https://open.spotify.com/embed/playlist/37i9dQZF1DWV0gynK7Pt6v?utm_source=generator&theme=0',
+    'yt-lofi': 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0'
+};
+
+window.changeMusicPreset = (val) => {
+    const customGroup = document.getElementById('custom-music-group');
+    const musicFrame = document.getElementById('music-frame');
+    if(val === 'custom') {
+        customGroup.style.display = 'flex';
+    } else {
+        customGroup.style.display = 'none';
+        musicFrame.src = musicPresets[val];
+    }
+};
+
+window.applyCustomMusic = () => {
+    let url = document.getElementById('custom-music-url').value.trim();
+    if(!url) return;
+    const musicFrame = document.getElementById('music-frame');
+
+    // Convert Spotify standard URL to embed URL
+    if(url.includes('open.spotify.com')) {
+        let embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+        musicFrame.src = embedUrl;
+    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if(url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
+        else if(url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
+        if(videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
+    } else {
+        musicFrame.src = url;
+    }
+};
+
+// --- LOCAL FILE UPLOAD & INSTANT VIEWER ---
+document.getElementById('local-file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    const localBook = {
+        title: file.name,
+        folders: ["MY LOCAL FILES", file.name],
+        url: objectUrl
+    };
+
+    // Load instantly into the main reader
+    loadBook(localBook, { classList: { add: ()=>{}, remove: ()=>{} } });
+});
 
 window.switchPomoTab = (evt, tabId) => {
     document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
@@ -409,10 +470,10 @@ function createBookElement(book) {
 function loadBook(book, clickedElement) {
     document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
-    clickedElement.classList.add('active');
+    if(clickedElement.classList) clickedElement.classList.add('active');
     
     document.getElementById('current-book-title').textContent = book.title;
-    document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
+    document.getElementById('current-book-breadcrumb').textContent = book.folders ? book.folders.join(" > ") : book.title;
     document.getElementById('placeholder-box').style.display = 'none';
     document.getElementById('fullscreen-btn').style.display = 'flex';
     document.getElementById('notes-toggle-btn').style.display = 'flex';
