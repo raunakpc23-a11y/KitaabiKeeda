@@ -137,10 +137,10 @@
 </head>
 <body>
 
-    <!-- Loading all 3 data files with cache busting -->
-    <script src="data.js?v=8"></script>
-    <script src="lectures.js?v=8"></script>
-    <script src="mocktests.js?v=8"></script>
+    <!-- Loading all data files with fresh cache-busting version -->
+    <script src="data.js?v=9"></script>
+    <script src="lectures.js?v=9"></script>
+    <script src="mocktests.js?v=9"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -188,7 +188,7 @@
                     <h2 id="current-book-title">Select a file</h2>
                 </div>
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
-                <!-- Fixed Dynamic Playlist Dropdown Menu -->
+                <!-- Dynamic Playlist Dropdown Menu -->
                 <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
             <div class="header-actions">
@@ -396,20 +396,19 @@
             
             let finalUrl = book.url;
 
-// --- UPGRADED PLAYLIST DROPDOWN LOGIC ---
+            // --- BULLETPROOF PLAYLIST DROPDOWN POPULATION ---
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url;
-                    // Forcefully grab the title from your lectures.js objects
-                    let itemTitle = vid.title || `Lecture ${index + 1}`;
-                    opt.textContent = itemTitle; 
+                    // Directly map the exact "title" key from your lectures.js objects
+                    opt.textContent = vid.title || `Lecture ${index + 1}`;
                     playlistDropdown.appendChild(opt);
                 });
                 playlistDropdown.style.display = 'block';
                 
-                // Load first video and set header title
+                // Load the first video by default
                 bookFrame.src = book.playlist[0].url;
                 document.getElementById('current-book-title').textContent = book.playlist[0].title;
                 
@@ -448,7 +447,9 @@
             viewerWrapper.style.animation = null;
 
             document.getElementById('floating-nav').style.display = 'flex';
-            bookFrame.src = finalUrl; 
+            if (!book.playlist) {
+                bookFrame.src = finalUrl;
+            }
             localStorage.setItem('last-opened-book', book.title);
 
             if (window.innerWidth <= 800) toggleMobileMenu(); 
