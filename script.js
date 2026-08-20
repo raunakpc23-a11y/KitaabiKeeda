@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // ==========================================
-    // 1. DATA & MODULE STATE
-    // ==========================================
     let masterLibrary = [];
     let currentRoot = "CLASS 10"; 
     let currentSubject = "All";
@@ -22,30 +19,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const defaultSettings = {
-        enabled: 'yes',
-        focusTime: 25,
-        breakTime: 5,
-        quoteRate: 30,
-        sound: 'beep',
-        vibrate: 'no',
-        icon: '🍅',
-        bubbles: 'yes',
-        themeShade: 'theme-amoled',
-        highlightTask: 'yes',
-        aiEnabled: 'yes',
-        activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
-        fontSize: 'font-medium',
-        autoStart: 'no',
-        volume: 0.5,
-        zenMode: 'no'
+        enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
+        aiEnabled: 'yes', activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
+        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no'
     };
 
     let pomoSettings = { ...defaultSettings };
     try {
         const saved = JSON.parse(localStorage.getItem('pomo_settings'));
-        if (saved && typeof saved === 'object') {
-            pomoSettings = { ...defaultSettings, ...saved };
-        }
+        if (saved && typeof saved === 'object') pomoSettings = { ...defaultSettings, ...saved };
     } catch(e) {}
 
     if (!Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
@@ -55,13 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
     let pomoSeconds = pomoSettings.focusTime * 60;
     let pomoInterval = null;
-    let quoteInterval = null;
     let isPomoRunning = false;
     let isFocusMode = true;
 
-    // ==========================================
-    // 2. DOM CACHE
-    // ==========================================
+    // DOM Caching
     const pomoTimeDisplay = document.getElementById('pomo-time');
     const pomoToggleBtn = document.getElementById('pomo-toggle');
     const pomoResetBtn = document.getElementById('pomo-reset');
@@ -105,20 +84,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const notesCopyBtn = document.getElementById('notes-copy-btn');
     const notesDlBtn = document.getElementById('notes-dl-btn');
 
-    // ==========================================
-    // 3. SYNTHESIZED WEB AUDIO ENGINE
-    // ==========================================
+    // Load libraries
+    setTimeout(() => {
+        if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
+        if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
+        if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
+        renderDynamicTopNav();
+    }, 150);
+
+    // Audio Engine
     let audioCtx = null;
     let ambientNode = null;
     let isAmbientPlaying = false;
 
     function getAudioContext() {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         return audioCtx;
     }
 
@@ -127,9 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const bufferSize = 2 * ctx.sampleRate;
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
-
-        let lastOut = 0.0;
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        let lastOut = 0.0, b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
 
         for (let i = 0; i < bufferSize; i++) {
             const white = Math.random() * 2 - 1;
@@ -138,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (type === 'ambient-brown') {
                 lastOut = (lastOut + (0.02 * white)) / 1.02;
                 output[i] = lastOut * 1.5;
-            } else { // rain synthesis
+            } else {
                 b0 = 0.99886 * b0 + white * 0.0555179;
                 b1 = 0.99332 * b1 + white * 0.0750759;
                 b2 = 0.96900 * b2 + white * 0.1538520;
@@ -149,27 +128,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 b6 = white * 0.115926;
             }
         }
-
         const whiteNoise = ctx.createBufferSource();
         whiteNoise.buffer = noiseBuffer;
         whiteNoise.loop = true;
-
         const gainNode = ctx.createGain();
         gainNode.gain.setValueAtTime(parseFloat(pomoSettings.volume) * 0.4, ctx.currentTime);
-
         whiteNoise.connect(gainNode);
         gainNode.connect(ctx.destination);
         whiteNoise.start(0);
-
         return { source: whiteNoise, gain: gainNode };
     }
 
     function stopAmbientAudio() {
         if (ambientNode) {
-            try {
-                ambientNode.source.stop();
-                ambientNode.source.disconnect();
-            } catch(e) {}
+            try { ambientNode.source.stop(); ambientNode.source.disconnect(); } catch(e) {}
             ambientNode = null;
         }
         isAmbientPlaying = false;
@@ -177,20 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn) btn.textContent = "▶ Start Ambient Sound";
     }
 
-    function startAmbientAudio(type) {
-        stopAmbientAudio();
-        ambientNode = createNoiseGenerator(type);
-        isAmbientPlaying = true;
-        const btn = document.getElementById('ambient-play-toggle');
-        if (btn) btn.textContent = "⏹ Stop Ambient Sound";
-    }
-
     document.getElementById('ambient-play-toggle').onclick = () => {
         const type = document.getElementById('music-preset-select').value;
         if (isAmbientPlaying) {
             stopAmbientAudio();
         } else {
-            startAmbientAudio(type);
+            ambientNode = createNoiseGenerator(type);
+            isAmbientPlaying = true;
+            document.getElementById('ambient-play-toggle').textContent = "⏹ Stop Ambient Sound";
         }
     };
 
@@ -241,39 +207,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // ==========================================
-    // 4. DATA ENGINE INITIALIZATION
-    // ==========================================
-    setTimeout(() => {
-        if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
-        if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
-        if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
-        filterAndRender();
-    }, 150);
-
-    // ==========================================
-    // 5. MODAL TABS & SETTINGS
-    // ==========================================
-    document.getElementById('pomo-open-settings').onclick = () => {
-        renderModuleCheckboxes();
-        modalOverlay.classList.add('open');
-    };
+    // Settings Bindings
+    document.getElementById('pomo-open-settings').onclick = () => { renderModuleCheckboxes(); modalOverlay.classList.add('open'); };
     document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
     modalOverlay.onclick = (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
     document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
     document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
     musicModalOverlay.onclick = (e) => { if (e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
-
-    document.querySelectorAll('.pomo-tab-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            const target = document.getElementById(btn.getAttribute('data-tab'));
-            if (target) target.classList.add('active');
-        };
-    });
 
     function renderModuleCheckboxes() {
         const grid = document.getElementById('module-checkbox-grid');
@@ -284,16 +225,6 @@ document.addEventListener("DOMContentLoaded", () => {
             label.innerHTML = `<input type="checkbox" value="${mod.id}" class="mod-checkbox" ${isChecked}> ${mod.label}`;
             grid.appendChild(label);
         });
-
-        grid.querySelectorAll('.mod-checkbox').forEach(cb => {
-            cb.onchange = (e) => {
-                const checked = grid.querySelectorAll('.mod-checkbox:checked');
-                if (checked.length > 4) {
-                    e.target.checked = false;
-                    alert("You can select up to 4 modules for top navigation.");
-                }
-            };
-        });
     }
 
     function renderDynamicTopNav() {
@@ -301,9 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
         if (selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
-        if (!pomoSettings.activeModules.includes(currentRoot)) {
-            currentRoot = selectedMods[0].id;
-        }
+        if (!pomoSettings.activeModules.includes(currentRoot)) currentRoot = selectedMods[0].id;
 
         selectedMods.forEach(mod => {
             let btn = document.createElement('button');
@@ -325,7 +254,6 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
         pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
         pomoLogoIcon.textContent = pomoSettings.icon;
-        
         chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
         if (pomoSettings.aiEnabled === 'no') chatWindow.classList.remove('open');
 
@@ -374,77 +302,23 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoSettings.zenMode = document.getElementById('pomo-setting-zen').value;
 
         const checkedBoxes = Array.from(document.querySelectorAll('#module-checkbox-grid .mod-checkbox:checked')).map(cb => cb.value);
-        if (checkedBoxes.length > 0) {
-            pomoSettings.activeModules = checkedBoxes;
-        }
+        if (checkedBoxes.length > 0) pomoSettings.activeModules = checkedBoxes;
 
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-        
         if (!isPomoRunning) {
             pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
             updatePomoDisplay();
         }
-
         renderDynamicTopNav();
         applyPomoSettingsUI();
         modalOverlay.classList.remove('open');
     };
 
-    // Tasks Management
-    function renderTasks() {
-        const listEl = document.getElementById('pomo-task-list');
-        listEl.innerHTML = '';
-        pomoTasks.forEach((t, idx) => {
-            let item = document.createElement('div');
-            item.className = `pomo-task-item ${t.done ? 'completed' : ''}`;
-            item.innerHTML = `
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex-grow:1;">
-                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="window._toggleTask(${idx})">
-                    <span>${t.text}</span>
-                </label>
-                <button onclick="window._deleteTask(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button>
-            `;
-            listEl.appendChild(item);
-        });
-        localStorage.setItem('pomo_tasks', JSON.stringify(pomoTasks));
-        applyPomoSettingsUI();
-    }
-
-    window._toggleTask = (idx) => { pomoTasks[idx].done = !pomoTasks[idx].done; renderTasks(); };
-    window._deleteTask = (idx) => { pomoTasks.splice(idx, 1); renderTasks(); };
-
-    document.getElementById('pomo-add-task-btn').onclick = () => {
-        let input = document.getElementById('pomo-new-task');
-        if (input.value.trim() !== '') {
-            pomoTasks.push({ text: input.value.trim(), done: false });
-            input.value = '';
-            renderTasks();
-        }
-    };
-
-    // ==========================================
-    // 6. POMODORO TIMER ENGINE
-    // ==========================================
+    // Pomodoro Timer
     function updatePomoDisplay() {
         let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
         let s = String(pomoSeconds % 60).padStart(2, '0');
         pomoTimeDisplay.textContent = `${m}:${s}`;
-    }
-
-    function playTone(type) {
-        if (type === 'none') return;
-        try {
-            const ctx = getAudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = type === 'chime' ? 'sine' : 'square';
-            osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime);
-            gain.gain.setValueAtTime(parseFloat(pomoSettings.volume), ctx.currentTime);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + (type === 'chime' ? 0.8 : 0.4));
-        } catch(e) {}
     }
 
     pomoToggleBtn.onclick = () => {
@@ -466,25 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     isPomoRunning = false;
                     pomoToggleBtn.textContent = '▶️';
                     pomoCard.classList.remove('running');
-                    playTone(pomoSettings.sound);
-                    if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
-                    if (isFocusMode) {
-                        pomoSeconds = pomoSettings.breakTime * 60;
-                        pomoStatusText.textContent = "Break Time";
-                        isFocusMode = false;
-                    } else {
-                        pomoSeconds = pomoSettings.focusTime * 60;
-                        pomoStatusText.textContent = "Focus Session";
-                        isFocusMode = true;
-                    }
-                    updatePomoDisplay();
-
-                    if (pomoSettings.autoStart === 'yes') {
-                        pomoToggleBtn.click();
-                    } else {
-                        alert(isFocusMode ? "Break ended! Time to focus." : "Focus session complete! Time for a break.");
-                    }
+                    alert("Timer completed!");
                 }
             }, 1000);
         }
@@ -493,17 +349,13 @@ document.addEventListener("DOMContentLoaded", () => {
     pomoResetBtn.onclick = () => {
         clearInterval(pomoInterval);
         isPomoRunning = false;
-        isFocusMode = true;
-        pomoStatusText.textContent = "Focus Session";
         pomoSeconds = pomoSettings.focusTime * 60;
         pomoToggleBtn.textContent = '▶️';
         pomoCard.classList.remove('running');
         updatePomoDisplay();
     };
 
-    // ==========================================
-    // 7. LIBRARY VIEWER & SEARCH
-    // ==========================================
+    // Navigation & Workspace
     function toggleMobileMenu() {
         sidebar.classList.toggle('open');
         document.getElementById('sidebar-overlay').classList.toggle('open');
@@ -526,30 +378,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     themeToggle.onclick = () => {
-        if (document.body.classList.contains('theme-light')) {
-            pomoSettings.themeShade = 'theme-amoled';
-            themeToggle.textContent = '☀️';
-        } else {
-            pomoSettings.themeShade = 'theme-light';
-            themeToggle.textContent = '🌙';
-        }
+        pomoSettings.themeShade = pomoSettings.themeShade === 'theme-light' ? 'theme-amoled' : 'theme-light';
+        themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
         applyPomoSettingsUI();
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
     };
 
-    // FIXED FULLSCREEN ACTION
     document.getElementById('fullscreen-btn').onclick = () => {
         const container = document.getElementById('reader-container-main');
         if (!document.fullscreenElement) {
             if (container.requestFullscreen) container.requestFullscreen();
-            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
-            else if (container.msRequestFullscreen) container.msRequestFullscreen();
         } else {
             if (document.exitFullscreen) document.exitFullscreen();
         }
     };
 
-    // FIXED SPLIT-SCREEN ACTION
     splitScreenBtn.onclick = () => {
         isSplitActive = !isSplitActive;
         const mainContainer = document.getElementById('reader-container-main');
@@ -566,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // FIXED NOTES TOGGLE & ACTIONS
     notesToggleBtn.onclick = () => notesPanel.classList.toggle('open');
     closeNotesBtn.onclick = () => notesPanel.classList.remove('open');
 
@@ -607,19 +449,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function filterAndRender() {
         if (masterLibrary.length === 0) return;
         const query = searchBar.value.toLowerCase().trim();
-        let filteredBooks = [];
-
-        if (currentRoot === "FAVORITES") {
-            filteredBooks = masterLibrary.filter(book => starredBooks.includes(book.title));
-        } else {
-            filteredBooks = masterLibrary.filter(book => {
+        let filteredBooks = currentRoot === "FAVORITES" 
+            ? masterLibrary.filter(book => starredBooks.includes(book.title))
+            : masterLibrary.filter(book => {
                 const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
-                const matchesSearch = meta.includes(query);
-                const matchesSubj = currentSubject === "All" || meta.includes(currentSubject.toLowerCase());
-                const matchesRoot = book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
-                return matchesSearch && matchesSubj && matchesRoot;
+                return meta.includes(query) && 
+                       (currentSubject === "All" || meta.includes(currentSubject.toLowerCase())) &&
+                       book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
             });
-        }
         renderTree(filteredBooks);
     }
 
@@ -691,12 +528,10 @@ document.addEventListener("DOMContentLoaded", () => {
             e.stopPropagation();
             if (starredBooks.includes(book.title)) {
                 starredBooks = starredBooks.filter(t => t !== book.title);
-                starBtn.innerHTML = '☆'; 
-                starBtn.classList.remove('starred');
+                starBtn.innerHTML = '☆'; starBtn.classList.remove('starred');
             } else {
                 starredBooks.push(book.title);
-                starBtn.innerHTML = '⭐'; 
-                starBtn.classList.add('starred');
+                starBtn.innerHTML = '⭐'; starBtn.classList.add('starred');
             }
             localStorage.setItem('library-starred', JSON.stringify(starredBooks));
             if (currentRoot === "FAVORITES") filterAndRender();
@@ -713,10 +548,8 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem('library-completed', JSON.stringify(completedBooks));
         };
         
-        actions.appendChild(starBtn); 
-        actions.appendChild(check);
-        div.appendChild(content); 
-        div.appendChild(actions);
+        actions.appendChild(starBtn); actions.appendChild(check);
+        div.appendChild(content); div.appendChild(actions);
         div.onclick = () => loadBook(book, div);
         return div;
     }
@@ -738,8 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
             playlistDropdown.innerHTML = '';
             book.playlist.forEach((vid, index) => {
                 let opt = document.createElement('option');
-                opt.value = vid.url; 
-                opt.textContent = vid.title || `Lecture ${index + 1}`;
+                opt.value = vid.url; opt.textContent = vid.title || `Lecture ${index + 1}`;
                 playlistDropdown.appendChild(opt);
             });
             playlistDropdown.style.display = 'block';
@@ -764,21 +596,15 @@ document.addEventListener("DOMContentLoaded", () => {
             sidebar.classList.add('collapsed');
             desktopSidebarToggle.textContent = '▶';
         }
-
         if (window.innerWidth <= 800) toggleMobileMenu(); 
     }
 
-    // ==========================================
-    // 8. AI COPILOT CHAT & SHORTCUTS
-    // ==========================================
+    // AI Copilot Bindings
     chatFab.onclick = () => chatWindow.classList.add('open');
     chatClose.onclick = () => chatWindow.classList.remove('open');
 
     let savedChat = localStorage.getItem('ai_chat_history');
-    if (savedChat) { 
-        chatBody.innerHTML = savedChat; 
-        chatBody.scrollTop = chatBody.scrollHeight; 
-    }
+    if (savedChat) { chatBody.innerHTML = savedChat; chatBody.scrollTop = chatBody.scrollHeight; }
 
     function appendMsg(html, isUser) {
         const d = document.createElement('div');
@@ -808,34 +634,23 @@ document.addEventListener("DOMContentLoaded", () => {
                     appendMsg(cardHtml, false);
                 }
             } else {
-                appendMsg("AI Engine is offline. Check if ai.js is loaded.", false);
+                appendMsg("AI Engine is offline.", false);
             }
-        } catch(e) { 
-            appendMsg("Error processing query.", false); 
-        }
+        } catch(e) { appendMsg("Error processing query.", false); }
     }
 
     window._openAIBook = (title) => {
         const book = masterLibrary.find(b => b.title === title);
-        if (book) {
-            loadBook(book, {});
-            chatWindow.classList.remove('open');
-        }
+        if (book) { loadBook(book, {}); chatWindow.classList.remove('open'); }
     };
 
     chatSend.onclick = handleChatSubmit;
     chatInput.onkeypress = (e) => { if (e.key === 'Enter') handleChatSubmit(); };
 
-    // Global Keybindings
+    // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'b') {
-            e.preventDefault();
-            desktopSidebarToggle.click();
-        }
-        if (e.ctrlKey && e.key === ' ') {
-            e.preventDefault();
-            chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
-        }
+        if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); desktopSidebarToggle.click(); }
+        if (e.ctrlKey && e.key === ' ') { e.preventDefault(); chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click(); }
         if (e.key === 'Escape') {
             modalOverlay.classList.remove('open');
             musicModalOverlay.classList.remove('open');
@@ -844,9 +659,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Run startup renders
     renderTasks();
     applyPomoSettingsUI();
     updatePomoDisplay();
-    renderDynamicTopNav();
 });
