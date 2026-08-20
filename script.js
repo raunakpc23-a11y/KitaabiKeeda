@@ -1,11 +1,12 @@
+// ==========================================
+// 1. STATE & STORAGE (Loaded First)
+// ==========================================
 let masterLibrary = [];
-
-setTimeout(() => {
-    if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
-    if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
-    if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
-    filterAndRender();
-}, 300);
+let currentRoot = "CLASS 10"; 
+let currentSubject = "All";
+let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
+let searchTimeout;
+let isTreeExpanded = false; 
 
 // --- ALL AVAILABLE MODULES ---
 const ALL_MODULES = [
@@ -17,7 +18,7 @@ const ALL_MODULES = [
     { id: 'FLASHCARDS', label: '📇 Flashcards' }
 ];
 
-// --- SAFE-MERGE PROTOCOL (Fixes the crash from old cached settings) ---
+// --- SAFE-MERGE PROTOCOL ---
 const defaultSettings = {
     enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
     aiEnabled: 'yes', activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
@@ -46,6 +47,9 @@ let quoteInterval = null;
 let isPomoRunning = false;
 let isFocusMode = true;
 
+// ==========================================
+// 2. DOM ELEMENTS (Mapped safely)
+// ==========================================
 const pomoTimeDisplay = document.getElementById('pomo-time');
 const pomoToggleBtn = document.getElementById('pomo-toggle');
 const pomoResetBtn = document.getElementById('pomo-reset');
@@ -57,8 +61,38 @@ const pomoLogoIcon = document.getElementById('pomo-logo-icon');
 const pomoHighlightBox = document.getElementById('pomo-highlight-box');
 const pomoHighlightText = document.getElementById('pomo-highlight-text');
 
-// Settings Modal Elements
 const modalOverlay = document.getElementById('pomo-modal-overlay');
+const musicModalOverlay = document.getElementById('music-modal-overlay');
+
+const bookListElement = document.getElementById('book-list');
+const searchBar = document.getElementById('search-bar');
+const themeToggle = document.getElementById('theme-toggle');
+const viewerWrapper = document.getElementById('viewer-wrapper');
+const bookFrame = document.getElementById('book-frame');
+const playlistDropdown = document.getElementById('playlist-dropdown');
+const downloadBtn = document.getElementById('download-btn');
+const selectorBox = document.getElementById('dynamic-mode-selector');
+
+const chatFab = document.getElementById('chat-fab-btn');
+const chatWindow = document.getElementById('chat-window');
+const chatClose = document.getElementById('chat-close-btn');
+const chatBody = document.getElementById('chat-body');
+const chatInput = document.getElementById('chat-input');
+const chatSend = document.getElementById('chat-send-btn');
+
+// ==========================================
+// 3. INITIALIZATION & DATA LOADING
+// ==========================================
+setTimeout(() => {
+    if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
+    if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
+    if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
+    filterAndRender();
+}, 300);
+
+// ==========================================
+// 4. SETTINGS & UI LOGIC
+// ==========================================
 document.getElementById('pomo-open-settings').onclick = () => {
     renderModuleCheckboxes();
     modalOverlay.classList.add('open');
@@ -66,8 +100,6 @@ document.getElementById('pomo-open-settings').onclick = () => {
 document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
 modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-// Music Modal
-const musicModalOverlay = document.getElementById('music-modal-overlay');
 document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
 document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
 musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
@@ -108,7 +140,6 @@ window.applyCustomMusic = () => {
     }
 };
 
-// Local File Upload
 document.getElementById('local-file-input').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -116,7 +147,6 @@ document.getElementById('local-file-input').addEventListener('change', (e) => {
     loadBook({ title: file.name, folders: ["MY LOCAL FILES", file.name], url: objectUrl }, { classList: { add: ()=>{}, remove: ()=>{} } });
 });
 
-// Tab Switching
 window.switchPomoTab = (evt, tabId) => {
     document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
@@ -124,7 +154,7 @@ window.switchPomoTab = (evt, tabId) => {
     document.getElementById(tabId).classList.add('active');
 };
 
-// Populate Settings safely
+// Populate Settings Form
 document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
 document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
 document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
@@ -163,16 +193,11 @@ function renderModuleCheckboxes() {
 }
 
 function renderDynamicTopNav() {
-    const selectorBox = document.getElementById('dynamic-mode-selector');
     selectorBox.innerHTML = '';
     
-    // Sort selected modules to maintain order
     let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
-    
-    // Fallback if empty
     if(selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
-    // Ensure currentRoot is valid
     if (!pomoSettings.activeModules.includes(currentRoot)) {
         currentRoot = selectedMods[0].id;
     }
@@ -181,7 +206,7 @@ function renderDynamicTopNav() {
         let btn = document.createElement('button');
         btn.className = `mode-btn ${mod.id === currentRoot ? 'active' : ''}`;
         btn.setAttribute('data-root', mod.id);
-        btn.textContent = mod.label.split(' ')[1] || mod.label; // Clean label
+        btn.textContent = mod.label.split(' ')[1] || mod.label; 
 
         btn.addEventListener('click', () => {
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
@@ -201,14 +226,11 @@ function applyPomoSettingsUI() {
     pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
     pomoLogoIcon.textContent = pomoSettings.icon;
     
-    // Update AI Button Visibility
-    const aiBtn = document.getElementById('chat-fab-btn');
-    const chatWin = document.getElementById('chat-window');
     if(pomoSettings.aiEnabled === 'no') {
-        aiBtn.style.display = 'none';
-        chatWin.classList.remove('open');
+        chatFab.style.display = 'none';
+        chatWindow.classList.remove('open');
     } else {
-        aiBtn.style.display = 'flex';
+        chatFab.style.display = 'flex';
     }
 
     if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
@@ -232,7 +254,6 @@ function playAlertSound(type) {
         const gain = ctx.createGain();
         osc.type = type === 'chime' ? 'sine' : 'square';
         osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime);
-        // Apply Master Volume
         gain.gain.setValueAtTime(parseFloat(pomoSettings.volume), ctx.currentTime);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -257,7 +278,6 @@ document.getElementById('pomo-save-settings').onclick = () => {
     pomoSettings.autoStart = document.getElementById('pomo-setting-autostart').value;
     pomoSettings.volume = document.getElementById('pomo-setting-volume').value;
 
-    // Save Active Modules
     let checkedModules = Array.from(document.querySelectorAll('.mod-checkbox:checked')).map(cb => cb.value);
     if(checkedModules.length > 0) {
         pomoSettings.activeModules = checkedModules;
@@ -265,7 +285,6 @@ document.getElementById('pomo-save-settings').onclick = () => {
 
     localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
     
-    // Apply UI Global Updates
     document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize}`;
     renderDynamicTopNav();
     applyPomoSettingsUI();
@@ -390,9 +409,8 @@ function toggleTimer() {
                 }
                 updatePomoDisplay();
 
-                // Auto-Start Flow Handling
                 if(pomoSettings.autoStart === 'yes') {
-                    toggleTimer(); // instantly restart
+                    toggleTimer(); 
                 } else {
                     alert(isFocusMode ? "Break over! Back to focus." : "Focus Session Complete! Time for a break.");
                 }
@@ -416,25 +434,9 @@ pomoResetBtn.onclick = () => {
     updatePomoDisplay();
 };
 
-// --- INITIALIZE UI ON LOAD ---
-applyPomoSettingsUI();
-updatePomoDisplay();
-renderDynamicTopNav(); // This injects your chosen 4 modules
-
-let currentRoot = "CLASS 10"; 
-let currentSubject = "All";
-let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
-let searchTimeout;
-let isTreeExpanded = false; 
-
-const bookListElement = document.getElementById('book-list');
-const searchBar = document.getElementById('search-bar');
-const themeToggle = document.getElementById('theme-toggle');
-const viewerWrapper = document.getElementById('viewer-wrapper');
-const bookFrame = document.getElementById('book-frame');
-const playlistDropdown = document.getElementById('playlist-dropdown');
-const downloadBtn = document.getElementById('download-btn');
-
+// ==========================================
+// 5. LIBRARY RENDERING & SEARCH
+// ==========================================
 function toggleMobileMenu() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('open');
@@ -643,14 +645,9 @@ document.getElementById('next-btn').onclick = () => {
     if(idx !== -1 && items[idx + 1]) items[idx + 1].click();
 };
 
-// --- AI COPILOT LOGIC BINDINGS ---
-const chatFab = document.getElementById('chat-fab-btn');
-const chatWindow = document.getElementById('chat-window');
-const chatClose = document.getElementById('chat-close-btn');
-const chatBody = document.getElementById('chat-body');
-const chatInput = document.getElementById('chat-input');
-const chatSend = document.getElementById('chat-send-btn');
-
+// ==========================================
+// 6. AI COPILOT CHAT BINDINGS
+// ==========================================
 chatFab.onclick = () => chatWindow.classList.add('open');
 chatClose.onclick = () => chatWindow.classList.remove('open');
 
@@ -729,3 +726,8 @@ chatSend.onclick = handleChatSubmit;
 chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleChatSubmit();
 });
+
+// STARTUP RENDER TRIGGERS
+applyPomoSettingsUI();
+updatePomoDisplay();
+renderDynamicTopNav();
