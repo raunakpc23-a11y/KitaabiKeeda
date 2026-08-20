@@ -137,10 +137,10 @@
 </head>
 <body>
 
-    <!-- Loading all 3 data files -->
-    <script src="data.js?v=7"></script>
-    <script src="lectures.js?v=7"></script>
-    <script src="mocktests.js?v=7"></script>
+    <!-- Loading all 3 data files with cache busting -->
+    <script src="data.js?v=8"></script>
+    <script src="lectures.js?v=8"></script>
+    <script src="mocktests.js?v=8"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -154,7 +154,7 @@
             <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
             <button class="mode-btn" data-root="LECTURES">📺 Lectures</button>
-            <button class="mode-btn" data-root="SIMULATOR">Simulator</button> <!-- Emoji removed -->
+            <button class="mode-btn" data-root="SIMULATOR">Simulator</button>
         </div>
         
         <div class="progress-wrapper">
@@ -188,7 +188,7 @@
                     <h2 id="current-book-title">Select a file</h2>
                 </div>
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
-                <!-- NEW: Dynamic Playlist Dropdown Menu -->
+                <!-- Fixed Dynamic Playlist Dropdown Menu -->
                 <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
             <div class="header-actions">
@@ -220,7 +220,6 @@
     </div>
 
     <script>
-        // Data Load Tracker
         let loadAttempts = 0;
         let mergeInterval = setInterval(() => {
             loadAttempts++;
@@ -228,7 +227,7 @@
                 const alreadyMerged = allBooks.some(b => b.folders[0] === "LECTURES");
                 if (!alreadyMerged) {
                     allBooks.push(...lectureVideos);
-                    allBooks.push(...mockTests); // Merge mock tests too
+                    allBooks.push(...mockTests);
                     filterAndRender();
                 }
                 clearInterval(mergeInterval);
@@ -316,9 +315,7 @@
                 const matchesSearch = searchString.toLowerCase().includes(query);
                 const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
                 
-                // STRICT ISOLATION: Simulator tab ONLY shows files from mocktests.js 
                 let matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
-                
                 return matchesRoot && matchesSearch && matchesSubject;
             });
             renderTree(filteredBooks);
@@ -367,7 +364,6 @@
             const div = document.createElement('div'); div.className = 'book-item';
             const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
 
-            // Mark as video if it has a youtube URL or a playlist array
             if ((book.url && book.url.includes("youtube")) || book.playlist) {
                 content.classList.add('is-video');
             }
@@ -400,20 +396,24 @@
             
             let finalUrl = book.url;
 
-            // --- PLAYLIST DROPDOWN LOGIC ---
+            // --- UPGRADED PLAYLIST DROPDOWN LOGIC ---
             if (book.playlist && book.playlist.length > 0) {
                 playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url;
-                    opt.textContent = `Part ${index + 1}: ${vid.title}`;
+                    // Safely extracts title or name property from your playlist items
+                    let itemTitle = vid.title || vid.name || `Lecture ${index + 1}`;
+                    opt.textContent = `${index + 1}. ${itemTitle}`;
                     playlistDropdown.appendChild(opt);
                 });
                 playlistDropdown.style.display = 'block';
-                finalUrl = book.playlist[0].url; // Load first video by default
+                finalUrl = book.playlist[0].url; 
                 
                 playlistDropdown.onchange = (e) => {
                     bookFrame.src = e.target.value;
+                    let selectedOption = playlistDropdown.options[playlistDropdown.selectedIndex];
+                    document.getElementById('current-book-title').textContent = selectedOption.textContent;
                 };
             } else {
                 playlistDropdown.style.display = 'none';
@@ -425,7 +425,9 @@
                 downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
                 downloadBtn.className = 'icon-btn primary-btn';
                 downloadBtn.style.backgroundColor = '#e53e3e';
-                downloadBtn.onclick = () => window.open(`simulator.html?url=${encodeURIComponent(book.url)}&title=${encodeURIComponent(book.title)}`, '_blank');
+                let qTarget = book.questionUrl || book.url;
+                let aTarget = book.answerKeyUrl || '';
+                downloadBtn.onclick = () => window.open(`simulator.html?qUrl=${encodeURIComponent(qTarget)}&aUrl=${encodeURIComponent(aTarget)}&title=${encodeURIComponent(book.title)}`, '_blank');
             } else if (!finalUrl || finalUrl.includes("youtube")) {
                 downloadBtn.style.display = 'none';
             } else {
