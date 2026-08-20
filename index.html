@@ -10,7 +10,7 @@
             --highlight: #ebf8ff; --highlight-text: #3182ce; --text-color: #1a202c; 
             --header-bg: #ffffff; --reader-bg: #edf2f7; --border-color: #e2e8f0;
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            --folder-bg: #f7fafc;
+            --folder-bg: #f7fafc; --success: #48bb78;
         }
 
         body.dark-mode {
@@ -18,6 +18,7 @@
             --highlight: #1e3a8a; --highlight-text: #60a5fa; --text-color: #f3f4f6; 
             --header-bg: #111827; --reader-bg: #0f172a; --border-color: #1f2937;
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); --folder-bg: #1f2937;
+            --success: #38a169;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -33,26 +34,35 @@
         .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* Mobile Overlay */
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
 
-        /* Big Category Switcher Buttons */
+        /* Big Category & Progress */
         .mode-selector { display: flex; gap: 12px; padding: 16px 20px 6px 20px; background-color: var(--sidebar-bg); }
         .mode-btn { flex: 1; padding: 12px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.9em; cursor: pointer; transition: all 0.25s; text-align: center; }
         .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
         .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); }
 
-        /* Search & Controls */
-        .search-container { padding: 12px 20px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 8px; }
+        .progress-wrapper { padding: 10px 20px; background-color: var(--sidebar-bg); }
+        .progress-bar { width: 100%; height: 6px; background-color: var(--border-color); border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--highlight-text), var(--success)); width: 0%; transition: width 0.4s ease; }
+        .progress-text { font-size: 0.75em; font-weight: 600; color: #718096; margin-top: 4px; text-align: right; }
+
+        /* Filters & Search */
+        .search-container { padding: 8px 20px 12px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
+        
+        .subject-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+        .subject-filters::-webkit-scrollbar { display: none; }
+        .subj-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--sidebar-text); font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .subj-chip:hover { border-color: var(--highlight-text); }
+        .subj-chip.active { background: var(--highlight-text); color: white; border-color: var(--highlight-text); }
+
         .search-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
         .search-input { width: 100%; padding: 10px 35px 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.9em; }
         .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
-        
-        .clear-search-btn { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: #a0aec0; font-size: 1.2em; display: none; padding: 4px; line-height: 1; }
+        .clear-search-btn { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: #a0aec0; font-size: 1.2em; display: none; padding: 4px; }
         .clear-search-btn:hover { color: #e53e3e; }
-
-        .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 4px 2px; }
+        .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
         .tree-controls span:hover { text-decoration: underline; }
 
         .book-list { flex-grow: 1; overflow-y: auto; padding: 14px 16px; list-style: none; }
@@ -66,55 +76,66 @@
         summary::-webkit-details-marker { display: none; }
         summary::before { content: "📁"; margin-right: 10px; font-size: 1.1em; filter: grayscale(0.2); }
         details[open] > summary::before { content: "📂"; filter: none; }
-        
         .folder-contents { padding-left: 14px; margin-top: 4px; border-left: 2px dashed var(--border-color); margin-left: 14px; }
         
-        /* File Items & Favorites Star */
-        .book-item { padding: 8px 10px 8px 12px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid transparent; }
-        .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
-        .book-item-content::before { content: "📄"; margin-right: 10px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
+        /* File Items */
+        .book-item { padding: 8px 10px 8px 8px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid transparent; gap: 8px; }
         .book-item:hover { background-color: var(--highlight); color: var(--highlight-text); }
         .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25); }
         
-        .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 2px 6px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
+        .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
+        .book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
+        
+        .book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .check-done { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
+        .fav-star { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0 4px; opacity: 0.3; transition: all 0.2s; border-radius: 6px; }
         .fav-star:hover { opacity: 1; transform: scale(1.25); }
         .fav-star.is-fav { opacity: 1; color: #ecc94b; text-shadow: 0 0 8px rgba(236, 201, 75, 0.5); }
         .book-item.active .fav-star { color: white; text-shadow: none; }
 
         /* Main Reader Workspace */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; position: relative; overflow: hidden; }
         .reader-header { padding: 16px 24px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); gap: 15px; }
-        .reader-header-info { display: flex; align-items: center; gap: 15px; overflow: hidden; }
+        .reader-header-info { display: flex; align-items: center; gap: 15px; overflow: hidden; flex-grow: 1; }
         .reader-header-info h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .breadcrumb { color: #64748b; font-size: 0.83em; margin-top: 4px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 20px; height: 100%; }
-        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; width: 100%; text-align: center; }
-        .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
-        
-        /* Action Buttons */
-        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 8px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background-color: var(--border-color); }
         .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
         .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
         .primary-btn:active { transform: scale(0.96); }
         #mobile-menu-btn { display: none; }
 
-        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); display: none; background-color: white; border: 1px solid var(--border-color); }
+        /* Reader Area & Floating Controls */
+        .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
+        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; text-align: center; }
+        .placeholder-text { color: #64748b; font-size: 1.05em; line-height: 1.6; }
+        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: var(--card-shadow); display: none; background-color: white; border: 1px solid var(--border-color); position: relative; }
+        
+        .floating-nav { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); padding: 6px 12px; border-radius: 20px; gap: 15px; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .floating-nav button { background: none; border: none; color: white; font-size: 1.2em; cursor: pointer; transition: transform 0.2s; font-weight: bold; }
+        .floating-nav button:hover { transform: scale(1.2); }
 
-        /* Mobile Responsiveness */
+        /* Quick Notes Slide-out */
+        .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.05); transition: right 0.3s ease; display: flex; flex-direction: column; z-index: 10; }
+        .notes-panel.open { right: 0; }
+        .notes-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .notes-area { flex-grow: 1; border: none; padding: 20px; width: 100%; resize: none; background: var(--reader-bg); color: var(--text-color); outline: none; font-size: 0.95em; line-height: 1.5; }
+
         @media (max-width: 800px) {
             .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; max-width: 380px; }
             .sidebar.open { left: 0; }
             #mobile-menu-btn { display: flex; }
-            .reader-container { padding: 10px; }
-            .primary-btn span { display: none; } /* Hide text on fullscreen btn on mobile */
+            .reader-container { padding: 5px; }
+            .primary-btn span { display: none; }
+            .notes-panel { width: 100%; right: -100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Scripts Data Import -->
     <script src="data.js"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -129,8 +150,19 @@
             <button class="mode-btn active" data-root="CLASS 10">🎓 Class 10</button>
             <button class="mode-btn" data-root="IIT-JEE">⚡ IIT-JEE</button>
         </div>
+        
+        <div class="progress-wrapper">
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">0% Completed</div>
+        </div>
 
         <div class="search-container">
+            <div class="subject-filters" id="subject-filters">
+                <button class="subj-chip active" data-subj="All">All</button>
+                <button class="subj-chip" data-subj="Physics">Physics</button>
+                <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
+                <button class="subj-chip" data-subj="Maths">Maths</button>
+            </div>
             <div class="search-wrapper">
                 <input type="text" id="search-bar" class="search-input" placeholder="Search files... (Press '/' to focus)">
                 <button id="clear-search-btn" class="clear-search-btn" title="Clear Search">✖</button>
@@ -154,285 +186,289 @@
                     <div id="current-book-breadcrumb" class="breadcrumb"></div>
                 </div>
             </div>
-            <button id="fullscreen-btn" class="icon-btn primary-btn" style="display: none;">⛶ <span>Fullscreen</span></button>
+            <div class="header-actions">
+                <button id="download-btn" class="icon-btn" title="Download PDF" style="display:none;">⬇️</button>
+                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
+                <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
+            </div>
         </div>
+        
         <div class="reader-container">
             <div class="placeholder-container" id="placeholder-box">
                 <p class="placeholder-text" id="placeholder">Choose a PDF file from the tree structure on the left to begin reading.</p>
             </div>
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" loading="lazy"></iframe>
+                <div class="floating-nav" id="floating-nav">
+                    <button id="prev-btn" title="Previous File">◀ Prev</button>
+                    <span style="opacity: 0.5;">|</span>
+                    <button id="next-btn" title="Next File">Next ▶</button>
+                </div>
             </div>
+        </div>
+
+        <div id="notes-panel" class="notes-panel">
+            <div class="notes-header">
+                <span>📝 Notes</span>
+                <button class="icon-btn" id="close-notes-btn" style="font-size: 1em; padding: 2px;">✖</button>
+            </div>
+            <textarea id="notes-area" class="notes-area" placeholder="Type your quick notes here..."></textarea>
         </div>
     </div>
 
     <script>
-        // ON-SCREEN ERROR CATCHER (Helps catch data.js missing errors)
+        // Error Catcher
         window.onerror = function(message) {
             if(message.includes("allBooks is not defined")) {
-                document.getElementById('book-list').innerHTML = `
-                    <div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;">
-                        <strong>Error:</strong> data.js file is missing or not loaded correctly. Please ensure data.js is in the same folder.
-                    </div>`;
-            }
-            return false;
+                document.getElementById('book-list').innerHTML = `<div style="padding: 20px; color: #e53e3e; background: #fff5f5; border-radius: 8px; margin: 10px; font-size: 0.85em; border: 1px solid #feb2b2;"><strong>Error:</strong> data.js file is missing or not loaded correctly.</div>`;
+            } return false;
         };
 
+        // State Tracking
         let currentRoot = "CLASS 10"; 
+        let currentSubject = "All";
         let favorites = JSON.parse(localStorage.getItem('library-favorites')) || [];
+        let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
+        let recentBooks = JSON.parse(localStorage.getItem('library-recent')) || [];
         let searchTimeout;
 
+        // Elements
         const bookListElement = document.getElementById('book-list');
         const searchBar = document.getElementById('search-bar');
         const clearSearchBtn = document.getElementById('clear-search-btn');
         const themeToggle = document.getElementById('theme-toggle');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
         const viewerWrapper = document.getElementById('viewer-wrapper');
         const bookFrame = document.getElementById('book-frame');
-        const modeButtons = document.querySelectorAll('.mode-btn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const floatingNav = document.getElementById('floating-nav');
+        const downloadBtn = document.getElementById('download-btn');
+        const notesPanel = document.getElementById('notes-panel');
+        const notesArea = document.getElementById('notes-area');
 
-        // --- MOBILE MENU LOGIC ---
+        // Mobile Menu
         function toggleMobileMenu() {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('open');
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
         }
-        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
-        sidebarOverlay.addEventListener('click', toggleMobileMenu);
+        document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+        document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
 
-        // --- ROOT TOGGLE ---
-        modeButtons.forEach(btn => {
+        // UI Interactions
+        document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                modeButtons.forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentRoot = btn.getAttribute('data-root');
-                searchBar.value = '';
-                clearSearchBtn.style.display = 'none';
+                searchBar.value = ''; clearSearchBtn.style.display = 'none';
                 filterAndRender();
             });
         });
 
-        // --- DARK MODE ---
-        if (localStorage.getItem('dark-mode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            themeToggle.textContent = '☀️';
-        }
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('dark-mode', isDark ? 'enabled' : 'disabled');
-            themeToggle.textContent = isDark ? '☀️' : '🌙';
+        document.querySelectorAll('.subj-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentSubject = chip.getAttribute('data-subj');
+                filterAndRender();
+            });
         });
 
-        fullscreenBtn.addEventListener('click', () => {
+        document.getElementById('fullscreen-btn').addEventListener('click', () => {
             if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
             else if (viewerWrapper.webkitRequestFullscreen) viewerWrapper.webkitRequestFullscreen();
         });
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === '/' && document.activeElement !== searchBar) {
-                e.preventDefault();
-                searchBar.focus();
-            }
+        document.getElementById('notes-toggle-btn').addEventListener('click', () => {
+            notesPanel.classList.toggle('open');
+        });
+        document.getElementById('close-notes-btn').addEventListener('click', () => {
+            notesPanel.classList.remove('open');
         });
 
-        document.getElementById('expand-all').addEventListener('click', () => {
-            document.querySelectorAll('#book-list details').forEach(d => d.open = true);
-        });
-        document.getElementById('collapse-all').addEventListener('click', () => {
-            document.querySelectorAll('#book-list details').forEach(d => d.open = false);
-        });
-
-        // --- SEARCH & DEBOUNCE ---
+        // Search
         searchBar.addEventListener('input', () => {
             clearSearchBtn.style.display = searchBar.value.length > 0 ? 'block' : 'none';
             clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterAndRender();
-            }, 250); // Waits 250ms after typing stops before searching
+            searchTimeout = setTimeout(filterAndRender, 250); 
         });
-
         clearSearchBtn.addEventListener('click', () => {
-            searchBar.value = '';
-            clearSearchBtn.style.display = 'none';
-            searchBar.focus();
+            searchBar.value = ''; clearSearchBtn.style.display = 'none'; searchBar.focus();
             filterAndRender();
         });
 
+        // Core Functions
+        function updateProgress() {
+            if (typeof allBooks === 'undefined') return;
+            const rootBooks = allBooks.filter(b => b.folders[0].toUpperCase() === currentRoot.toUpperCase());
+            const total = rootBooks.length;
+            const completed = rootBooks.filter(b => completedBooks.includes(b.title)).length;
+            const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-text').textContent = `${pct}% Completed`;
+        }
+
         function filterAndRender() {
-            if (typeof allBooks === 'undefined') return; // Guard for data.js
+            if (typeof allBooks === 'undefined') return;
+            updateProgress();
             const query = searchBar.value.toLowerCase();
+            
             const filteredBooks = allBooks.filter(book => {
                 const matchesRoot = book.folders[0].toUpperCase() === currentRoot.toUpperCase();
                 const searchString = book.title + " " + book.folders.join(" ");
                 const matchesSearch = searchString.toLowerCase().includes(query);
-                return matchesRoot && matchesSearch;
+                const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
+                return matchesRoot && matchesSearch && matchesSubject;
             });
-            renderTree(filteredBooks, query.length > 0);
-        }
-
-        // --- RECURSIVE FILE COUNTER ---
-        function countAllFiles(node) {
-            let count = (node._files ? node._files.length : 0);
-            Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => {
-                count += countAllFiles(node[k]);
-            });
-            return count;
+            renderTree(filteredBooks, query.length > 0 || currentSubject !== "All");
         }
 
         function renderTree(booksArray, isSearching) {
             bookListElement.innerHTML = ''; 
 
-            const rootFavorites = favorites.filter(favTitle => {
-                const b = allBooks.find(item => item.title === favTitle);
-                return b && b.folders[0].toUpperCase() === currentRoot.toUpperCase();
-            });
+            // Render Recent
+            const localRecent = recentBooks.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
+            if (localRecent.length > 0 && !isSearching) {
+                const rDet = document.createElement('details'); rDet.open = true;
+                const rSum = document.createElement('summary'); rSum.textContent = `🕒 Recently Viewed`;
+                rDet.appendChild(rSum);
+                const rCont = document.createElement('div'); rCont.className = 'folder-contents';
+                localRecent.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) rCont.appendChild(createBookElement(b)); });
+                rDet.appendChild(rCont); bookListElement.appendChild(rDet);
+            }
 
-            if (rootFavorites.length > 0 && !isSearching) {
-                const favDetails = document.createElement('details');
-                favDetails.open = true;
-                const favSummary = document.createElement('summary');
-                favSummary.textContent = `⭐ Favorites (${rootFavorites.length})`;
-                favDetails.appendChild(favSummary);
-
-                const favContents = document.createElement('div');
-                favContents.className = 'folder-contents';
-
-                rootFavorites.forEach(favTitle => {
-                    const book = allBooks.find(b => b.title === favTitle);
-                    if (book) {
-                        favContents.appendChild(createBookElement(book));
-                    }
-                });
-
-                favDetails.appendChild(favContents);
-                bookListElement.appendChild(favDetails);
+            // Render Favorites
+            const rootFavs = favorites.filter(t => allBooks.find(b => b.title === t && b.folders[0].toUpperCase() === currentRoot.toUpperCase()));
+            if (rootFavs.length > 0 && !isSearching) {
+                const fDet = document.createElement('details'); fDet.open = true;
+                const fSum = document.createElement('summary'); fSum.textContent = `⭐ Favorites (${rootFavs.length})`;
+                fDet.appendChild(fSum);
+                const fCont = document.createElement('div'); fCont.className = 'folder-contents';
+                rootFavs.forEach(t => { const b = allBooks.find(x => x.title === t); if(b) fCont.appendChild(createBookElement(b)); });
+                fDet.appendChild(fCont); bookListElement.appendChild(fDet);
             }
 
             if (booksArray.length === 0) {
-                bookListElement.innerHTML = '<div class="placeholder-text" style="font-size: 0.9em; margin-top:20px; text-align:center;">No files found.</div>';
-                return;
+                bookListElement.innerHTML += '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px;">No files found.</div>'; return;
             }
 
             const fileTree = { _files: [], _isFolder: true };
-            
             booksArray.forEach(book => {
                 let currentLevel = fileTree;
-                const subFolders = book.folders.slice(1); 
-                subFolders.forEach(folder => {
+                book.folders.slice(1).forEach(folder => {
                     if (!currentLevel[folder]) currentLevel[folder] = { _files: [], _isFolder: true };
                     currentLevel = currentLevel[folder];
                 });
                 currentLevel._files.push(book);
             });
 
-            function buildHTMLNode(nodeObj, isOpen) {
-                const container = document.createElement('div');
-                const folderNames = Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort();
-                
-                folderNames.forEach(folderName => {
-                    const details = document.createElement('details');
-                    if (isOpen) details.open = true; 
-                    
-                    const summary = document.createElement('summary');
-                    const totalFiles = countAllFiles(nodeObj[folderName]);
-                    // Folder Counter added here
-                    summary.textContent = `${folderName} (${totalFiles})`;
-                    details.appendChild(summary);
-                    
-                    const contents = document.createElement('div');
-                    contents.className = 'folder-contents';
-                    contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
-                    
-                    details.appendChild(contents);
-                    container.appendChild(details);
-                });
-
-                if (nodeObj._files) {
-                    nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(book => {
-                        container.appendChild(createBookElement(book));
-                    });
-                }
-                
-                return container;
+            function countAllFiles(node) {
+                let count = (node._files ? node._files.length : 0);
+                Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => count += countAllFiles(node[k]));
+                return count;
             }
 
+            function buildHTMLNode(nodeObj, isOpen) {
+                const container = document.createElement('div');
+                Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort().forEach(folderName => {
+                    const details = document.createElement('details'); if (isOpen) details.open = true; 
+                    const summary = document.createElement('summary');
+                    summary.textContent = `${folderName} (${countAllFiles(nodeObj[folderName])})`;
+                    details.appendChild(summary);
+                    const contents = document.createElement('div'); contents.className = 'folder-contents';
+                    contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
+                    details.appendChild(contents); container.appendChild(details);
+                });
+                if (nodeObj._files) nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
+                return container;
+            }
             bookListElement.appendChild(buildHTMLNode(fileTree, isSearching));
         }
 
         function createBookElement(book) {
-            const div = document.createElement('div');
-            div.className = 'book-item';
+            const div = document.createElement('div'); div.className = 'book-item';
+            const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
+
+            const actions = document.createElement('div'); actions.className = 'book-actions';
             
-            const content = document.createElement('div');
-            content.className = 'book-item-content';
-            content.textContent = book.title;
-
-            const star = document.createElement('button');
-            star.className = 'fav-star';
-            const isFav = favorites.includes(book.title);
-            star.textContent = isFav ? '★' : '☆';
-            if (isFav) star.classList.add('is-fav');
-
-            star.addEventListener('click', (e) => {
+            // Completion Checkbox
+            const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
+            check.checked = completedBooks.includes(book.title);
+            check.onclick = (e) => {
                 e.stopPropagation();
-                if (favorites.includes(book.title)) {
-                    favorites = favorites.filter(t => t !== book.title);
-                    star.textContent = '☆';
-                    star.classList.remove('is-fav');
-                } else {
-                    favorites.push(book.title);
-                    star.textContent = '★';
-                    star.classList.add('is-fav');
-                }
+                if(check.checked) completedBooks.push(book.title); else completedBooks = completedBooks.filter(t => t !== book.title);
+                localStorage.setItem('library-completed', JSON.stringify(completedBooks));
+                updateProgress();
+            };
+
+            // Favorite Star
+            const star = document.createElement('button'); star.className = 'fav-star';
+            const isFav = favorites.includes(book.title); star.textContent = isFav ? '★' : '☆'; if (isFav) star.classList.add('is-fav');
+            star.onclick = (e) => {
+                e.stopPropagation();
+                if (favorites.includes(book.title)) { favorites = favorites.filter(t => t !== book.title); star.textContent = '☆'; star.classList.remove('is-fav'); } 
+                else { favorites.push(book.title); star.textContent = '★'; star.classList.add('is-fav'); }
                 localStorage.setItem('library-favorites', JSON.stringify(favorites));
                 filterAndRender();
-            });
+            };
 
-            div.appendChild(content);
-            div.appendChild(star);
-            
-            div.addEventListener('click', () => loadBook(book, div, div));
+            actions.appendChild(check); actions.appendChild(star);
+            div.appendChild(content); div.appendChild(actions);
+            div.onclick = () => loadBook(book, div);
             return div;
         }
 
-        // --- PATH HIGHLIGHTING & PDF LOADER ---
         function loadBook(book, clickedElement) {
-            // Remove old highlights
-            document.querySelectorAll('.book-item').forEach(item => item.classList.remove('active'));
+            // Update UI Tracking
+            document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
             document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
-            
-            // Add new highlights
             clickedElement.classList.add('active');
             let parent = clickedElement.parentElement;
             while(parent && parent.id !== 'book-list') {
-                if (parent.tagName.toLowerCase() === 'details') {
-                    const summary = parent.querySelector('summary');
-                    if (summary) summary.classList.add('active-path');
-                }
+                if (parent.tagName.toLowerCase() === 'details') { const sum = parent.querySelector('summary'); if (sum) sum.classList.add('active-path'); }
                 parent = parent.parentElement;
             }
 
+            // Update Recent
+            recentBooks = recentBooks.filter(t => t !== book.title);
+            recentBooks.unshift(book.title);
+            if(recentBooks.length > 5) recentBooks.pop();
+            localStorage.setItem('library-recent', JSON.stringify(recentBooks));
+
+            // Load Content
             document.getElementById('current-book-title').textContent = book.title;
             document.getElementById('current-book-breadcrumb').textContent = book.folders.join(" > ");
-            
             document.getElementById('placeholder-box').style.display = 'none';
-            fullscreenBtn.style.display = 'flex';
-            viewerWrapper.style.display = 'block';
+            document.getElementById('fullscreen-btn').style.display = 'flex';
+            document.getElementById('notes-toggle-btn').style.display = 'flex';
             
+            // Setup Download
+            const match = book.url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if(match) {
+                downloadBtn.style.display = 'flex';
+                downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
+            } else { downloadBtn.style.display = 'none'; }
+
+            // Setup Notes
+            notesArea.value = localStorage.getItem('notes_' + book.title) || '';
+            notesArea.oninput = function() { localStorage.setItem('notes_' + book.title, this.value); };
+
+            viewerWrapper.style.display = 'block';
+            floatingNav.style.display = 'flex';
             bookFrame.src = book.url; 
             localStorage.setItem('last-opened-book', book.title);
 
-            // Auto-close sidebar on mobile
-            if (window.innerWidth <= 800) {
-                sidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('open');
-            }
+            if (window.innerWidth <= 800) toggleMobileMenu(); // Close menu on mobile
         }
 
-        // Boot up! Wait 50ms to ensure data.js loaded if deferred
+        // Prev/Next Navigation
+        function navigateBook(direction) {
+            const items = Array.from(document.querySelectorAll('#book-list .book-item'));
+            const currentIndex = items.findIndex(item => item.classList.contains('active'));
+            if(currentIndex !== -1 && items[currentIndex + direction]) items[currentIndex + direction].click();
+        }
+        document.getElementById('prev-btn').onclick = () => navigateBook(-1);
+        document.getElementById('next-btn').onclick = () => navigateBook(1);
+
+        // Boot Init
         setTimeout(() => {
             if (typeof allBooks !== 'undefined') {
                 filterAndRender();
@@ -442,9 +478,7 @@
                     if (targetBook) {
                         setTimeout(() => {
                             document.querySelectorAll('.book-item').forEach(el => {
-                                if (el.querySelector('.book-item-content').textContent.trim() === targetBook.title) {
-                                    loadBook(targetBook, el);
-                                }
+                                if (el.querySelector('.book-item-content').textContent.trim() === targetBook.title) loadBook(targetBook, el);
                             });
                         }, 100);
                     }
