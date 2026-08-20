@@ -8,9 +8,9 @@
 </head>
 <body class="theme-amoled">
 
-    <script src="data.js?v=27"></script>
-    <script src="lectures.js?v=27"></script>
-    <script src="mocktests.js?v=27"></script>
+    <script src="data.js?v=29"></script>
+    <script src="lectures.js?v=29"></script>
+    <script src="mocktests.js?v=29"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -64,7 +64,6 @@
                 <div class="search-wrapper">
                     <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
                 </div>
-                <!-- LOCAL FILE UPLOADER BUTTON -->
                 <label class="local-file-btn" title="Open any PDF/file from your device">
                     📂 Open File
                     <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
@@ -271,6 +270,27 @@
             </div>
             <textarea id="notes-area" class="notes-area" placeholder="Type your notes here..."></textarea>
         </div>
+        
+        <!-- AI COPILOT & NAVIGATOR CHAT -->
+        <button class="chat-fab" id="chat-fab-btn" title="AI Navigator & Copilot">🤖</button>
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <span>🧭 AI Study Navigator</span>
+                <button class="icon-btn" id="chat-close-btn" style="font-size: 0.9em; padding: 2px 6px;">✖</button>
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="chat-msg bot-msg">
+                    👋 <strong>Hi! I'm your AI Study Navigator.</strong><br>
+                    • Ask me where to find topics (e.g., <em>"Show me electrostatics lectures"</em> or <em>"Find math mock tests"</em>).<br>
+                    • Or ask quick concept/formula questions!
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chat-input" placeholder="Ask a formula or find a topic...">
+                <button id="chat-send-btn">Ask</button>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
