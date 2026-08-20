@@ -37,21 +37,18 @@
         .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
 
-        /* --- REDESIGNED POMODORO WIDGET --- */
+        /* POMODORO WIDGET */
         .pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
         .pomodoro-card { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; transition: all 0.3s ease; gap: 8px; }
         .pomodoro-card.running { border-color: var(--highlight-text); animation: pulseGlow 2s infinite; }
         
-        /* Left: Bigger Icon & Status */
         .pomo-left { display: flex; align-items: center; gap: 10px; }
         .pomo-icon { font-size: 1.8em; line-height: 1; }
         .pomo-info { display: flex; flex-direction: column; gap: 1px; }
         .pomo-status { font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #718096; }
 
-        /* Center: Timer */
         .pomodoro-display { font-family: monospace; font-size: 1.5em; font-weight: 800; color: var(--highlight-text); letter-spacing: -0.5px; text-align: center; }
 
-        /* Right: Controls & Gear */
         .pomo-controls { display: flex; gap: 6px; align-items: center; }
         .pomo-btn { background: var(--sidebar-bg); border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85em; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; color: var(--text-color); }
         .pomo-btn:hover { background: var(--highlight); border-color: var(--highlight-text); transform: scale(1.05); }
@@ -60,7 +57,7 @@
 
         .pomo-bubble { background: var(--highlight); border: 1px solid rgba(49, 130, 206, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; }
 
-        /* --- MODAL STYLES --- */
+        /* MODAL STYLES */
         .pomo-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(3px); justify-content: center; align-items: center; }
         .pomo-modal-overlay.open { display: flex; }
         .pomo-modal { background: var(--sidebar-bg); border: 1px solid var(--border-color); width: 420px; max-width: 90%; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
@@ -134,7 +131,6 @@
         .title-row h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .breadcrumb { color: #64748b; font-size: 0.83em; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* Playlist Dropdown UI */
         .playlist-select { margin-top: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); font-weight: 600; font-size: 0.85em; width: 100%; max-width: 400px; outline: none; cursor: pointer; transition: all 0.2s; }
         .playlist-select:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
 
@@ -172,9 +168,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=17"></script>
-    <script src="lectures.js?v=17"></script>
-    <script src="mocktests.js?v=17"></script>
+    <script src="data.js?v=18"></script>
+    <script src="lectures.js?v=18"></script>
+    <script src="mocktests.js?v=18"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -184,7 +180,7 @@
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
-        <!-- REDESIGNED POMODORO WIDGET -->
+        <!-- POMODORO WIDGET -->
         <div class="pomodoro-container" id="pomo-container">
             <div class="pomodoro-card" id="pomo-card">
                 <div class="pomo-left">
@@ -294,7 +290,6 @@
                     </select>
                 </div>
 
-                <!-- Task Checklist -->
                 <div class="pomo-tasks-container">
                     <label style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">📝 Session Goal / Tasks:</label>
                     <div class="pomo-task-input-row">
@@ -349,7 +344,6 @@
     </div>
 
     <script>
-        // --- MASTER LIBRARY GENERATOR ---
         let masterLibrary = [];
 
         setTimeout(() => {
@@ -359,7 +353,6 @@
             filterAndRender();
         }, 300);
 
-        // --- POMODORO ADVANCED HUB LOGIC ---
         let pomoSettings = JSON.parse(localStorage.getItem('pomo_settings')) || {
             enabled: 'yes', focusTime: 25, breakTime: 5, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes'
         };
@@ -379,13 +372,11 @@
         const pomoContainer = document.getElementById('pomo-container');
         const pomoLogoIcon = document.getElementById('pomo-logo-icon');
 
-        // Modal Elements
         const modalOverlay = document.getElementById('pomo-modal-overlay');
         document.getElementById('pomo-open-settings').onclick = () => modalOverlay.classList.add('open');
         document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
         modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-        // Populate Form Values
         document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
         document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
         document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
@@ -404,7 +395,6 @@
         }
         applyPomoSettingsUI();
 
-        // Audio Alerts using Web Audio API
         function playAlertSound(type) {
             if (type === 'none') return;
             try {
@@ -421,7 +411,6 @@
             } catch(e) { console.log("Audio not supported"); }
         }
 
-        // Save Settings Handler
         document.getElementById('pomo-save-settings').onclick = () => {
             pomoSettings.enabled = document.getElementById('pomo-setting-enable').value;
             pomoSettings.focusTime = parseInt(document.getElementById('pomo-setting-focus').value);
@@ -441,7 +430,6 @@
             modalOverlay.classList.remove('open');
         };
 
-        // Task Management
         function renderTasks() {
             const listEl = document.getElementById('pomo-task-list');
             listEl.innerHTML = '';
@@ -473,7 +461,6 @@
         };
         renderTasks();
 
-        // Timer Loop & Quotes
         const focusQuotes = ["Let's lock in and conquer some problems! 💪", "Deep work mode activated. Stay focused! ⚡", "One concept at a time. You've got this! 🎯", "Distractions out. Equations in. 🚀"];
         const breakQuotes = ["Time to stretch your legs and hydrate! ☕", "Great focus! Rest your eyes for a moment. 🌿", "Breathe in, breathe out. Relax. 🧘‍♂️", "Almost ready for the next sprint! 🔋"];
 
