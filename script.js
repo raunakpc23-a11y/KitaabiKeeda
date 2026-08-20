@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // ==========================================
+    // 1. DATA & MODULE STATE
+    // ==========================================
     let masterLibrary = [];
     let currentRoot = "CLASS 10"; 
     let currentSubject = "All";
@@ -19,29 +22,46 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const defaultSettings = {
-        enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
-        aiEnabled: 'yes', activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
-        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no'
+        enabled: 'yes',
+        focusTime: 25,
+        breakTime: 5,
+        quoteRate: 30,
+        sound: 'beep',
+        vibrate: 'no',
+        icon: '🍅',
+        bubbles: 'yes',
+        themeShade: 'theme-amoled',
+        highlightTask: 'yes',
+        aiEnabled: 'yes',
+        activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
+        fontSize: 'font-medium',
+        autoStart: 'no',
+        volume: 0.5,
+        zenMode: 'no'
     };
 
-    let savedData = {};
-    try { savedData = JSON.parse(localStorage.getItem('pomo_settings')) || {}; } catch(e) {}
-    let pomoSettings = { ...defaultSettings, ...savedData };
+    let pomoSettings = { ...defaultSettings };
+    try {
+        const saved = JSON.parse(localStorage.getItem('pomo_settings'));
+        if (saved && typeof saved === 'object') {
+            pomoSettings = { ...defaultSettings, ...saved };
+        }
+    } catch(e) {}
 
-    if (!pomoSettings.activeModules || !Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
+    if (!Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
         pomoSettings.activeModules = ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'];
     }
 
     let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
-    document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
-
     let pomoSeconds = pomoSettings.focusTime * 60;
     let pomoInterval = null;
     let quoteInterval = null;
     let isPomoRunning = false;
     let isFocusMode = true;
 
-    // DOM Elements Mapping
+    // ==========================================
+    // 2. DOM CACHE
+    // ==========================================
     const pomoTimeDisplay = document.getElementById('pomo-time');
     const pomoToggleBtn = document.getElementById('pomo-toggle');
     const pomoResetBtn = document.getElementById('pomo-reset');
@@ -78,28 +98,100 @@ document.addEventListener("DOMContentLoaded", () => {
     const desktopSidebarToggle = document.getElementById('desktop-sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
 
-    setTimeout(() => {
-        if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
-        if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
-        if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
-        filterAndRender();
-    }, 300);
+    const notesPanel = document.getElementById('notes-panel');
+    const notesArea = document.getElementById('notes-area');
+    const notesToggleBtn = document.getElementById('notes-toggle-btn');
+    const closeNotesBtn = document.getElementById('close-notes-btn');
+    const notesCopyBtn = document.getElementById('notes-copy-btn');
+    const notesDlBtn = document.getElementById('notes-dl-btn');
 
-    // Settings Modal
-    document.getElementById('pomo-open-settings').onclick = () => { renderModuleCheckboxes(); modalOverlay.classList.add('open'); };
-    document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
-    modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
+    // ==========================================
+    // 3. SYNTHESIZED WEB AUDIO ENGINE
+    // ==========================================
+    let audioCtx = null;
+    let ambientNode = null;
+    let isAmbientPlaying = false;
 
-    document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
-    document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
-    musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
+    function getAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
 
-    // Working Audio Streams
-    const ambientAudioStreams = {
-        'white-rain': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Rain_on_tent.ogg',
-        'white-brown': 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Brown_noise.ogg',
-        'white-fire': 'https://upload.wikimedia.org/wikipedia/commons/0/06/Crackling_campfire.ogg',
-        'white-cafe': 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Coffee_shop_ambiance.ogg'
+    function createNoiseGenerator(type) {
+        const ctx = getAudioContext();
+        const bufferSize = 2 * ctx.sampleRate;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+
+        let lastOut = 0.0;
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            if (type === 'ambient-white') {
+                output[i] = white * 0.2;
+            } else if (type === 'ambient-brown') {
+                lastOut = (lastOut + (0.02 * white)) / 1.02;
+                output[i] = lastOut * 1.5;
+            } else { // rain synthesis
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.04;
+                b6 = white * 0.115926;
+            }
+        }
+
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const gainNode = ctx.createGain();
+        gainNode.gain.setValueAtTime(parseFloat(pomoSettings.volume) * 0.4, ctx.currentTime);
+
+        whiteNoise.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        whiteNoise.start(0);
+
+        return { source: whiteNoise, gain: gainNode };
+    }
+
+    function stopAmbientAudio() {
+        if (ambientNode) {
+            try {
+                ambientNode.source.stop();
+                ambientNode.source.disconnect();
+            } catch(e) {}
+            ambientNode = null;
+        }
+        isAmbientPlaying = false;
+        const btn = document.getElementById('ambient-play-toggle');
+        if (btn) btn.textContent = "▶ Start Ambient Sound";
+    }
+
+    function startAmbientAudio(type) {
+        stopAmbientAudio();
+        ambientNode = createNoiseGenerator(type);
+        isAmbientPlaying = true;
+        const btn = document.getElementById('ambient-play-toggle');
+        if (btn) btn.textContent = "⏹ Stop Ambient Sound";
+    }
+
+    document.getElementById('ambient-play-toggle').onclick = () => {
+        const type = document.getElementById('music-preset-select').value;
+        if (isAmbientPlaying) {
+            stopAmbientAudio();
+        } else {
+            startAmbientAudio(type);
+        }
     };
 
     const musicPresets = {
@@ -109,77 +201,79 @@ document.addEventListener("DOMContentLoaded", () => {
         'yt-lofi': 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0'
     };
 
-    window.changeMusicPreset = (val) => {
+    document.getElementById('music-preset-select').onchange = (e) => {
+        const val = e.target.value;
         const customGroup = document.getElementById('custom-music-group');
+        const iframeWrapper = document.getElementById('music-iframe-container');
+        const ambientBox = document.getElementById('ambient-controls-box');
         const musicFrame = document.getElementById('music-frame');
-        const ambientPlayer = document.getElementById('ambient-audio-player');
 
-        ambientPlayer.pause();
-        ambientPlayer.src = '';
-        ambientPlayer.style.display = 'none';
-        musicFrame.style.display = 'block';
+        stopAmbientAudio();
 
-        if(val === 'custom') {
-            customGroup.style.display = 'flex';
-        } else if (ambientAudioStreams[val]) {
+        if (val.startsWith('ambient-')) {
             customGroup.style.display = 'none';
-            musicFrame.style.display = 'none';
-            ambientPlayer.style.display = 'block';
-            ambientPlayer.src = ambientAudioStreams[val];
-            ambientPlayer.volume = parseFloat(pomoSettings.volume);
-            ambientPlayer.play().catch(e => console.log("Audio autoplay restricted"));
+            iframeWrapper.style.display = 'none';
+            ambientBox.style.display = 'block';
+            musicFrame.src = '';
+        } else if (val === 'custom') {
+            customGroup.style.display = 'flex';
+            iframeWrapper.style.display = 'block';
+            ambientBox.style.display = 'none';
         } else {
             customGroup.style.display = 'none';
-            musicFrame.src = musicPresets[val];
+            iframeWrapper.style.display = 'block';
+            ambientBox.style.display = 'none';
+            musicFrame.src = musicPresets[val] || '';
         }
     };
 
-    window.applyCustomMusic = () => {
-        let url = document.getElementById('custom-music-url').value.trim();
-        if(!url) return;
+    document.getElementById('custom-music-apply-btn').onclick = () => {
+        const url = document.getElementById('custom-music-url').value.trim();
+        if (!url) return;
         const musicFrame = document.getElementById('music-frame');
-        document.getElementById('ambient-audio-player').pause();
-        document.getElementById('ambient-audio-player').style.display = 'none';
-        musicFrame.style.display = 'block';
-
-        if(url.includes('open.spotify.com')) {
+        if (url.includes('open.spotify.com')) {
             musicFrame.src = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
         } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
             let videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1].split('?')[0];
-            if(videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
+            if (videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
         } else {
             musicFrame.src = url;
         }
     };
 
-    document.getElementById('local-file-input').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        loadBook({ title: file.name, folders: ["MY LOCAL FILES", file.name], url: URL.createObjectURL(file) }, {});
-    });
+    // ==========================================
+    // 4. DATA ENGINE INITIALIZATION
+    // ==========================================
+    setTimeout(() => {
+        if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
+        if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
+        if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
+        filterAndRender();
+    }, 150);
 
-    window.switchPomoTab = (evt, tabId) => {
-        document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
-        evt.currentTarget.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
+    // ==========================================
+    // 5. MODAL TABS & SETTINGS
+    // ==========================================
+    document.getElementById('pomo-open-settings').onclick = () => {
+        renderModuleCheckboxes();
+        modalOverlay.classList.add('open');
     };
+    document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
+    modalOverlay.onclick = (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); };
 
-    document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
-    document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
-    document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
-    document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
-    document.getElementById('pomo-setting-rate').value = pomoSettings.quoteRate;
-    document.getElementById('pomo-setting-sound').value = pomoSettings.sound;
-    document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
-    document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
-    document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
-    document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask;
-    document.getElementById('pomo-setting-ai').value = pomoSettings.aiEnabled;
-    document.getElementById('pomo-setting-fontsize').value = pomoSettings.fontSize;
-    document.getElementById('pomo-setting-autostart').value = pomoSettings.autoStart;
-    document.getElementById('pomo-setting-volume').value = pomoSettings.volume;
-    document.getElementById('pomo-setting-zen').value = pomoSettings.zenMode || 'no';
+    document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
+    document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
+    musicModalOverlay.onclick = (e) => { if (e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
+
+    document.querySelectorAll('.pomo-tab-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const target = document.getElementById(btn.getAttribute('data-tab'));
+            if (target) target.classList.add('active');
+        };
+    });
 
     function renderModuleCheckboxes() {
         const grid = document.getElementById('module-checkbox-grid');
@@ -190,14 +284,26 @@ document.addEventListener("DOMContentLoaded", () => {
             label.innerHTML = `<input type="checkbox" value="${mod.id}" class="mod-checkbox" ${isChecked}> ${mod.label}`;
             grid.appendChild(label);
         });
+
+        grid.querySelectorAll('.mod-checkbox').forEach(cb => {
+            cb.onchange = (e) => {
+                const checked = grid.querySelectorAll('.mod-checkbox:checked');
+                if (checked.length > 4) {
+                    e.target.checked = false;
+                    alert("You can select up to 4 modules for top navigation.");
+                }
+            };
+        });
     }
 
     function renderDynamicTopNav() {
         selectorBox.innerHTML = '';
         let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
-        if(selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
+        if (selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
-        if (!pomoSettings.activeModules.includes(currentRoot)) currentRoot = selectedMods[0].id;
+        if (!pomoSettings.activeModules.includes(currentRoot)) {
+            currentRoot = selectedMods[0].id;
+        }
 
         selectedMods.forEach(mod => {
             let btn = document.createElement('button');
@@ -219,10 +325,35 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
         pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
         pomoLogoIcon.textContent = pomoSettings.icon;
+        
         chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
-        if(pomoSettings.aiEnabled === 'no') chatWindow.classList.remove('open');
-        if(pomoSettings.zenMode === 'yes') document.body.classList.add('zen-mode');
-        else document.body.classList.remove('zen-mode');
+        if (pomoSettings.aiEnabled === 'no') chatWindow.classList.remove('open');
+
+        document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
+
+        document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
+        document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
+        document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
+        document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
+        document.getElementById('pomo-setting-rate').value = pomoSettings.quoteRate;
+        document.getElementById('pomo-setting-sound').value = pomoSettings.sound;
+        document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
+        document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
+        document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
+        document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask;
+        document.getElementById('pomo-setting-ai').value = pomoSettings.aiEnabled;
+        document.getElementById('pomo-setting-fontsize').value = pomoSettings.fontSize;
+        document.getElementById('pomo-setting-autostart').value = pomoSettings.autoStart;
+        document.getElementById('pomo-setting-volume').value = pomoSettings.volume;
+        document.getElementById('pomo-setting-zen').value = pomoSettings.zenMode;
+
+        if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
+            let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
+            pomoHighlightText.textContent = firstIncomplete.text;
+            pomoHighlightBox.style.display = 'flex';
+        } else {
+            pomoHighlightBox.style.display = 'none';
+        }
     }
 
     document.getElementById('pomo-save-settings').onclick = () => {
@@ -242,20 +373,78 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoSettings.volume = document.getElementById('pomo-setting-volume').value;
         pomoSettings.zenMode = document.getElementById('pomo-setting-zen').value;
 
-        let checkedModules = Array.from(document.querySelectorAll('.mod-checkbox:checked')).map(cb => cb.value);
-        if(checkedModules.length > 0) pomoSettings.activeModules = checkedModules;
+        const checkedBoxes = Array.from(document.querySelectorAll('#module-checkbox-grid .mod-checkbox:checked')).map(cb => cb.value);
+        if (checkedBoxes.length > 0) {
+            pomoSettings.activeModules = checkedBoxes;
+        }
 
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-        document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
+        
+        if (!isPomoRunning) {
+            pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
+            updatePomoDisplay();
+        }
+
         renderDynamicTopNav();
         applyPomoSettingsUI();
         modalOverlay.classList.remove('open');
     };
 
+    // Tasks Management
+    function renderTasks() {
+        const listEl = document.getElementById('pomo-task-list');
+        listEl.innerHTML = '';
+        pomoTasks.forEach((t, idx) => {
+            let item = document.createElement('div');
+            item.className = `pomo-task-item ${t.done ? 'completed' : ''}`;
+            item.innerHTML = `
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex-grow:1;">
+                    <input type="checkbox" ${t.done ? 'checked' : ''} onchange="window._toggleTask(${idx})">
+                    <span>${t.text}</span>
+                </label>
+                <button onclick="window._deleteTask(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button>
+            `;
+            listEl.appendChild(item);
+        });
+        localStorage.setItem('pomo_tasks', JSON.stringify(pomoTasks));
+        applyPomoSettingsUI();
+    }
+
+    window._toggleTask = (idx) => { pomoTasks[idx].done = !pomoTasks[idx].done; renderTasks(); };
+    window._deleteTask = (idx) => { pomoTasks.splice(idx, 1); renderTasks(); };
+
+    document.getElementById('pomo-add-task-btn').onclick = () => {
+        let input = document.getElementById('pomo-new-task');
+        if (input.value.trim() !== '') {
+            pomoTasks.push({ text: input.value.trim(), done: false });
+            input.value = '';
+            renderTasks();
+        }
+    };
+
+    // ==========================================
+    // 6. POMODORO TIMER ENGINE
+    // ==========================================
     function updatePomoDisplay() {
         let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
         let s = String(pomoSeconds % 60).padStart(2, '0');
         pomoTimeDisplay.textContent = `${m}:${s}`;
+    }
+
+    function playTone(type) {
+        if (type === 'none') return;
+        try {
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type === 'chime' ? 'sine' : 'square';
+            osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime);
+            gain.gain.setValueAtTime(parseFloat(pomoSettings.volume), ctx.currentTime);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + (type === 'chime' ? 0.8 : 0.4));
+        } catch(e) {}
     }
 
     pomoToggleBtn.onclick = () => {
@@ -269,8 +458,34 @@ document.addEventListener("DOMContentLoaded", () => {
             pomoToggleBtn.textContent = '⏸️';
             pomoCard.classList.add('running');
             pomoInterval = setInterval(() => {
-                if (pomoSeconds > 0) { pomoSeconds--; updatePomoDisplay(); }
-                else { clearInterval(pomoInterval); isPomoRunning = false; pomoToggleBtn.textContent = '▶️'; alert("Timer done!"); }
+                if (pomoSeconds > 0) {
+                    pomoSeconds--;
+                    updatePomoDisplay();
+                } else {
+                    clearInterval(pomoInterval);
+                    isPomoRunning = false;
+                    pomoToggleBtn.textContent = '▶️';
+                    pomoCard.classList.remove('running');
+                    playTone(pomoSettings.sound);
+                    if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+                    if (isFocusMode) {
+                        pomoSeconds = pomoSettings.breakTime * 60;
+                        pomoStatusText.textContent = "Break Time";
+                        isFocusMode = false;
+                    } else {
+                        pomoSeconds = pomoSettings.focusTime * 60;
+                        pomoStatusText.textContent = "Focus Session";
+                        isFocusMode = true;
+                    }
+                    updatePomoDisplay();
+
+                    if (pomoSettings.autoStart === 'yes') {
+                        pomoToggleBtn.click();
+                    } else {
+                        alert(isFocusMode ? "Break ended! Time to focus." : "Focus session complete! Time for a break.");
+                    }
+                }
             }, 1000);
         }
     };
@@ -278,19 +493,28 @@ document.addEventListener("DOMContentLoaded", () => {
     pomoResetBtn.onclick = () => {
         clearInterval(pomoInterval);
         isPomoRunning = false;
+        isFocusMode = true;
+        pomoStatusText.textContent = "Focus Session";
         pomoSeconds = pomoSettings.focusTime * 60;
         pomoToggleBtn.textContent = '▶️';
         pomoCard.classList.remove('running');
         updatePomoDisplay();
     };
 
-    // UI & Render triggers
+    // ==========================================
+    // 7. LIBRARY VIEWER & SEARCH
+    // ==========================================
     function toggleMobileMenu() {
         sidebar.classList.toggle('open');
         document.getElementById('sidebar-overlay').classList.toggle('open');
     }
     document.getElementById('mobile-menu-btn').onclick = toggleMobileMenu;
     document.getElementById('sidebar-overlay').onclick = toggleMobileMenu;
+
+    desktopSidebarToggle.onclick = () => {
+        sidebar.classList.toggle('collapsed');
+        desktopSidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+    };
 
     document.querySelectorAll('.subj-chip').forEach(chip => {
         chip.onclick = () => {
@@ -303,45 +527,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
     themeToggle.onclick = () => {
         if (document.body.classList.contains('theme-light')) {
-            document.body.className = `theme-amoled ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
             pomoSettings.themeShade = 'theme-amoled';
             themeToggle.textContent = '☀️';
         } else {
-            document.body.className = `theme-light ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
             pomoSettings.themeShade = 'theme-light';
             themeToggle.textContent = '🌙';
         }
+        applyPomoSettingsUI();
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
     };
 
-    // Fullscreen fix
+    // FIXED FULLSCREEN ACTION
     document.getElementById('fullscreen-btn').onclick = () => {
-        const targetViewer = isSplitActive ? document.getElementById('reader-container-main') : viewerWrapper;
-        if (targetViewer.requestFullscreen) targetViewer.requestFullscreen();
+        const container = document.getElementById('reader-container-main');
+        if (!document.fullscreenElement) {
+            if (container.requestFullscreen) container.requestFullscreen();
+            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+            else if (container.msRequestFullscreen) container.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
     };
 
-    // Split Screen fix
+    // FIXED SPLIT-SCREEN ACTION
     splitScreenBtn.onclick = () => {
         isSplitActive = !isSplitActive;
-        const readerContainerMain = document.getElementById('reader-container-main');
+        const mainContainer = document.getElementById('reader-container-main');
         if (isSplitActive) {
-            readerContainerMain.classList.add('split-active');
+            mainContainer.classList.add('split-active');
             viewerWrapperSplit.style.display = 'block';
-            bookFrameSplit.src = bookFrame.src; 
+            bookFrameSplit.src = bookFrame.src;
             splitScreenBtn.style.backgroundColor = 'var(--success)';
         } else {
-            readerContainerMain.classList.remove('split-active');
+            mainContainer.classList.remove('split-active');
             viewerWrapperSplit.style.display = 'none';
+            bookFrameSplit.src = '';
             splitScreenBtn.style.backgroundColor = '';
         }
     };
 
-    document.getElementById('notes-toggle-btn').onclick = () => document.getElementById('notes-panel').classList.toggle('open');
-    document.getElementById('close-notes-btn').onclick = () => document.getElementById('notes-panel').classList.remove('open');
+    // FIXED NOTES TOGGLE & ACTIONS
+    notesToggleBtn.onclick = () => notesPanel.classList.toggle('open');
+    closeNotesBtn.onclick = () => notesPanel.classList.remove('open');
+
+    notesArea.value = localStorage.getItem('quick_notes') || '';
+    notesArea.oninput = () => localStorage.setItem('quick_notes', notesArea.value);
+
+    notesCopyBtn.onclick = () => {
+        navigator.clipboard.writeText(notesArea.value).then(() => {
+            notesCopyBtn.textContent = '✅';
+            setTimeout(() => notesCopyBtn.textContent = '📋', 1500);
+        });
+    };
+
+    notesDlBtn.onclick = () => {
+        const blob = new Blob([notesArea.value], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "Study_Notes.txt";
+        a.click();
+    };
 
     searchBar.oninput = () => {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterAndRender, 250); 
+        searchTimeout = setTimeout(filterAndRender, 200); 
     };
 
     document.getElementById('folder-toggle-btn').onclick = () => {
@@ -349,24 +598,35 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll('#book-list details').forEach(d => d.open = isTreeExpanded);
     };
 
+    document.getElementById('local-file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        loadBook({ title: file.name, folders: ["LOCAL FILES", file.name], url: URL.createObjectURL(file) }, {});
+    };
+
     function filterAndRender() {
         if (masterLibrary.length === 0) return;
-        const query = searchBar.value.toLowerCase();
-        let filteredBooks = currentRoot === "FAVORITES" 
-            ? masterLibrary.filter(book => starredBooks.includes(book.title))
-            : masterLibrary.filter(book => {
-                const searchString = book.title + " " + (book.folders ? book.folders.join(" ") : "");
-                return searchString.toLowerCase().includes(query) && 
-                       (currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase())) &&
-                       book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+        const query = searchBar.value.toLowerCase().trim();
+        let filteredBooks = [];
+
+        if (currentRoot === "FAVORITES") {
+            filteredBooks = masterLibrary.filter(book => starredBooks.includes(book.title));
+        } else {
+            filteredBooks = masterLibrary.filter(book => {
+                const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
+                const matchesSearch = meta.includes(query);
+                const matchesSubj = currentSubject === "All" || meta.includes(currentSubject.toLowerCase());
+                const matchesRoot = book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                return matchesSearch && matchesSubj && matchesRoot;
             });
+        }
         renderTree(filteredBooks);
     }
 
     function renderTree(booksArray) {
         bookListElement.innerHTML = ''; 
         if (booksArray.length === 0) {
-            bookListElement.innerHTML = `<div class="placeholder-text" style="font-size:0.9em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred favorites yet!' : 'No files found.'}</div>`; 
+            bookListElement.innerHTML = `<div class="placeholder-text" style="font-size:0.85em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred files yet.' : 'No files found.'}</div>`; 
             return;
         }
 
@@ -385,69 +645,85 @@ document.addEventListener("DOMContentLoaded", () => {
             currentLevel._files.push(book);
         });
 
-        function countAllFiles(node) {
+        function countFiles(node) {
             let count = (node._files ? node._files.length : 0);
-            Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => count += countAllFiles(node[k]));
+            Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => count += countFiles(node[k]));
             return count;
         }
 
-        function buildHTMLNode(nodeObj, isOpen) {
+        function buildNode(nodeObj, isOpen) {
             const container = document.createElement('div');
             Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort().forEach(folderName => {
                 const details = document.createElement('details'); 
                 if (isOpen || isTreeExpanded) details.open = true; 
                 const summary = document.createElement('summary');
-                summary.textContent = `${folderName} (${countAllFiles(nodeObj[folderName])})`;
+                summary.textContent = `${folderName} (${countFiles(nodeObj[folderName])})`;
                 details.appendChild(summary);
-                const contents = document.createElement('div'); contents.className = 'folder-contents';
-                contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
-                details.appendChild(contents); container.appendChild(details);
+                const contents = document.createElement('div'); 
+                contents.className = 'folder-contents';
+                contents.appendChild(buildNode(nodeObj[folderName], isOpen));
+                details.appendChild(contents); 
+                container.appendChild(details);
             });
-            if (nodeObj._files) nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
+            if (nodeObj._files) {
+                nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
+            }
             return container;
         }
-        bookListElement.appendChild(buildHTMLNode(fileTree, searchBar.value.length > 0));
+        bookListElement.appendChild(buildNode(fileTree, searchBar.value.length > 0));
     }
 
     function createBookElement(book) {
-        const div = document.createElement('div'); div.className = 'book-item';
-        const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
+        const div = document.createElement('div'); 
+        div.className = 'book-item';
+        const content = document.createElement('div'); 
+        content.className = 'book-item-content'; 
+        content.textContent = book.title;
         if ((book.url && book.url.includes("youtube")) || book.playlist) content.classList.add('is-video');
 
-        const actions = document.createElement('div'); actions.className = 'book-actions';
+        const actions = document.createElement('div'); 
+        actions.className = 'book-actions';
+        
         const starBtn = document.createElement('button');
         starBtn.className = `star-btn ${starredBooks.includes(book.title) ? 'starred' : ''}`;
         starBtn.innerHTML = starredBooks.includes(book.title) ? '⭐' : '☆';
         starBtn.onclick = (e) => {
             e.stopPropagation();
-            if(starredBooks.includes(book.title)) {
+            if (starredBooks.includes(book.title)) {
                 starredBooks = starredBooks.filter(t => t !== book.title);
-                starBtn.innerHTML = '☆'; starBtn.classList.remove('starred');
+                starBtn.innerHTML = '☆'; 
+                starBtn.classList.remove('starred');
             } else {
                 starredBooks.push(book.title);
-                starBtn.innerHTML = '⭐'; starBtn.classList.add('starred');
+                starBtn.innerHTML = '⭐'; 
+                starBtn.classList.add('starred');
             }
             localStorage.setItem('library-starred', JSON.stringify(starredBooks));
-            if(currentRoot === "FAVORITES") filterAndRender();
+            if (currentRoot === "FAVORITES") filterAndRender();
         };
 
-        const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
+        const check = document.createElement('input'); 
+        check.type = 'checkbox'; 
+        check.className = 'check-done';
         check.checked = completedBooks.includes(book.title);
         check.onclick = (e) => {
             e.stopPropagation();
-            if(check.checked) completedBooks.push(book.title); else completedBooks = completedBooks.filter(t => t !== book.title);
+            if (check.checked) completedBooks.push(book.title); 
+            else completedBooks = completedBooks.filter(t => t !== book.title);
             localStorage.setItem('library-completed', JSON.stringify(completedBooks));
         };
         
-        actions.appendChild(starBtn); actions.appendChild(check);
-        div.appendChild(content); div.appendChild(actions);
+        actions.appendChild(starBtn); 
+        actions.appendChild(check);
+        div.appendChild(content); 
+        div.appendChild(actions);
         div.onclick = () => loadBook(book, div);
         return div;
     }
 
     function loadBook(book, clickedElement) {
         document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
-        if(clickedElement.classList) clickedElement.classList.add('active');
+        if (clickedElement.classList) clickedElement.classList.add('active');
         
         document.getElementById('current-book-title').textContent = book.title;
         document.getElementById('current-book-breadcrumb').textContent = book.folders ? book.folders.join(" > ") : book.title;
@@ -457,19 +733,21 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('notes-toggle-btn').style.display = 'flex';
         
         let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
+
         if (book.playlist && book.playlist.length > 0) {
             playlistDropdown.innerHTML = '';
             book.playlist.forEach((vid, index) => {
                 let opt = document.createElement('option');
-                opt.value = vid.url; opt.textContent = vid.title || `Lecture ${index + 1}`;
+                opt.value = vid.url; 
+                opt.textContent = vid.title || `Lecture ${index + 1}`;
                 playlistDropdown.appendChild(opt);
             });
             playlistDropdown.style.display = 'block';
             bookFrame.src = book.playlist[0].url;
-            if(isSplitActive) bookFrameSplit.src = book.playlist[0].url;
+            if (isSplitActive) bookFrameSplit.src = book.playlist[0].url;
             playlistDropdown.onchange = (e) => {
                 bookFrame.src = e.target.value;
-                if(isSplitActive) bookFrameSplit.src = e.target.value;
+                if (isSplitActive) bookFrameSplit.src = e.target.value;
             };
         } else {
             playlistDropdown.style.display = 'none';
@@ -479,57 +757,27 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('floating-nav').style.display = 'flex';
         if (!book.playlist) {
             bookFrame.src = finalUrl;
-            if(isSplitActive) bookFrameSplit.src = finalUrl;
+            if (isSplitActive) bookFrameSplit.src = finalUrl;
         }
+
+        if (pomoSettings.zenMode === 'yes') {
+            sidebar.classList.add('collapsed');
+            desktopSidebarToggle.textContent = '▶';
+        }
+
         if (window.innerWidth <= 800) toggleMobileMenu(); 
     }
 
-    // Hotkeys & Notes
-    desktopSidebarToggle.onclick = () => {
-        sidebar.classList.toggle('collapsed');
-        desktopSidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-    };
-
-    document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); desktopSidebarToggle.click(); }
-        if (e.ctrlKey && e.key === ' ') { e.preventDefault(); chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click(); }
-    });
-
-    const notesArea = document.getElementById('notes-area');
-    notesArea.value = localStorage.getItem('quick_notes') || '';
-    notesArea.oninput = () => localStorage.setItem('quick_notes', notesArea.value);
-
-    document.getElementById('notes-copy-btn').onclick = () => {
-        navigator.clipboard.writeText(notesArea.value);
-        alert("Notes copied!");
-    };
-    document.getElementById('notes-dl-btn').onclick = () => {
-        const blob = new Blob([notesArea.value], { type: "text/plain" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "Study_Notes.txt";
-        a.click();
-    };
-
-    // AI Chat Bindings
+    // ==========================================
+    // 8. AI COPILOT CHAT & SHORTCUTS
+    // ==========================================
     chatFab.onclick = () => chatWindow.classList.add('open');
     chatClose.onclick = () => chatWindow.classList.remove('open');
 
     let savedChat = localStorage.getItem('ai_chat_history');
-    if (savedChat) { chatBody.innerHTML = savedChat; chatBody.scrollTop = chatBody.scrollHeight; }
-
-    async function handleChatSubmit() {
-        const val = chatInput.value.trim();
-        if (!val) return;
-        appendMsg(val, true);
-        chatInput.value = '';
-
-        try {
-            if (typeof processAIQuery !== 'undefined') {
-                const res = await processAIQuery(val, masterLibrary);
-                appendMsg(res.type === 'fact' ? res.reply : `Found matches in library!`, false);
-            }
-        } catch(e) { appendMsg("AI error.", false); }
+    if (savedChat) { 
+        chatBody.innerHTML = savedChat; 
+        chatBody.scrollTop = chatBody.scrollHeight; 
     }
 
     function appendMsg(html, isUser) {
@@ -541,9 +789,63 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('ai_chat_history', chatBody.innerHTML);
     }
 
+    async function handleChatSubmit() {
+        const val = chatInput.value.trim();
+        if (!val) return;
+        appendMsg(val, true);
+        chatInput.value = '';
+
+        try {
+            if (typeof processAIQuery !== 'undefined') {
+                const res = await processAIQuery(val, masterLibrary);
+                if (res.type === 'fact') {
+                    appendMsg(res.reply, false);
+                } else if (res.type === 'navigation') {
+                    let cardHtml = `<p style="margin-bottom:6px;">${res.prefix || 'Matches found:'}</p>`;
+                    res.matches.forEach(b => {
+                        cardHtml += `<button class="primary-btn" style="width:100%; margin-bottom:4px; font-size:0.8em; text-align:left;" onclick="window._openAIBook('${b.title.replace(/'/g, "\\'")}')">📄 ${b.title}</button>`;
+                    });
+                    appendMsg(cardHtml, false);
+                }
+            } else {
+                appendMsg("AI Engine is offline. Check if ai.js is loaded.", false);
+            }
+        } catch(e) { 
+            appendMsg("Error processing query.", false); 
+        }
+    }
+
+    window._openAIBook = (title) => {
+        const book = masterLibrary.find(b => b.title === title);
+        if (book) {
+            loadBook(book, {});
+            chatWindow.classList.remove('open');
+        }
+    };
+
     chatSend.onclick = handleChatSubmit;
     chatInput.onkeypress = (e) => { if (e.key === 'Enter') handleChatSubmit(); };
 
+    // Global Keybindings
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            desktopSidebarToggle.click();
+        }
+        if (e.ctrlKey && e.key === ' ') {
+            e.preventDefault();
+            chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
+        }
+        if (e.key === 'Escape') {
+            modalOverlay.classList.remove('open');
+            musicModalOverlay.classList.remove('open');
+            chatWindow.classList.remove('open');
+            notesPanel.classList.remove('open');
+        }
+    });
+
+    // Run startup renders
+    renderTasks();
     applyPomoSettingsUI();
     updatePomoDisplay();
     renderDynamicTopNav();
