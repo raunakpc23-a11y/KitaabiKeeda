@@ -1,664 +1,220 @@
-let masterLibrary = [];
-
-setTimeout(() => {
-    if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
-    if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
-    if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
-    filterAndRender();
-}, 300);
-
-let pomoSettings = JSON.parse(localStorage.getItem('pomo_settings')) || {
-    enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes'
-};
-let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
-
-if (pomoSettings.themeShade) {
-    document.body.className = pomoSettings.themeShade;
+:root { 
+    --primary-bg: #f4f6f8; --sidebar-bg: #ffffff; --sidebar-text: #2d3748; 
+    --highlight: #ebf8ff; --highlight-text: #3182ce; --text-color: #1a202c; 
+    --header-bg: #ffffff; --reader-bg: #edf2f7; --border-color: #e2e8f0;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    --folder-bg: #f7fafc; --success: #48bb78;
 }
 
-let pomoSeconds = pomoSettings.focusTime * 60;
-let pomoInterval = null;
-let quoteInterval = null;
-let isPomoRunning = false;
-let isFocusMode = true;
-
-const pomoTimeDisplay = document.getElementById('pomo-time');
-const pomoToggleBtn = document.getElementById('pomo-toggle');
-const pomoResetBtn = document.getElementById('pomo-reset');
-const pomoStatusText = document.getElementById('pomo-status-text');
-const pomoCard = document.getElementById('pomo-card');
-const pomoBubble = document.getElementById('pomo-bubble');
-const pomoContainer = document.getElementById('pomo-container');
-const pomoLogoIcon = document.getElementById('pomo-logo-icon');
-const pomoHighlightBox = document.getElementById('pomo-highlight-box');
-const pomoHighlightText = document.getElementById('pomo-highlight-text');
-
-// Settings Modal Elements
-const modalOverlay = document.getElementById('pomo-modal-overlay');
-document.getElementById('pomo-open-settings').onclick = () => modalOverlay.classList.add('open');
-document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
-modalOverlay.onclick = (e) => { if(e.target === modalOverlay) modalOverlay.classList.remove('open'); };
-
-// Music Modal Elements
-const musicModalOverlay = document.getElementById('music-modal-overlay');
-document.getElementById('music-open-btn').onclick = () => musicModalOverlay.classList.add('open');
-document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
-musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
-
-// Music Presets
-const musicPresets = {
-    'spotify-lofi': 'https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0',
-    'spotify-focus': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
-    'spotify-classical': 'https://open.spotify.com/embed/playlist/37i9dQZF1DWV0gynK7Pt6v?utm_source=generator&theme=0',
-    'yt-lofi': 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0'
-};
-
-window.changeMusicPreset = (val) => {
-    const customGroup = document.getElementById('custom-music-group');
-    const musicFrame = document.getElementById('music-frame');
-    if(val === 'custom') {
-        customGroup.style.display = 'flex';
-    } else {
-        customGroup.style.display = 'none';
-        musicFrame.src = musicPresets[val];
-    }
-};
-
-window.applyCustomMusic = () => {
-    let url = document.getElementById('custom-music-url').value.trim();
-    if(!url) return;
-    const musicFrame = document.getElementById('music-frame');
-
-    if(url.includes('open.spotify.com')) {
-        let embedUrl = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
-        musicFrame.src = embedUrl;
-    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        let videoId = '';
-        if(url.includes('v=')) videoId = url.split('v=')[1].split('&')[0];
-        else if(url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0];
-        if(videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
-    } else {
-        musicFrame.src = url;
-    }
-};
-
-// --- LOCAL FILE UPLOADER ---
-document.getElementById('local-file-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const objectUrl = URL.createObjectURL(file);
-    const localBook = {
-        title: file.name,
-        folders: ["MY LOCAL FILES", file.name],
-        url: objectUrl
-    };
-
-    loadBook(localBook, { classList: { add: ()=>{}, remove: ()=>{} } });
-});
-
-window.switchPomoTab = (evt, tabId) => {
-    document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.pomo-tab-content').forEach(c => c.classList.remove('active'));
-    evt.currentTarget.classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-};
-
-document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade || 'theme-amoled';
-document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
-document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
-document.getElementById('pomo-setting-break').value = pomoSettings.breakTime;
-document.getElementById('pomo-setting-rate').value = pomoSettings.quoteRate || 30;
-document.getElementById('pomo-setting-sound').value = pomoSettings.sound;
-document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
-document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
-document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
-document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask || 'yes';
-
-function applyPomoSettingsUI() {
-    pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
-    pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
-    pomoLogoIcon.textContent = pomoSettings.icon;
-    
-    if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
-        let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
-        pomoHighlightText.textContent = firstIncomplete.text;
-        pomoHighlightBox.style.display = 'flex';
-    } else {
-        pomoHighlightBox.style.display = 'none';
-    }
-
-    if(!isPomoRunning) {
-        pomoStatusText.textContent = isFocusMode ? 'Focus Session' : 'Break Time';
-    }
-}
-applyPomoSettingsUI();
-
-function playAlertSound(type) {
-    if (type === 'none') return;
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = type === 'chime' ? 'sine' : 'square';
-        osc.frequency.setValueAtTime(type === 'chime' ? 587.33 : 440, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + (type === 'chime' ? 0.8 : 0.4));
-    } catch(e) { console.log("Audio not supported"); }
+body.theme-amoled {
+    --primary-bg: #000000; --sidebar-bg: #0d0d0f; --sidebar-text: #f8fafc; 
+    --highlight: #1e3a8a; --highlight-text: #38bdf8; --text-color: #f8fafc; 
+    --header-bg: #0d0d0f; --reader-bg: #000000; --border-color: #27272a;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.9); --folder-bg: #18181b;
+    --success: #22c55e;
 }
 
-document.getElementById('pomo-save-settings').onclick = () => {
-    pomoSettings.themeShade = document.getElementById('pomo-setting-theme-shade').value;
-    pomoSettings.enabled = document.getElementById('pomo-setting-enable').value;
-    pomoSettings.focusTime = parseInt(document.getElementById('pomo-setting-focus').value);
-    pomoSettings.breakTime = parseInt(document.getElementById('pomo-setting-break').value);
-    pomoSettings.quoteRate = parseInt(document.getElementById('pomo-setting-rate').value);
-    pomoSettings.sound = document.getElementById('pomo-setting-sound').value;
-    pomoSettings.vibrate = document.getElementById('pomo-setting-vibrate').value;
-    pomoSettings.icon = document.getElementById('pomo-setting-icon').value;
-    pomoSettings.bubbles = document.getElementById('pomo-setting-bubbles').value;
-    pomoSettings.highlightTask = document.getElementById('pomo-setting-highlight').value;
-
-    localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-    document.body.className = pomoSettings.themeShade;
-    applyPomoSettingsUI();
-    
-    if(!isPomoRunning) {
-        pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
-        updatePomoDisplay();
-    }
-    if (isPomoRunning) setupQuoteRotation();
-    modalOverlay.classList.remove('open');
-};
-
-function renderTasks() {
-    const listEl = document.getElementById('pomo-task-list');
-    listEl.innerHTML = '';
-    pomoTasks.forEach((t, idx) => {
-        let item = document.createElement('div');
-        item.className = `pomo-task-item ${t.done ? 'completed' : ''}`;
-        item.innerHTML = `
-            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; flex-grow:1;">
-                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${idx})">
-                <span>${t.text}</span>
-            </label>
-            <button onclick="deleteTask(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button>
-        `;
-        listEl.appendChild(item);
-    });
-    localStorage.setItem('pomo_tasks', JSON.stringify(pomoTasks));
-    applyPomoSettingsUI();
+body.theme-charcoal {
+    --primary-bg: #121212; --sidebar-bg: #1e1e24; --sidebar-text: #f4f4f5; 
+    --highlight: #3f3f46; --highlight-text: #38bdf8; --text-color: #f4f4f5; 
+    --header-bg: #1e1e24; --reader-bg: #121212; --border-color: #3f3f46;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6); --folder-bg: #27272a;
+    --success: #10b981;
 }
 
-window.toggleTask = (idx) => { pomoTasks[idx].done = !pomoTasks[idx].done; renderTasks(); };
-window.deleteTask = (idx) => { pomoTasks.splice(idx, 1); renderTasks(); };
-
-document.getElementById('pomo-add-task-btn').onclick = () => {
-    let input = document.getElementById('pomo-new-task');
-    if(input.value.trim() !== '') {
-        pomoTasks.push({ text: input.value.trim(), done: false });
-        input.value = '';
-        renderTasks();
-    }
-};
-renderTasks();
-
-const focusQuotes = [
-    "Let's lock in and conquer some problems! 💪",
-    "Deep work mode activated. Stay focused! ⚡",
-    "One concept at a time. You've got this! 🎯",
-    "Distractions out. Equations in. 🚀",
-    "Pain of discipline < Pain of regret. Keep pushing! 🔥",
-    "Master the fundamentals, and the complex problems will fall. 🧠",
-    "Excellence is not an act, but a daily habit. 📈",
-    "Build your future one correct answer at a time. 🌟",
-    "Sweat more in practice, bleed less in the exam. ⚙️",
-    "Stay hungry for knowledge, ruthless with doubts. 🦁"
-];
-
-const breakQuotes = [
-    "Time to stretch your legs and hydrate! ☕",
-    "Great focus! Rest your eyes for a moment. 🌿",
-    "Breathe in, breathe out. Relax. 🧘‍♂️",
-    "Almost ready for the next sprint! 🔋",
-    "Step away from the screen. Give your brain a breather. 🌳",
-    "Hydration check! Drink a glass of water right now. 💧"
-];
-
-function rotateQuote() {
-    if (!isPomoRunning || pomoSettings.bubbles !== 'yes') return;
-    pomoBubble.style.opacity = 0;
-    setTimeout(() => {
-        const arr = isFocusMode ? focusQuotes : breakQuotes;
-        pomoBubble.textContent = arr[Math.floor(Math.random() * arr.length)];
-        pomoBubble.style.opacity = 1;
-    }, 300);
+body.theme-slate {
+    --primary-bg: #0f172a; --sidebar-bg: #1e293b; --sidebar-text: #f1f5f9; 
+    --highlight: #3b82f6; --highlight-text: #60a5fa; --text-color: #f1f5f9; 
+    --header-bg: #1e293b; --reader-bg: #0f172a; --border-color: #475569;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); --folder-bg: #334155;
+    --success: #34d399;
 }
 
-function setupQuoteRotation() {
-    if (quoteInterval) clearInterval(quoteInterval);
-    const rateMs = (pomoSettings.quoteRate || 30) * 1000;
-    quoteInterval = setInterval(rotateQuote, rateMs);
+body.theme-light {
+    --primary-bg: #f4f6f8; --sidebar-bg: #ffffff; --sidebar-text: #2d3748; 
+    --highlight: #ebf8ff; --highlight-text: #3182ce; --text-color: #1a202c; 
+    --header-bg: #ffffff; --reader-bg: #edf2f7; --border-color: #cbd5e1;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    --folder-bg: #edf2f7; --success: #48bb78;
 }
 
-function updatePomoDisplay() {
-    let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
-    let s = String(pomoSeconds % 60).padStart(2, '0');
-    pomoTimeDisplay.textContent = `${m}:${s}`;
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+body { display: flex; height: 100vh; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; overflow: hidden; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); } }
+
+.sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background-color: var(--sidebar-bg); }
+.sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
+.header-controls-group { display: flex; align-items: center; gap: 6px; }
+.icon-btn-header { background: none; border: none; font-size: 1.15em; cursor: pointer; padding: 4px; border-radius: 6px; transition: transform 0.2s; }
+.icon-btn-header:hover { transform: scale(1.15); }
+
+.pomodoro-container { padding: 14px 20px; background-color: var(--sidebar-bg); border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; transition: all 0.3s; }
+.pomodoro-card { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 12px; transition: all 0.3s ease; gap: 8px; }
+.pomodoro-card.running { border-color: var(--highlight-text); animation: pulseGlow 2s infinite; }
+
+.pomo-left { display: flex; align-items: center; gap: 10px; }
+.pomo-icon { font-size: 1.8em; line-height: 1; }
+.pomo-info { display: flex; flex-direction: column; gap: 1px; }
+.pomo-status { font-size: 0.7em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--highlight-text); }
+.pomodoro-display { font-family: monospace; font-size: 1.5em; font-weight: 800; color: var(--highlight-text); letter-spacing: -0.5px; text-align: center; }
+
+.pomo-controls { display: flex; gap: 6px; align-items: center; }
+.pomo-btn { background: var(--sidebar-bg); border: 1px solid var(--border-color); cursor: pointer; font-size: 0.85em; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; color: var(--text-color); }
+.pomo-btn:hover { background: var(--highlight); border-color: var(--highlight-text); transform: scale(1.05); }
+
+.pomo-gear-sidebar { background: none; border: none; cursor: pointer; font-size: 1.1em; opacity: 0.8; transition: opacity 0.2s, transform 0.2s; padding: 2px; color: var(--text-color); }
+.pomo-gear-sidebar:hover { opacity: 1; transform: rotate(45deg); }
+
+.pomo-bubble { background: var(--folder-bg); border: 1px solid var(--border-color); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; transition: opacity 0.3s ease; }
+.pomo-highlight-task { display: none; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 0.82em; font-weight: 600; color: var(--text-color); align-items: center; gap: 8px; }
+.pomo-highlight-task span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* MODAL STYLES */
+.pomo-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(4px); justify-content: center; align-items: center; }
+.pomo-modal-overlay.open { display: flex; }
+.pomo-modal { background: var(--sidebar-bg); border: 1px solid var(--border-color); width: 440px; max-width: 90%; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
+.music-modal { width: 480px; }
+.pomo-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1em; background: var(--sidebar-bg); }
+
+.pomo-modal-tabs { display: flex; background: var(--folder-bg); border-bottom: 1px solid var(--border-color); }
+.pomo-tab-btn { flex: 1; padding: 10px; background: none; border: none; font-weight: 700; font-size: 0.85em; color: var(--sidebar-text); cursor: pointer; transition: 0.2s; text-align: center; border-bottom: 2px solid transparent; }
+.pomo-tab-btn.active { border-bottom-color: var(--highlight-text); color: var(--highlight-text); background: var(--sidebar-bg); }
+
+.pomo-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 60vh; overflow-y: auto; background: var(--sidebar-bg); }
+.pomo-tab-content { display: none; flex-direction: column; gap: 16px; }
+.pomo-tab-content.active { display: flex; }
+
+.pomo-setting-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.9em; font-weight: 600; }
+.pomo-setting-group select, .pomo-setting-group input[type="text"] { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); outline: none; }
+.pomo-tasks-container { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-color); padding-top: 12px; }
+.pomo-task-input-row { display: flex; gap: 8px; }
+.pomo-task-input-row input { flex-grow: 1; }
+.pomo-task-list { display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto; }
+.pomo-task-item { display: flex; align-items: center; justify-content: space-between; background: var(--folder-bg); padding: 6px 10px; border-radius: 6px; font-size: 0.85em; border: 1px solid var(--border-color); }
+.pomo-task-item.completed span { text-decoration: line-through; opacity: 0.6; }
+.pomo-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; background: var(--sidebar-bg); }
+
+.music-iframe-wrapper { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin-top: 8px; background: #000; }
+
+.sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
+.sidebar-overlay.open { display: block; opacity: 1; }
+
+.mode-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px 6px 16px; background-color: var(--sidebar-bg); }
+.mode-btn { flex: 1 1 calc(50% - 8px); padding: 10px 4px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.85em; cursor: pointer; transition: all 0.25s; text-align: center; }
+.mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
+.mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25); }
+
+.search-container { padding: 12px 20px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
+.subject-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.subject-filters::-webkit-scrollbar { display: none; }
+.subj-chip { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--sidebar-text); font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.subj-chip:hover { border-color: var(--highlight-text); }
+.subj-chip.active { background: var(--highlight-text); color: white; border-color: var(--highlight-text); }
+
+.search-row { display: flex; gap: 8px; align-items: center; width: 100%; }
+.search-wrapper { position: relative; display: flex; align-items: center; flex-grow: 1; }
+.search-input { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--folder-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.88em; }
+.search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+
+.local-file-btn { padding: 8px 12px; font-size: 0.82em; font-weight: 700; background: var(--folder-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 8px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.local-file-btn:hover { background: var(--highlight); border-color: var(--highlight-text); color: var(--highlight-text); }
+
+.tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
+.tree-controls span:hover { text-decoration: underline; }
+
+.book-list { flex-grow: 1; overflow-y: auto; padding: 14px 16px; list-style: none; background-color: var(--sidebar-bg); }
+
+details { margin-bottom: 4px; }
+summary { padding: 9px 12px; cursor: pointer; font-weight: 600; border-radius: 8px; display: flex; align-items: center; background-color: var(--folder-bg); user-select: none; transition: background 0.2s, color 0.2s; font-size: 0.91em; color: var(--sidebar-text); border: 1px solid var(--border-color); }
+summary:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--highlight-text); }
+summary.active-path { color: var(--highlight-text); font-weight: 700; border-bottom: 2px solid var(--highlight-text); border-radius: 8px 8px 0 0; }
+summary::marker { display: none; content: ""; } 
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "📁"; margin-right: 10px; font-size: 1.1em; filter: grayscale(0.2); transition: transform 0.2s; }
+details[open] > summary::before { content: "📂"; filter: none; transform: scale(1.1); }
+.folder-contents { padding-left: 14px; margin-top: 4px; border-left: 2px dashed var(--border-color); margin-left: 14px; }
+
+.book-item { padding: 8px 10px 8px 8px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid var(--border-color); background: var(--folder-bg); gap: 8px; border-left: 3px solid transparent; }
+.book-item:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--highlight-text); }
+.book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25); border-left: 3px solid #38bdf8; }
+
+.book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
+.book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
+.book-item-content.is-video::before { content: "▶️"; }
+
+.book-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.check-done { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
+
+.main-content { flex-grow: 1; display: flex; flex-direction: column; background-color: var(--reader-bg); width: 100%; position: relative; overflow: hidden; }
+.reader-header { padding: 16px 24px; background-color: var(--header-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); gap: 15px; }
+.reader-header-info { display: flex; flex-direction: column; gap: 4px; overflow: hidden; flex-grow: 1; }
+
+.title-row { display: flex; align-items: center; gap: 12px; }
+.title-row h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.breadcrumb { color: var(--text-color); opacity: 0.7; font-size: 0.83em; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.playlist-select { margin-top: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); font-weight: 600; font-size: 0.85em; width: 100%; max-width: 400px; outline: none; cursor: pointer; transition: all 0.2s; }
+.playlist-select:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
+
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+.icon-btn:hover { background-color: var(--border-color); }
+.primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
+.primary-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+#mobile-menu-btn { display: none; }
+
+.reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
+.placeholder-container { background-color: var(--sidebar-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 480px; text-align: center; }
+
+#viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: none; background-color: #000; border: 1px solid var(--border-color); position: relative; animation: fadeIn 0.4s ease-out; }
+
+.floating-nav { display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; gap: 20px; color: white; z-index: 10; align-items: center; }
+.floating-nav button { background: none; border: none; color: white; font-size: 1.1em; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+.floating-nav button:hover { transform: scale(1.1); color: #38bdf8; }
+.floating-nav span { opacity: 0.3; }
+
+.notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--sidebar-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.5); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 10; }
+.notes-panel.open { right: 0; }
+.notes-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+.notes-area { flex-grow: 1; border: none; padding: 20px; width: 100%; resize: none; background: var(--primary-bg); color: var(--text-color); outline: none; font-size: 0.95em; line-height: 1.6; }
+
+/* AI STUDY NAVIGATOR CHAT UI */
+.chat-fab { position: fixed; bottom: 24px; right: 24px; background: var(--highlight-text); color: white; border: none; border-radius: 50%; width: 56px; height: 56px; font-size: 1.5em; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s; z-index: 999; display: flex; justify-content: center; align-items: center; }
+.chat-fab:hover { transform: scale(1.1); }
+
+.chat-window { position: fixed; bottom: 90px; right: 24px; width: 360px; height: 480px; background: var(--sidebar-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; z-index: 998; opacity: 0; pointer-events: none; transform: translateY(10px); transition: all 0.3s ease; overflow: hidden; }
+.chat-window.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+.chat-header { background: var(--folder-bg); padding: 14px 18px; border-bottom: 1px solid var(--border-color); font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+.chat-body { flex-grow: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: var(--primary-bg); }
+.chat-msg { max-width: 88%; padding: 10px 14px; border-radius: 12px; font-size: 0.88em; line-height: 1.45; word-wrap: break-word; }
+.bot-msg { background: var(--folder-bg); border: 1px solid var(--border-color); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; }
+.user-msg { background: var(--highlight-text); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+/* Interactive Navigation Link Card inside Chat */
+.chat-nav-card { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.nav-shortcut-btn { background: var(--sidebar-bg); border: 1px solid var(--highlight-text); color: var(--highlight-text); padding: 6px 10px; border-radius: 8px; font-size: 0.82em; font-weight: bold; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; }
+.nav-shortcut-btn:hover { background: var(--highlight-text); color: white; transform: translateX(3px); }
+
+.chat-footer { padding: 12px; background: var(--sidebar-bg); border-top: 1px solid var(--border-color); display: flex; gap: 8px; }
+.chat-footer input { flex-grow: 1; padding: 10px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); outline: none; font-size: 0.85em; }
+.chat-footer input:focus { border-color: var(--highlight-text); }
+.chat-footer button { background: var(--highlight-text); color: white; border: none; padding: 0 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85em; transition: 0.2s; }
+.chat-footer button:hover { opacity: 0.9; }
+
+@media (max-width: 800px) {
+    .sidebar { position: fixed; left: -100%; height: 100%; width: 85%; max-width: 380px; }
+    .sidebar.open { left: 0; }
+    #mobile-menu-btn { display: flex; }
+    .reader-container { padding: 5px; }
+    .primary-btn span { display: none; }
+    .notes-panel { width: 100%; right: -100%; }
+    .chat-window { width: calc(100vw - 40px); right: 20px; bottom: 85px; }
 }
-
-pomoToggleBtn.onclick = () => {
-    if (isPomoRunning) {
-        clearInterval(pomoInterval);
-        clearInterval(quoteInterval);
-        isPomoRunning = false;
-        pomoToggleBtn.textContent = '▶️';
-        pomoCard.classList.remove('running');
-        pomoBubble.textContent = "Timer paused.";
-    } else {
-        isPomoRunning = true;
-        pomoToggleBtn.textContent = '⏸️';
-        pomoCard.classList.add('running');
-        rotateQuote();
-        setupQuoteRotation();
-
-        pomoInterval = setInterval(() => {
-            if (pomoSeconds > 0) {
-                pomoSeconds--;
-                updatePomoDisplay();
-            } else {
-                clearInterval(pomoInterval);
-                clearInterval(quoteInterval);
-                isPomoRunning = false;
-                pomoToggleBtn.textContent = '▶️';
-                pomoCard.classList.remove('running');
-                
-                if (pomoSettings.sound !== 'none') playAlertSound(pomoSettings.sound);
-                if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
-
-                if (isFocusMode) {
-                    alert("Focus Session Complete! Time for a break.");
-                    pomoSeconds = pomoSettings.breakTime * 60;
-                    pomoStatusText.textContent = "Break Time";
-                    isFocusMode = false;
-                    pomoBubble.textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
-                } else {
-                    alert("Break over! Back to focus.");
-                    pomoSeconds = pomoSettings.focusTime * 60;
-                    pomoStatusText.textContent = "Focus Session";
-                    isFocusMode = true;
-                    pomoBubble.textContent = focusQuotes[Math.floor(Math.random() * focusQuotes.length)];
-                }
-                updatePomoDisplay();
-            }
-        }, 1000);
-    }
-};
-
-pomoResetBtn.onclick = () => {
-    clearInterval(pomoInterval);
-    clearInterval(quoteInterval);
-    isPomoRunning = false;
-    isFocusMode = true;
-    pomoStatusText.textContent = "Focus Session";
-    pomoSeconds = pomoSettings.focusTime * 60;
-    pomoToggleBtn.textContent = '▶️';
-    pomoCard.classList.remove('running');
-    pomoBubble.textContent = "Timer reset. Ready when you are!";
-    updatePomoDisplay();
-};
-
-updatePomoDisplay();
-
-// --- LIBRARY NAVIGATION LOGIC ---
-let currentRoot = "CLASS 10"; 
-let currentSubject = "All";
-let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
-let searchTimeout;
-
-const bookListElement = document.getElementById('book-list');
-const searchBar = document.getElementById('search-bar');
-const themeToggle = document.getElementById('theme-toggle');
-const viewerWrapper = document.getElementById('viewer-wrapper');
-const bookFrame = document.getElementById('book-frame');
-const playlistDropdown = document.getElementById('playlist-dropdown');
-const downloadBtn = document.getElementById('download-btn');
-
-function toggleMobileMenu() {
-    document.getElementById('sidebar').classList.toggle('open');
-    document.getElementById('sidebar-overlay').classList.toggle('open');
-}
-document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
-document.getElementById('sidebar-overlay').addEventListener('click', toggleMobileMenu);
-
-document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentRoot = btn.getAttribute('data-root');
-        searchBar.value = ''; 
-        filterAndRender();
-    });
-});
-
-document.querySelectorAll('.subj-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentSubject = chip.getAttribute('data-subj');
-        filterAndRender();
-    });
-});
-
-themeToggle.addEventListener('click', () => {
-    if (document.body.classList.contains('theme-light')) {
-        document.body.className = 'theme-amoled';
-        pomoSettings.themeShade = 'theme-amoled';
-        themeToggle.textContent = '☀️';
-    } else {
-        document.body.className = 'theme-light';
-        pomoSettings.themeShade = 'theme-light';
-        themeToggle.textContent = '🌙';
-    }
-    localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-});
-
-document.getElementById('fullscreen-btn').addEventListener('click', () => {
-    if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
-});
-
-document.getElementById('notes-toggle-btn').addEventListener('click', () => {
-    document.getElementById('notes-panel').classList.toggle('open');
-});
-document.getElementById('close-notes-btn').addEventListener('click', () => {
-    document.getElementById('notes-panel').classList.remove('open');
-});
-
-searchBar.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(filterAndRender, 250); 
-});
-
-document.getElementById('expand-all').addEventListener('click', () => {
-    document.querySelectorAll('#book-list details').forEach(d => d.open = true);
-});
-document.getElementById('collapse-all').addEventListener('click', () => {
-    document.querySelectorAll('#book-list details').forEach(d => d.open = false);
-});
-
-function filterAndRender() {
-    if (masterLibrary.length === 0) return;
-    const query = searchBar.value.toLowerCase();
-    
-    const filteredBooks = masterLibrary.filter(book => {
-        const searchString = book.title + " " + (book.folders ? book.folders.join(" ") : "");
-        const matchesSearch = searchString.toLowerCase().includes(query);
-        const matchesSubject = currentSubject === "All" || searchString.toLowerCase().includes(currentSubject.toLowerCase());
-        
-        let matchesRoot = book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
-        return matchesRoot && matchesSearch && matchesSubject;
-    });
-    renderTree(filteredBooks);
-}
-
-function renderTree(booksArray) {
-    bookListElement.innerHTML = ''; 
-    if (booksArray.length === 0) {
-        bookListElement.innerHTML = '<div class="placeholder-text" style="font-size:0.9em; margin-top:20px; text-align:center;">No files found.</div>'; return;
-    }
-
-    const fileTree = { _files: [], _isFolder: true };
-    booksArray.forEach(book => {
-        let currentLevel = fileTree;
-        book.folders.slice(1).forEach(folder => {
-            if (!currentLevel[folder]) currentLevel[folder] = { _files: [], _isFolder: true };
-            currentLevel = currentLevel[folder];
-        });
-        currentLevel._files.push(book);
-    });
-
-    function countAllFiles(node) {
-        let count = (node._files ? node._files.length : 0);
-        Object.keys(node).filter(k => k !== '_files' && k !== '_isFolder').forEach(k => count += countAllFiles(node[k]));
-        return count;
-    }
-
-    function buildHTMLNode(nodeObj, isOpen) {
-        const container = document.createElement('div');
-        Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort().forEach(folderName => {
-            const details = document.createElement('details'); if (isOpen) details.open = true; 
-            const summary = document.createElement('summary');
-            summary.textContent = `${folderName} (${countAllFiles(nodeObj[folderName])})`;
-            details.appendChild(summary);
-            const contents = document.createElement('div'); contents.className = 'folder-contents';
-            contents.appendChild(buildHTMLNode(nodeObj[folderName], isOpen));
-            details.appendChild(contents); container.appendChild(details);
-        });
-        if (nodeObj._files) nodeObj._files.sort((a,b) => a.title.localeCompare(b.title)).forEach(b => container.appendChild(createBookElement(b)));
-        return container;
-    }
-    bookListElement.appendChild(buildHTMLNode(fileTree, searchBar.value.length > 0));
-}
-
-function createBookElement(book) {
-    const div = document.createElement('div'); div.className = 'book-item';
-    const content = document.createElement('div'); content.className = 'book-item-content'; content.textContent = book.title;
-
-    if ((book.url && book.url.includes("youtube")) || book.playlist) {
-        content.classList.add('is-video');
-    }
-
-    const actions = document.createElement('div'); actions.className = 'book-actions';
-    const check = document.createElement('input'); check.type = 'checkbox'; check.className = 'check-done';
-    check.checked = completedBooks.includes(book.title);
-    check.onclick = (e) => {
-        e.stopPropagation();
-        if(check.checked) completedBooks.push(book.title); else completedBooks = completedBooks.filter(t => t !== book.title);
-        localStorage.setItem('library-completed', JSON.stringify(completedBooks));
-    };
-    
-    actions.appendChild(check);
-    div.appendChild(content); div.appendChild(actions);
-    div.onclick = () => loadBook(book, div);
-    return div;
-}
-
-function loadBook(book, clickedElement) {
-    document.querySelectorAll('.book-item').forEach(i => i.classList.remove('active'));
-    document.querySelectorAll('summary.active-path').forEach(el => el.classList.remove('active-path'));
-    if(clickedElement.classList) clickedElement.classList.add('active');
-    
-    document.getElementById('current-book-title').textContent = book.title;
-    document.getElementById('current-book-breadcrumb').textContent = book.folders ? book.folders.join(" > ") : book.title;
-    document.getElementById('placeholder-box').style.display = 'none';
-    document.getElementById('fullscreen-btn').style.display = 'flex';
-    document.getElementById('notes-toggle-btn').style.display = 'flex';
-    
-    let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
-
-    if (book.playlist && book.playlist.length > 0) {
-        playlistDropdown.innerHTML = '';
-        book.playlist.forEach((vid, index) => {
-            let opt = document.createElement('option');
-            opt.value = vid.url;
-            opt.textContent = vid.title || `Lecture ${index + 1}`;
-            playlistDropdown.appendChild(opt);
-        });
-        playlistDropdown.style.display = 'block';
-        
-        bookFrame.src = book.playlist[0].url;
-        document.getElementById('current-book-title').textContent = book.playlist[0].title;
-        
-        playlistDropdown.onchange = (e) => {
-            bookFrame.src = e.target.value;
-            let selectedOption = playlistDropdown.options[playlistDropdown.selectedIndex];
-            document.getElementById('current-book-title').textContent = selectedOption.textContent;
-        };
-    } else {
-        playlistDropdown.style.display = 'none';
-    }
-
-    if (currentRoot === "SIMULATOR") {
-        downloadBtn.style.display = 'flex';
-        downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
-        downloadBtn.className = 'icon-btn primary-btn';
-        downloadBtn.style.backgroundColor = '#ef4444';
-        let qTarget = book.questionUrl || book.url;
-        let aTarget = book.answerKeyUrl || '';
-        downloadBtn.onclick = () => window.open(`simulator.html?qUrl=${encodeURIComponent(qTarget)}&aUrl=${encodeURIComponent(aTarget)}&title=${encodeURIComponent(book.title)}`, '_blank');
-    } else if (!finalUrl || finalUrl.includes("youtube")) {
-        downloadBtn.style.display = 'none';
-    } else {
-        downloadBtn.style.display = 'flex';
-        downloadBtn.innerHTML = '⬇️';
-        downloadBtn.className = 'icon-btn';
-        downloadBtn.style.backgroundColor = 'transparent';
-        const match = finalUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (match) downloadBtn.onclick = () => window.open(`https://drive.google.com/uc?export=download&id=${match[1]}`, '_blank');
-    }
-
-    viewerWrapper.style.display = 'block';
-    viewerWrapper.style.animation = 'none';
-    viewerWrapper.offsetHeight; 
-    viewerWrapper.style.animation = null;
-
-    document.getElementById('floating-nav').style.display = 'flex';
-    if (!book.playlist) {
-        bookFrame.src = finalUrl;
-    }
-    localStorage.setItem('last-opened-book', book.title);
-
-    if (window.innerWidth <= 800) toggleMobileMenu(); 
-}
-
-document.getElementById('prev-btn').onclick = () => {
-    const items = Array.from(document.querySelectorAll('#book-list .book-item'));
-    const idx = items.findIndex(i => i.classList.contains('active'));
-    if(idx > 0) items[idx - 1].click();
-};
-document.getElementById('next-btn').onclick = () => {
-    const items = Array.from(document.querySelectorAll('#book-list .book-item'));
-    const idx = items.findIndex(i => i.classList.contains('active'));
-    if(idx !== -1 && items[idx + 1]) items[idx + 1].click();
-};
-
-// --- AI STUDY NAVIGATOR & DIRECT COPILOT LOGIC ---
-const chatFab = document.getElementById('chat-fab-btn');
-const chatWindow = document.getElementById('chat-window');
-const chatClose = document.getElementById('chat-close-btn');
-const chatBody = document.getElementById('chat-body');
-const chatInput = document.getElementById('chat-input');
-const chatSend = document.getElementById('chat-send-btn');
-
-chatFab.onclick = () => chatWindow.classList.add('open');
-chatClose.onclick = () => chatWindow.classList.remove('open');
-
-// Quick Facts / Knowledge Base for Instant Answers
-const factsKnowledgeBase = [
-    { keys: ["ohm's law", "ohms law"], reply: "⚡ <strong>Ohm's Law:</strong> $V = IR$. Voltage ($V$) equals Current ($I$) multiplied by Resistance ($R$)." },
-    { keys: ["quadratic formula", "quadratic"], reply: "📐 <strong>Quadratic Formula:</strong> For $ax^2 + bx + c = 0$, $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$." },
-    { keys: ["kinetic energy"], reply: "🏃 <strong>Kinetic Energy:</strong> $KE = \\frac{1}{2}mv^2$, where $m$ is mass and $v$ is velocity." },
-    { keys: ["gravitational force", "gravity formula", "newton gravity"], reply: "🪐 <strong>Newton's Law of Gravitation:</strong> $F = G \\frac{m_1 m_2}{r^2}$." },
-    { keys: ["snell's law", "snells law", "refraction"], reply: "🔍 <strong>Snell's Law:</strong> $n_1 \\sin(\\theta_1) = n_2 \\sin(\\theta_2)$." },
-    { keys: ["ideal gas", "gas equation"], reply: "🧪 <strong>Ideal Gas Law:</strong> $PV = nRT$." },
-    { keys: ["simulator", "cbt"], reply: "⏱️ You can click the <strong>Simulator</strong> tab above to launch full 3-hour NTA JEE Mock Tests with OMR palettes and countdown timers!" },
-    { keys: ["pomodoro", "timer"], reply: "🍅 The <strong>Pomodoro Timer</strong> is located at the top of the sidebar. You can customize focus durations, themes, and alert sounds using the ⚙️ icon." },
-    { keys: ["music", "spotify", "songs"], reply: "🎵 Click the <strong>🎵</strong> icon in the header to open background lofi beats or stream custom Spotify/YouTube links while studying." }
-];
-
-function processAIQuery(query) {
-    const qLower = query.toLowerCase().trim();
-
-    // 1. Check knowledge base for direct factual answers
-    for (let item of factsKnowledgeBase) {
-        if (item.keys.some(k => qLower.includes(k))) {
-            return { type: 'fact', reply: item.reply };
-        }
-    }
-
-    // 2. Search masterLibrary for pinpoint resource routing
-    const words = qLower.replace(/find|show|me|where|are|the|open|search|pdf|video/gi, '').trim().split(' ').filter(w => w.length > 2);
-    
-    let matches = [];
-    if (words.length > 0) {
-        matches = masterLibrary.filter(book => {
-            const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
-            return words.every(w => meta.includes(w)) || words.some(w => meta.includes(w));
-        });
-    }
-
-    if (matches.length > 0) {
-        return {
-            type: 'navigation',
-            matches: matches.slice(0, 4) // Top 4 matches
-        };
-    }
-
-    // 3. Fallback response
-    return {
-        type: 'fact',
-        reply: `I couldn't find an exact file or formula for "<em>${query}</em>". Try searching for specific chapters (e.g. <em>Electrostatics</em>, <em>Carbon</em>, <em>Calculus</em>, or <em>Mock Test</em>).`
-    };
-}
-
-function handleNavigateToResource(bookIndex) {
-    const book = masterLibrary[bookIndex];
-    if (!book) return;
-
-    // Switch to the correct mode category if applicable
-    const rootCategory = book.folders ? book.folders[0].toUpperCase() : 'CLASS 10';
-    document.querySelectorAll('.mode-btn').forEach(btn => {
-        if (btn.getAttribute('data-root') === rootCategory) {
-            btn.click();
-        }
-    });
-
-    // Auto-load the book
-    loadBook(book, { classList: { add: ()=>{}, remove: ()=>{} } });
-    chatWindow.classList.remove('open');
-}
-
-function appendAIMessage(htmlContent, isUser) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
-    msgDiv.innerHTML = htmlContent;
-    chatBody.appendChild(msgDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-}
-
-function handleChatSubmit() {
-    const val = chatInput.value.trim();
-    if (!val) return;
-
-    appendAIMessage(val, true);
-    chatInput.value = '';
-
-    setTimeout(() => {
-        const result = processAIQuery(val);
-        if (result.type === 'fact') {
-            appendAIMessage(result.reply, false);
-        } else if (result.type === 'navigation') {
-            let cardHtml = `📍 <strong>Found ${result.matches.length} matching material(s):</strong><div class="chat-nav-card">`;
-            result.matches.forEach((b) => {
-                const globalIdx = masterLibrary.indexOf(b);
-                const isVid = (b.url && b.url.includes("youtube")) || b.playlist;
-                cardHtml += `
-                    <button class="nav-shortcut-btn" onclick="handleNavigateToResource(${globalIdx})">
-                        <span>${isVid ? '▶️' : '📄'} ${b.title}</span>
-                        <span style="opacity:0.6; font-size:0.9em;">Open ➔</span>
-                    </button>
-                `;
-            });
-            cardHtml += `</div>`;
-            appendAIMessage(cardHtml, false);
-        }
-    }, 400);
-}
-
-chatSend.onclick = handleChatSubmit;
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleChatSubmit();
-});
