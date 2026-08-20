@@ -142,7 +142,7 @@
         #mobile-menu-btn { display: none; }
 
         .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
-        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 450px; text-align: center; }
+        .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 480px; text-align: center; }
         
         #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; background-color: #000; border: 1px solid var(--border-color); position: relative; animation: fadeIn 0.4s ease-out; }
         
@@ -168,9 +168,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=18"></script>
-    <script src="lectures.js?v=18"></script>
-    <script src="mocktests.js?v=18"></script>
+    <script src="data.js?v=19"></script>
+    <script src="lectures.js?v=19"></script>
+    <script src="mocktests.js?v=19"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -242,7 +242,7 @@
                 <div class="pomo-setting-group">
                     <label>Focus Duration:</label>
                     <select id="pomo-setting-focus">
-                        <option value="5">5 Minutes (Quick Test)</option>
+                        <option value="5">5 Minutes</option>
                         <option value="15">15 Minutes</option>
                         <option value="25" selected>25 Minutes (Standard)</option>
                         <option value="30">30 Minutes</option>
@@ -277,6 +277,7 @@
                     <label>Icon Style:</label>
                     <select id="pomo-setting-icon">
                         <option value="🍅" selected>🍅 Tomato</option>
+                        <option value="🐉">🐉 Komodo Dragon</option>
                         <option value="⚡">⚡ Lightning</option>
                         <option value="🧠">🧠 Brain</option>
                         <option value="🚀">🚀 Rocket</option>
@@ -324,7 +325,8 @@
         
         <div class="reader-container">
             <div class="placeholder-container" id="placeholder-box">
-                <p class="placeholder-text">Choose a PDF or Video from the tree structure on the left.</p>
+                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
+                <p class="placeholder-text" style="color: #64748b; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
             </div>
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
@@ -497,13 +499,13 @@
                         if (pomoSettings.vibrate === 'yes' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
 
                         if (isFocusMode) {
-                            alert("🍅 Focus Session Complete! Time for a break.");
+                            alert("Focus Session Complete! Time for a break.");
                             pomoSeconds = pomoSettings.breakTime * 60;
                             pomoStatusText.textContent = "Break Time";
                             isFocusMode = false;
                             pomoBubble.textContent = breakQuotes[Math.floor(Math.random() * breakQuotes.length)];
                         } else {
-                            alert("⚡ Break over! Back to focus.");
+                            alert("Break over! Back to focus.");
                             pomoSeconds = pomoSettings.focusTime * 60;
                             pomoStatusText.textContent = "Focus Session";
                             isFocusMode = true;
