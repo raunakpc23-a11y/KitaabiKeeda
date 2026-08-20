@@ -110,7 +110,6 @@ document.getElementById('music-open-btn').onclick = () => musicModalOverlay.clas
 document.getElementById('music-close-modal').onclick = () => musicModalOverlay.classList.remove('open');
 musicModalOverlay.onclick = (e) => { if(e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); };
 
-// Expanded Long Ambient Audio Streams (White/Brown Noise, Rain, Cafe, Fireplace)
 const ambientAudioStreams = {
     'white-rain': 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_423439b1a5.mp3?filename=heavy-rain-and-thunder-19728.mp3',
     'white-brown': 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db4c979d40.mp3?filename=white-noise-107773.mp3',
@@ -130,19 +129,20 @@ window.changeMusicPreset = (val) => {
     const musicFrame = document.getElementById('music-frame');
     const ambientPlayer = document.getElementById('ambient-audio-player');
 
-    // Stop native ambient audio if switching away
     ambientPlayer.pause();
     ambientPlayer.src = '';
+    ambientPlayer.style.display = 'none';
     musicFrame.style.display = 'block';
 
     if(val === 'custom') {
         customGroup.style.display = 'flex';
     } else if (ambientAudioStreams[val]) {
         customGroup.style.display = 'none';
-        musicFrame.style.display = 'none'; // hide iframe for direct audio stream
+        musicFrame.style.display = 'none';
+        ambientPlayer.style.display = 'block';
         ambientPlayer.src = ambientAudioStreams[val];
         ambientPlayer.volume = parseFloat(pomoSettings.volume);
-        ambientPlayer.play().catch(e => console.log("Autoplay prevented:", e));
+        ambientPlayer.play().catch(e => console.log("Audio autoplay restricted:", e));
     } else {
         customGroup.style.display = 'none';
         musicFrame.src = musicPresets[val];
@@ -154,6 +154,7 @@ window.applyCustomMusic = () => {
     if(!url) return;
     const musicFrame = document.getElementById('music-frame');
     document.getElementById('ambient-audio-player').pause();
+    document.getElementById('ambient-audio-player').style.display = 'none';
     musicFrame.style.display = 'block';
 
     if(url.includes('open.spotify.com')) {
@@ -183,7 +184,6 @@ window.switchPomoTab = (evt, tabId) => {
     document.getElementById(tabId).classList.add('active');
 };
 
-// Populate Settings Form
 document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
 document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
 document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
@@ -503,18 +503,25 @@ themeToggle.addEventListener('click', () => {
     localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
 });
 
+// FULLSCREEN HANDLER FIX
 document.getElementById('fullscreen-btn').addEventListener('click', () => {
-    if (viewerWrapper.requestFullscreen) viewerWrapper.requestFullscreen();
+    const targetViewer = isSplitActive ? document.getElementById('reader-container-main') : viewerWrapper;
+    if (targetViewer.requestFullscreen) {
+        targetViewer.requestFullscreen();
+    } else if (targetViewer.webkitRequestFullscreen) {
+        targetViewer.webkitRequestFullscreen();
+    } else if (targetViewer.msRequestFullscreen) {
+        targetViewer.msRequestFullscreen();
+    }
 });
 
-// Split Screen Toggle
 splitScreenBtn.addEventListener('click', () => {
     isSplitActive = !isSplitActive;
     const readerContainerMain = document.getElementById('reader-container-main');
     if (isSplitActive) {
         readerContainerMain.classList.add('split-active');
         viewerWrapperSplit.style.display = 'block';
-        bookFrameSplit.src = bookFrame.src; // duplicate active file for side-by-side work
+        bookFrameSplit.src = bookFrame.src; 
         splitScreenBtn.style.backgroundColor = 'var(--success)';
     } else {
         readerContainerMain.classList.remove('split-active');
@@ -567,7 +574,6 @@ function renderTree(booksArray) {
     }
 
     if (currentRoot === "FAVORITES") {
-        // Flat list for Favorites tab
         booksArray.forEach(b => bookListElement.appendChild(createBookElement(b)));
         return;
     }
@@ -617,7 +623,6 @@ function createBookElement(book) {
 
     const actions = document.createElement('div'); actions.className = 'book-actions';
     
-    // Favorite Star Button
     const starBtn = document.createElement('button');
     starBtn.className = `star-btn ${starredBooks.includes(book.title) ? 'starred' : ''}`;
     starBtn.innerHTML = starredBooks.includes(book.title) ? '⭐' : '☆';
