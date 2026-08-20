@@ -13,12 +13,13 @@
             --folder-bg: #f7fafc; --success: #48bb78;
         }
 
+        /* --- TRUE AMOLED DARK MODE --- */
         body.dark-mode {
-            --primary-bg: #0b0f19; --sidebar-bg: #111827; --sidebar-text: #e5e7eb; 
-            --highlight: #1e3a8a; --highlight-text: #60a5fa; --text-color: #f3f4f6; 
-            --header-bg: #111827; --reader-bg: #0f172a; --border-color: #1f2937;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); --folder-bg: #1f2937;
-            --success: #38a169;
+            --primary-bg: #000000; --sidebar-bg: #0a0a0a; --sidebar-text: #f1f5f9; 
+            --highlight: #172554; --highlight-text: #38bdf8; --text-color: #f8fafc; 
+            --header-bg: #0a0a0a; --reader-bg: #000000; --border-color: #1c1c1e;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.8); --folder-bg: #121212;
+            --success: #22c55e;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -27,10 +28,10 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        body.dark-mode ::-webkit-scrollbar-thumb { background: #374151; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #27272a; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(49, 130, 206, 0); } 100% { box-shadow: 0 0 0 0 rgba(49, 130, 206, 0); } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); } }
 
         /* Sidebar & Header */
         .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -55,12 +56,12 @@
         .pomo-gear { background: none; border: none; cursor: pointer; font-size: 1.1em; opacity: 0.6; transition: opacity 0.2s, transform 0.2s; padding: 2px; }
         .pomo-gear:hover { opacity: 1; transform: rotate(45deg); }
 
-        .pomo-bubble { background: var(--highlight); border: 1px solid rgba(49, 130, 206, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; }
+        .pomo-bubble { background: var(--highlight); border: 1px solid rgba(56, 189, 248, 0.2); padding: 6px 10px; border-radius: 8px; font-size: 0.78em; font-weight: 600; color: var(--highlight-text); text-align: center; }
 
         /* MODAL STYLES */
-        .pomo-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(3px); justify-content: center; align-items: center; }
+        .pomo-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; backdrop-filter: blur(4px); justify-content: center; align-items: center; }
         .pomo-modal-overlay.open { display: flex; }
-        .pomo-modal { background: var(--sidebar-bg); border: 1px solid var(--border-color); width: 420px; max-width: 90%; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
+        .pomo-modal { background: var(--sidebar-bg); border: 1px solid var(--border-color); width: 420px; max-width: 90%; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; animation: fadeIn 0.3s ease-out; }
         .pomo-modal-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1em; }
         .pomo-modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 70vh; overflow-y: auto; }
         .pomo-setting-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.9em; font-weight: 600; }
@@ -73,14 +74,14 @@
         .pomo-task-item.completed span { text-decoration: line-through; opacity: 0.6; }
         .pomo-modal-footer { padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; background: var(--folder-bg); }
 
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
 
         /* Category Buttons */
         .mode-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 16px 6px 16px; background-color: var(--sidebar-bg); }
         .mode-btn { flex: 1 1 calc(50% - 8px); padding: 10px 4px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--folder-bg); color: var(--sidebar-text); font-weight: 700; font-size: 0.85em; cursor: pointer; transition: all 0.25s; text-align: center; }
         .mode-btn:hover { border-color: var(--highlight-text); transform: translateY(-1px); }
-        .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(49, 130, 206, 0.35); }
+        .mode-btn.active { background-color: var(--highlight-text); color: white; border-color: var(--highlight-text); box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25); }
 
         /* Filters & Search */
         .search-container { padding: 12px 20px; border-bottom: 1px solid var(--border-color); background-color: var(--sidebar-bg); display: flex; flex-direction: column; gap: 10px; }
@@ -92,7 +93,7 @@
 
         .search-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
         .search-input { width: 100%; padding: 10px 35px 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background-color: var(--primary-bg); color: var(--text-color); outline: none; transition: all 0.2s; font-size: 0.9em; }
-        .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+        .search-input:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
         
         .tree-controls { display: flex; justify-content: space-between; font-size: 0.8em; color: var(--highlight-text); font-weight: 600; cursor: pointer; padding: 0 2px; }
         .tree-controls span:hover { text-decoration: underline; }
@@ -113,7 +114,7 @@
         /* File Items */
         .book-item { padding: 8px 10px 8px 8px; margin: 3px 0; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.89em; transition: all 0.2s; color: var(--sidebar-text); border: 1px solid transparent; gap: 8px; border-left: 3px solid transparent; }
         .book-item:hover { background-color: var(--highlight); color: var(--highlight-text); }
-        .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(49, 130, 206, 0.25); border-left: 3px solid #63b3ed; }
+        .book-item.active { background-color: var(--highlight-text); color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25); border-left: 3px solid #38bdf8; }
         
         .book-item-content { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1; }
         .book-item-content::before { content: "📄"; margin-right: 8px; opacity: 0.8; font-size: 1.05em; flex-shrink: 0; }
@@ -129,29 +130,29 @@
         
         .title-row { display: flex; align-items: center; gap: 12px; }
         .title-row h2 { font-size: 1.35em; font-weight: 700; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .breadcrumb { color: #64748b; font-size: 0.83em; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .breadcrumb { color: #71717a; font-size: 0.83em; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
         .playlist-select { margin-top: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); font-weight: 600; font-size: 0.85em; width: 100%; max-width: 400px; outline: none; cursor: pointer; transition: all 0.2s; }
-        .playlist-select:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+        .playlist-select:focus { border-color: var(--highlight-text); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15); }
 
         .header-actions { display: flex; gap: 8px; align-items: center; }
         .icon-btn { background: none; border: none; color: inherit; font-size: 1.4em; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background-color: var(--border-color); }
         .primary-btn { background-color: var(--highlight-text); color: white; font-weight: bold; font-size: 0.88em; padding: 9px 18px; display: flex; gap: 8px; border-radius: 8px; transition: transform 0.15s, background-color 0.2s; }
-        .primary-btn:hover { background-color: #2b6cb0; transform: translateY(-1px); }
+        .primary-btn:hover { background-color: #0284c7; transform: translateY(-1px); }
         #mobile-menu-btn { display: none; }
 
         .reader-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 15px; height: 100%; position: relative; }
         .placeholder-container { background-color: var(--header-bg); padding: 40px; border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); max-width: 480px; text-align: center; }
         
-        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: none; background-color: #000; border: 1px solid var(--border-color); position: relative; animation: fadeIn 0.4s ease-out; }
+        #viewer-wrapper { width: 100%; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.8); display: none; background-color: #000; border: 1px solid var(--border-color); position: relative; animation: fadeIn 0.4s ease-out; }
         
-        .floating-nav { display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; gap: 20px; color: white; z-index: 10; align-items: center; }
+        .floating-nav { display: none; position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 30px; gap: 20px; color: white; z-index: 10; align-items: center; }
         .floating-nav button { background: none; border: none; color: white; font-size: 1.1em; cursor: pointer; transition: all 0.2s; font-weight: 600; }
-        .floating-nav button:hover { transform: scale(1.1); color: #60a5fa; }
+        .floating-nav button:hover { transform: scale(1.1); color: #38bdf8; }
         .floating-nav span { opacity: 0.3; }
 
-        .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.05); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 10; }
+        .notes-panel { position: absolute; top: 0; right: -350px; width: 350px; height: 100%; background: var(--header-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.5); transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; z-index: 10; }
         .notes-panel.open { right: 0; }
         .notes-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .notes-area { flex-grow: 1; border: none; padding: 20px; width: 100%; resize: none; background: var(--reader-bg); color: var(--text-color); outline: none; font-size: 0.95em; line-height: 1.6; }
@@ -168,9 +169,9 @@
 </head>
 <body>
 
-    <script src="data.js?v=19"></script>
-    <script src="lectures.js?v=19"></script>
-    <script src="mocktests.js?v=19"></script>
+    <script src="data.js?v=20"></script>
+    <script src="lectures.js?v=20"></script>
+    <script src="mocktests.js?v=20"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -326,7 +327,7 @@
         <div class="reader-container">
             <div class="placeholder-container" id="placeholder-box">
                 <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
-                <p class="placeholder-text" style="color: #64748b; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
+                <p class="placeholder-text" style="color: #a1a1aa; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
             </div>
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
@@ -443,7 +444,7 @@
                         <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${idx})">
                         <span>${t.text}</span>
                     </label>
-                    <button onclick="deleteTask(${idx})" style="background:none; border:none; color:#e53e3e; cursor:pointer;">✕</button>
+                    <button onclick="deleteTask(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;">✕</button>
                 `;
                 listEl.appendChild(item);
             });
@@ -719,7 +720,7 @@
                 downloadBtn.style.display = 'flex';
                 downloadBtn.innerHTML = '⏱️ <span style="font-size: 0.9em; margin-left: 6px; font-family: sans-serif;">Start Exam</span>';
                 downloadBtn.className = 'icon-btn primary-btn';
-                downloadBtn.style.backgroundColor = '#e53e3e';
+                downloadBtn.style.backgroundColor = '#ef4444';
                 let qTarget = book.questionUrl || book.url;
                 let aTarget = book.answerKeyUrl || '';
                 downloadBtn.onclick = () => window.open(`simulator.html?qUrl=${encodeURIComponent(qTarget)}&aUrl=${encodeURIComponent(aTarget)}&title=${encodeURIComponent(book.title)}`, '_blank');
