@@ -8,9 +8,9 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <script src="data.js?v=35"></script>
-    <script src="lectures.js?v=35"></script>
-    <script src="mocktests.js?v=35"></script>
+    <script src="data.js?v=36"></script>
+    <script src="lectures.js?v=36"></script>
+    <script src="mocktests.js?v=36"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -18,7 +18,7 @@
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
             <div class="header-controls-group">
-                <button class="icon-btn-header" id="music-open-btn" title="Open Music Player (Spotify / YT Music)">🎵</button>
+                <button class="icon-btn-header" id="music-open-btn" title="Open Ambient & Music Hub">🎵</button>
                 <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
                 <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌙</button>
             </div>
@@ -71,21 +71,25 @@
         <div class="book-list" id="book-list"></div>
     </div>
 
-    <!-- MUSIC PLAYER MODAL -->
+    <!-- EXPANDED AMBIENT & MUSIC HUB MODAL -->
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
-                <span>🎵 Focus Music (Spotify & YT Music)</span>
+                <span>🎵 Focus Music & Ambient Noise Hub</span>
                 <button class="icon-btn" id="music-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
             </div>
             <div class="pomo-modal-body">
                 <div class="pomo-setting-group">
-                    <label>Study Music Presets:</label>
+                    <label>Music & Soundscapes Presets:</label>
                     <select id="music-preset-select" onchange="changeMusicPreset(this.value)">
                         <option value="spotify-lofi">Spotify: Lofi Study Beats</option>
                         <option value="spotify-focus">Spotify: Deep Focus Instrumental</option>
                         <option value="spotify-classical">Spotify: Classical Essentials</option>
                         <option value="yt-lofi">YouTube: Lofi Girl Live Stream</option>
+                        <option value="white-rain">🌧️ Ambient: Heavy Continuous Rain</option>
+                        <option value="white-brown">🌊 Ambient: Deep Brown/White Noise</option>
+                        <option value="white-fire">🔥 Ambient: Cozy Fireplace</option>
+                        <option value="white-cafe">☕ Ambient: Coffee Shop Chatter</option>
                         <option value="custom">Custom Spotify / YouTube URL</option>
                     </select>
                 </div>
@@ -100,6 +104,8 @@
 
                 <div class="music-iframe-wrapper">
                     <iframe id="music-frame" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <!-- Hidden audio fallback element for native long white noise streams -->
+                    <audio id="ambient-audio-player" loop style="display:none;"></audio>
                 </div>
             </div>
         </div>
@@ -158,7 +164,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: THEME & UI -->
+                <!-- TAB 2: THEME & UI (ZEN MODE TOGGLES ADDED) -->
                 <div class="pomo-tab-content" id="tab-ui">
                     <div class="pomo-setting-group">
                         <label>Dark / Light Mode Shade:</label>
@@ -178,6 +184,13 @@
                         </select>
                     </div>
                     <div class="pomo-setting-group">
+                        <label>Zen Mode (Distraction Shield):</label>
+                        <select id="pomo-setting-zen">
+                            <option value="no" selected>Disabled (Normal View)</option>
+                            <option value="yes">Enabled (Hides Header & Timers on Read)</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group">
                         <label>Highlight Main Task on Main Page:</label>
                         <select id="pomo-setting-highlight">
                             <option value="yes" selected>Enabled (Show Banner)</option>
@@ -189,15 +202,6 @@
                         <select id="pomo-setting-bubbles">
                             <option value="yes" selected>Show Bubbles</option>
                             <option value="no">Hide Bubbles</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Pomodoro Icon Style:</label>
-                        <select id="pomo-setting-icon">
-                            <option value="🍅" selected>🍅 Tomato</option>
-                            <option value="🐉">🐉 Komodo Dragon</option>
-                            <option value="⚡">⚡ Lightning</option>
-                            <option value="🧠">🧠 Brain</option>
                         </select>
                     </div>
                 </div>
@@ -276,12 +280,14 @@
             </div>
             <div class="header-actions">
                 <button id="download-btn" class="icon-btn" style="display:none;"></button>
+                <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
                 <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
         
-        <div class="reader-container">
+        <!-- READER CONTAINER (SPLIT SCREEN READY) -->
+        <div class="reader-container" id="reader-container-main">
             <div class="placeholder-container" id="placeholder-box">
                 <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
@@ -291,6 +297,10 @@
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
+            </div>
+            <!-- SPLIT SCREEN SECONDARY FRAME -->
+            <div id="viewer-wrapper-split" style="display:none;">
+                <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen loading="lazy"></iframe>
             </div>
         </div>
 
@@ -329,7 +339,7 @@
 
     </div>
 
-    <script src="ai.js?v=35"></script>
-    <script src="script.js?v=35"></script>
+    <script src="ai.js?v=36"></script>
+    <script src="script.js?v=36"></script>
 </body>
 </html>
