@@ -6,11 +6,11 @@
     <title>My Study Library</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="theme-amoled">
+<body class="theme-amoled font-medium">
 
-    <script src="data.js?v=31"></script>
-    <script src="lectures.js?v=31"></script>
-    <script src="mocktests.js?v=31"></script>
+    <script src="data.js?v=32"></script>
+    <script src="lectures.js?v=32"></script>
+    <script src="mocktests.js?v=32"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
@@ -45,12 +45,9 @@
             </div>
         </div>
 
-        <!-- SLEEK SEGMENTED CONTROL -->
-        <div class="mode-selector">
-            <button class="mode-btn active" data-root="CLASS 10">Class 10</button>
-            <button class="mode-btn" data-root="IIT-JEE">IIT-JEE</button>
-            <button class="mode-btn" data-root="LECTURES">Lectures</button>
-            <button class="mode-btn" data-root="SIMULATOR">Simulator</button>
+        <!-- DYNAMIC SEGMENTED CONTROL -->
+        <div class="mode-selector" id="dynamic-mode-selector">
+            <!-- Buttons injected via JavaScript based on Settings -->
         </div>
 
         <div class="search-container">
@@ -65,7 +62,6 @@
                 <div class="search-wrapper">
                     <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
                 </div>
-                <!-- UNIFIED TOGGLE & UPLOAD -->
                 <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
                 <label class="local-file-btn" title="Open any PDF/file from your device">
                     📂
@@ -81,7 +77,7 @@
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
-                <span>🎵 Focus Music (Spotify & YT Music)</span>
+                <span>🎵 Focus Music</span>
                 <button class="icon-btn" id="music-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
             </div>
             <div class="pomo-modal-body">
@@ -111,20 +107,24 @@
         </div>
     </div>
 
-    <!-- POMODORO SETTINGS & TASKS MODAL -->
+    <!-- MASTER SETTINGS MODAL -->
     <div class="pomo-modal-overlay" id="pomo-modal-overlay">
         <div class="pomo-modal">
             <div class="pomo-modal-header">
-                <span>⚙️ Pomodoro Hub & Settings</span>
+                <span>⚙️ Control Panel</span>
                 <button class="icon-btn" id="pomo-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
             </div>
             
             <div class="pomo-modal-tabs">
-                <button class="pomo-tab-btn active" onclick="switchPomoTab(event, 'tab-focus')">🎯 Focus Settings</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-other')">🎨 Other Settings & Theme</button>
+                <button class="pomo-tab-btn active" onclick="switchPomoTab(event, 'tab-focus')">🎯 Focus</button>
+                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-ui')">🎨 Theme</button>
+                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-modules')">🧩 Modules</button>
+                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-audio')">🔔 Audio</button>
             </div>
 
             <div class="pomo-modal-body">
+                
+                <!-- TAB 1: FOCUS & FLOW -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
                         <label>Focus Duration:</label>
@@ -132,7 +132,6 @@
                             <option value="5">5 Minutes</option>
                             <option value="15">15 Minutes</option>
                             <option value="25" selected>25 Minutes (Standard)</option>
-                            <option value="30">30 Minutes</option>
                             <option value="45">45 Minutes (Deep Work)</option>
                             <option value="60">60 Minutes (1 Hour)</option>
                         </select>
@@ -146,21 +145,12 @@
                         </select>
                     </div>
                     <div class="pomo-setting-group">
-                        <label>Alert Tone:</label>
-                        <select id="pomo-setting-sound">
-                            <option value="beep">Digital Beep</option>
-                            <option value="chime">Soft Chime</option>
-                            <option value="none">Mute (No Sound)</option>
+                        <label>Auto-Start Next Session:</label>
+                        <select id="pomo-setting-autostart">
+                            <option value="no" selected>Disabled (Manual Start)</option>
+                            <option value="yes">Enabled (Continuous Flow)</option>
                         </select>
                     </div>
-                    <div class="pomo-setting-group">
-                        <label>Vibration Alert:</label>
-                        <select id="pomo-setting-vibrate">
-                            <option value="yes">Enabled</option>
-                            <option value="no" selected>Disabled</option>
-                        </select>
-                    </div>
-
                     <div class="pomo-tasks-container">
                         <label style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">📝 Session Goal / Tasks:</label>
                         <div class="pomo-task-input-row">
@@ -171,9 +161,10 @@
                     </div>
                 </div>
 
-                <div class="pomo-tab-content" id="tab-other">
+                <!-- TAB 2: THEME & UI -->
+                <div class="pomo-tab-content" id="tab-ui">
                     <div class="pomo-setting-group">
-                        <label>Dark / Light Mode Shade Preset:</label>
+                        <label>Dark / Light Mode Shade:</label>
                         <select id="pomo-setting-theme-shade">
                             <option value="theme-amoled">AMOLED Pitch Black (#000000)</option>
                             <option value="theme-charcoal">Charcoal Dark (#121212)</option>
@@ -182,10 +173,11 @@
                         </select>
                     </div>
                     <div class="pomo-setting-group">
-                        <label>Enable Pomodoro Widget in Sidebar:</label>
-                        <select id="pomo-setting-enable">
-                            <option value="yes">Enabled</option>
-                            <option value="no">Disabled (Hidden)</option>
+                        <label>App Font Size:</label>
+                        <select id="pomo-setting-fontsize">
+                            <option value="font-small">Small</option>
+                            <option value="font-medium" selected>Medium (Default)</option>
+                            <option value="font-large">Large</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
@@ -203,22 +195,68 @@
                         </select>
                     </div>
                     <div class="pomo-setting-group">
+                        <label>Pomodoro Icon Style:</label>
+                        <select id="pomo-setting-icon">
+                            <option value="🍅" selected>🍅 Tomato</option>
+                            <option value="🐉">🐉 Komodo Dragon</option>
+                            <option value="⚡">⚡ Lightning</option>
+                            <option value="🧠">🧠 Brain</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MODULES & AI -->
+                <div class="pomo-tab-content" id="tab-modules">
+                    <div class="pomo-setting-group">
+                        <label>AI Study Copilot (Chatbot):</label>
+                        <select id="pomo-setting-ai">
+                            <option value="yes" selected>Enabled</option>
+                            <option value="no">Disabled (Hide Copilot)</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group">
+                        <label>Enable Pomodoro Widget:</label>
+                        <select id="pomo-setting-enable">
+                            <option value="yes">Enabled</option>
+                            <option value="no">Disabled (Hidden)</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group" style="margin-top: 8px;">
+                        <label>Top Navigation Modules (Select Max 4):</label>
+                        <div class="module-checkbox-grid" id="module-checkbox-grid">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: AUDIO & ALERTS -->
+                <div class="pomo-tab-content" id="tab-audio">
+                    <div class="pomo-setting-group">
+                        <label>Alert Tone:</label>
+                        <select id="pomo-setting-sound">
+                            <option value="beep">Digital Beep</option>
+                            <option value="chime">Soft Chime</option>
+                            <option value="none">Mute (No Sound)</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group">
+                        <label>Alert Volume:</label>
+                        <input type="range" id="pomo-setting-volume" min="0" max="1" step="0.1" value="0.5">
+                    </div>
+                    <div class="pomo-setting-group">
+                        <label>Vibration Alert:</label>
+                        <select id="pomo-setting-vibrate">
+                            <option value="yes">Enabled</option>
+                            <option value="no" selected>Disabled</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group">
                         <label>Quote Rotation Speed:</label>
                         <select id="pomo-setting-rate">
                             <option value="10">Every 10 Seconds</option>
                             <option value="30" selected>Every 30 Seconds</option>
                             <option value="60">Every 1 Minute</option>
                             <option value="300">Every 5 Minutes</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Icon Style:</label>
-                        <select id="pomo-setting-icon">
-                            <option value="🍅" selected>🍅 Tomato</option>
-                            <option value="🐉">🐉 Komodo Dragon</option>
-                            <option value="⚡">⚡ Lightning</option>
-                            <option value="🧠">🧠 Brain</option>
-                            <option value="🚀">🚀 Rocket</option>
                         </select>
                     </div>
                 </div>
@@ -268,7 +306,7 @@
             <textarea id="notes-area" class="notes-area" placeholder="Type your notes here..."></textarea>
         </div>
         
-        <!-- AI COPILOT & NAVIGATOR CHAT -->
+        <!-- AI COPILOT CHAT -->
         <button class="chat-fab" id="chat-fab-btn" title="AI Navigator & Copilot">🤖</button>
         <div class="chat-window" id="chat-window">
             <div class="chat-header">
@@ -291,8 +329,7 @@
 
     </div>
 
-    <!-- External JavaScript Files -->
-    <script src="ai.js?v=31"></script>
-    <script src="script.js?v=31"></script>
+    <script src="ai.js?v=32"></script>
+    <script src="script.js?v=32"></script>
 </body>
 </html>
