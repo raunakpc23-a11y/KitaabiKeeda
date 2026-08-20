@@ -313,10 +313,12 @@ pomoResetBtn.onclick = () => {
 
 updatePomoDisplay();
 
+// --- LIBRARY NAVIGATION LOGIC ---
 let currentRoot = "CLASS 10"; 
 let currentSubject = "All";
 let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
 let searchTimeout;
+let isTreeExpanded = false; // Unified toggle state
 
 const bookListElement = document.getElementById('book-list');
 const searchBar = document.getElementById('search-bar');
@@ -381,11 +383,10 @@ searchBar.addEventListener('input', () => {
     searchTimeout = setTimeout(filterAndRender, 250); 
 });
 
-document.getElementById('expand-all').addEventListener('click', () => {
-    document.querySelectorAll('#book-list details').forEach(d => d.open = true);
-});
-document.getElementById('collapse-all').addEventListener('click', () => {
-    document.querySelectorAll('#book-list details').forEach(d => d.open = false);
+// Unified Folder Toggle Logic
+document.getElementById('folder-toggle-btn').addEventListener('click', () => {
+    isTreeExpanded = !isTreeExpanded;
+    document.querySelectorAll('#book-list details').forEach(d => d.open = isTreeExpanded);
 });
 
 function filterAndRender() {
@@ -428,7 +429,9 @@ function renderTree(booksArray) {
     function buildHTMLNode(nodeObj, isOpen) {
         const container = document.createElement('div');
         Object.keys(nodeObj).filter(k => k !== '_files' && k !== '_isFolder').sort().forEach(folderName => {
-            const details = document.createElement('details'); if (isOpen) details.open = true; 
+            const details = document.createElement('details'); 
+            if (isOpen || isTreeExpanded) details.open = true; 
+            
             const summary = document.createElement('summary');
             summary.textContent = `${folderName} (${countAllFiles(nodeObj[folderName])})`;
             details.appendChild(summary);
