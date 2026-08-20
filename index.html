@@ -8,12 +8,13 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <script src="data.js?v=42"></script>
-    <script src="lectures.js?v=42"></script>
-    <script src="mocktests.js?v=42"></script>
+    <script src="data.js"></script>
+    <script src="lectures.js"></script>
+    <script src="mocktests.js"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
@@ -24,6 +25,7 @@
             </div>
         </div>
 
+        <!-- POMODORO WIDGET -->
         <div class="pomodoro-container" id="pomo-container">
             <div class="pomodoro-card" id="pomo-card">
                 <div class="pomo-left">
@@ -44,8 +46,10 @@
             </div>
         </div>
 
+        <!-- DYNAMIC MODULE SELECTOR -->
         <div class="mode-selector" id="dynamic-mode-selector"></div>
 
+        <!-- SEARCH CONTAINER -->
         <div class="search-container">
             <div class="subject-filters" id="subject-filters">
                 <button class="subj-chip active" data-subj="All">All</button>
@@ -66,6 +70,7 @@
             </div>
         </div>
         
+        <!-- BOOK/FILE LIST -->
         <div class="book-list" id="book-list"></div>
     </div>
 
@@ -73,36 +78,38 @@
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
-                <span>🎵 Focus Music & Ambient Noise Hub</span>
-                <button class="icon-btn" id="music-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
+                <span>🎵 Focus Music & Ambient Generator</span>
+                <button class="icon-btn" id="music-close-modal">✖</button>
             </div>
             <div class="pomo-modal-body">
                 <div class="pomo-setting-group">
-                    <label>Music & Soundscapes Presets:</label>
-                    <select id="music-preset-select" onchange="changeMusicPreset(this.value)">
+                    <label>Audio Mode:</label>
+                    <select id="music-preset-select">
+                        <option value="ambient-rain">🌧️ Synthesized Ambient Rain</option>
+                        <option value="ambient-brown">🌊 Synthesized Brown/Deep Noise</option>
+                        <option value="ambient-white">📻 Synthesized Pure White Noise</option>
                         <option value="spotify-lofi">Spotify: Lofi Study Beats</option>
                         <option value="spotify-focus">Spotify: Deep Focus Instrumental</option>
                         <option value="spotify-classical">Spotify: Classical Essentials</option>
                         <option value="yt-lofi">YouTube: Lofi Girl Live Stream</option>
-                        <option value="white-rain">🌧️ Ambient: Heavy Continuous Rain</option>
-                        <option value="white-brown">🌊 Ambient: Deep Brown/White Noise</option>
-                        <option value="white-fire">🔥 Ambient: Cozy Fireplace</option>
-                        <option value="white-cafe">☕ Ambient: Coffee Shop Chatter</option>
                         <option value="custom">Custom Spotify / YouTube URL</option>
                     </select>
+                </div>
+
+                <div class="ambient-controls-box" id="ambient-controls-box">
+                    <button class="primary-btn" id="ambient-play-toggle" style="width: 100%; justify-content: center; margin-bottom: 8px;">▶ Start Ambient Sound</button>
                 </div>
 
                 <div class="pomo-setting-group" id="custom-music-group" style="display:none;">
                     <label>Paste Spotify Playlist/Track or YouTube URL:</label>
                     <div style="display:flex; gap:8px;">
                         <input type="text" id="custom-music-url" placeholder="https://open.spotify.com/playlist/...">
-                        <button class="primary-btn" onclick="applyCustomMusic()" style="padding: 6px 12px; font-size: 0.8em;">Apply</button>
+                        <button class="primary-btn" id="custom-music-apply-btn" style="padding: 6px 12px; font-size: 0.8em;">Apply</button>
                     </div>
                 </div>
 
-                <div class="music-iframe-wrapper">
-                    <iframe id="music-frame" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-                    <audio id="ambient-audio-player" loop style="width:100%; margin-top:8px; display:none;" controls></audio>
+                <div class="music-iframe-wrapper" id="music-iframe-container" style="display:none;">
+                    <iframe id="music-frame" src="" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                 </div>
             </div>
         </div>
@@ -113,24 +120,25 @@
         <div class="pomo-modal">
             <div class="pomo-modal-header">
                 <span>⚙️ Control Panel</span>
-                <button class="icon-btn" id="pomo-close-modal" style="font-size: 1em; padding: 4px 8px;">✖</button>
+                <button class="icon-btn" id="pomo-close-modal">✖</button>
             </div>
             
             <div class="pomo-modal-tabs">
-                <button class="pomo-tab-btn active" onclick="switchPomoTab(event, 'tab-focus')">🎯 Focus</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-ui')">🎨 Theme</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-modules')">🧩 Modules</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-audio')">🔔 Audio</button>
+                <button class="pomo-tab-btn active" data-tab="tab-focus">🎯 Focus</button>
+                <button class="pomo-tab-btn" data-tab="tab-ui">🎨 Theme</button>
+                <button class="pomo-tab-btn" data-tab="tab-modules">🧩 Modules</button>
+                <button class="pomo-tab-btn" data-tab="tab-audio">🔔 Audio</button>
             </div>
 
             <div class="pomo-modal-body">
+                <!-- TAB 1: FOCUS -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
                         <label>Focus Duration:</label>
                         <select id="pomo-setting-focus">
                             <option value="5">5 Minutes</option>
                             <option value="15">15 Minutes</option>
-                            <option value="25" selected>25 Minutes (Standard)</option>
+                            <option value="25">25 Minutes (Standard)</option>
                             <option value="45">45 Minutes (Deep Work)</option>
                             <option value="60">60 Minutes (1 Hour)</option>
                         </select>
@@ -138,7 +146,7 @@
                     <div class="pomo-setting-group">
                         <label>Break Duration:</label>
                         <select id="pomo-setting-break">
-                            <option value="5" selected>5 Minutes</option>
+                            <option value="5">5 Minutes</option>
                             <option value="10">10 Minutes</option>
                             <option value="15">15 Minutes</option>
                         </select>
@@ -146,7 +154,7 @@
                     <div class="pomo-setting-group">
                         <label>Auto-Start Next Session:</label>
                         <select id="pomo-setting-autostart">
-                            <option value="no" selected>Disabled (Manual Start)</option>
+                            <option value="no">Disabled (Manual Start)</option>
                             <option value="yes">Enabled (Continuous Flow)</option>
                         </select>
                     </div>
@@ -160,6 +168,7 @@
                     </div>
                 </div>
 
+                <!-- TAB 2: THEME -->
                 <div class="pomo-tab-content" id="tab-ui">
                     <div class="pomo-setting-group">
                         <label>Dark / Light Mode Shade:</label>
@@ -174,38 +183,39 @@
                         <label>App Font Size:</label>
                         <select id="pomo-setting-fontsize">
                             <option value="font-small">Small</option>
-                            <option value="font-medium" selected>Medium (Default)</option>
+                            <option value="font-medium">Medium (Default)</option>
                             <option value="font-large">Large</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Zen Mode (Distraction Shield):</label>
                         <select id="pomo-setting-zen">
-                            <option value="no" selected>Disabled (Normal View)</option>
-                            <option value="yes">Enabled (Hides Header & Timers on Read)</option>
+                            <option value="no">Disabled (Normal View)</option>
+                            <option value="yes">Enabled (Hides Sidebar on File View)</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Highlight Main Task on Main Page:</label>
                         <select id="pomo-setting-highlight">
-                            <option value="yes" selected>Enabled (Show Banner)</option>
+                            <option value="yes">Enabled (Show Banner)</option>
                             <option value="no">Disabled (Hidden)</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Motivational Bubbles:</label>
                         <select id="pomo-setting-bubbles">
-                            <option value="yes" selected>Show Bubbles</option>
+                            <option value="yes">Show Bubbles</option>
                             <option value="no">Hide Bubbles</option>
                         </select>
                     </div>
                 </div>
 
+                <!-- TAB 3: MODULES -->
                 <div class="pomo-tab-content" id="tab-modules">
                     <div class="pomo-setting-group">
                         <label>AI Study Copilot (Chatbot):</label>
                         <select id="pomo-setting-ai">
-                            <option value="yes" selected>Enabled</option>
+                            <option value="yes">Enabled</option>
                             <option value="no">Disabled (Hide Copilot)</option>
                         </select>
                     </div>
@@ -217,11 +227,12 @@
                         </select>
                     </div>
                     <div class="pomo-setting-group" style="margin-top: 8px;">
-                        <label>Top Navigation Modules (Select Max 4):</label>
+                        <label>Top Navigation Modules (Choose up to 4):</label>
                         <div class="module-checkbox-grid" id="module-checkbox-grid"></div>
                     </div>
                 </div>
 
+                <!-- TAB 4: AUDIO -->
                 <div class="pomo-tab-content" id="tab-audio">
                     <div class="pomo-setting-group">
                         <label>Alert Tone:</label>
@@ -233,20 +244,20 @@
                     </div>
                     <div class="pomo-setting-group">
                         <label>Alert Volume:</label>
-                        <input type="range" id="pomo-setting-volume" min="0" max="1" step="0.1" value="0.5">
+                        <input type="range" id="pomo-setting-volume" min="0" max="1" step="0.05" value="0.5">
                     </div>
                     <div class="pomo-setting-group">
                         <label>Vibration Alert:</label>
                         <select id="pomo-setting-vibrate">
                             <option value="yes">Enabled</option>
-                            <option value="no" selected>Disabled</option>
+                            <option value="no">Disabled</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Quote Rotation Speed:</label>
                         <select id="pomo-setting-rate">
                             <option value="10">Every 10 Seconds</option>
-                            <option value="30" selected>Every 30 Seconds</option>
+                            <option value="30">Every 30 Seconds</option>
                             <option value="60">Every 1 Minute</option>
                             <option value="300">Every 5 Minutes</option>
                         </select>
@@ -255,11 +266,12 @@
             </div>
 
             <div class="pomo-modal-footer">
-                <button class="primary-btn" id="pomo-save-settings" style="padding: 6px 16px; font-size: 0.85em;">Save Settings</button>
+                <button class="primary-btn" id="pomo-save-settings">Save Settings</button>
             </div>
         </div>
     </div>
 
+    <!-- MAIN VIEWER & WORKSPACE -->
     <div class="main-content">
         <div class="reader-header">
             <div class="reader-header-info">
@@ -281,27 +293,28 @@
         
         <div class="reader-container" id="reader-container-main">
             <div class="placeholder-container" id="placeholder-box">
-                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
-                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
+                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">READY TO STUDY</h2>
+                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
             </div>
             <div id="viewer-wrapper">
-                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen" loading="lazy"></iframe>
+                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
             <div id="viewer-wrapper-split" style="display:none;">
-                <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen" loading="lazy"></iframe>
+                <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
             </div>
         </div>
 
+        <!-- QUICK NOTES DRAWER -->
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
                 <span>📝 Quick Notes</span>
-                <div>
-                    <button class="icon-btn" id="notes-copy-btn" title="Copy to Clipboard" style="font-size: 1em;">📋</button>
-                    <button class="icon-btn" id="notes-dl-btn" title="Download Notes" style="font-size: 1em;">💾</button>
-                    <button class="icon-btn" id="close-notes-btn" style="font-size: 1em;">✖</button>
+                <div style="display: flex; gap: 4px;">
+                    <button class="icon-btn" id="notes-copy-btn" title="Copy to Clipboard">📋</button>
+                    <button class="icon-btn" id="notes-dl-btn" title="Download Notes">💾</button>
+                    <button class="icon-btn" id="close-notes-btn">✖</button>
                 </div>
             </div>
             <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save!"></textarea>
@@ -312,7 +325,7 @@
         <div class="chat-window" id="chat-window">
             <div class="chat-header">
                 <span>🧭 AI Study Copilot</span>
-                <button class="icon-btn" id="chat-close-btn" style="font-size: 0.9em; padding: 2px 6px;">✖</button>
+                <button class="icon-btn" id="chat-close-btn">✖</button>
             </div>
             <div class="chat-body" id="chat-body">
                 <div class="chat-msg bot-msg">
@@ -327,10 +340,9 @@
                 <button id="chat-send-btn">Ask</button>
             </div>
         </div>
-
     </div>
 
-    <script src="ai.js?v=42"></script>
-    <script src="script.js?v=42"></script>
+    <script src="ai.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
