@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Settings Bindings
+    // Settings Modal
     document.getElementById('pomo-open-settings').onclick = () => { renderModuleCheckboxes(); modalOverlay.classList.add('open'); };
     document.getElementById('pomo-close-modal').onclick = () => modalOverlay.classList.remove('open');
     modalOverlay.onclick = (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); };
@@ -225,6 +225,16 @@ document.addEventListener("DOMContentLoaded", () => {
             label.innerHTML = `<input type="checkbox" value="${mod.id}" class="mod-checkbox" ${isChecked}> ${mod.label}`;
             grid.appendChild(label);
         });
+
+        grid.querySelectorAll('.mod-checkbox').forEach(cb => {
+            cb.onchange = (e) => {
+                const checked = grid.querySelectorAll('.mod-checkbox:checked');
+                if (checked.length > 4) {
+                    e.target.checked = false;
+                    alert("You can select up to 4 modules for top navigation.");
+                }
+            };
+        });
     }
 
     function renderDynamicTopNav() {
@@ -232,7 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
         let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
         if (selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
-        if (!pomoSettings.activeModules.includes(currentRoot)) currentRoot = selectedMods[0].id;
+        if (!pomoSettings.activeModules.includes(currentRoot)) {
+            currentRoot = selectedMods[0].id;
+        }
 
         selectedMods.forEach(mod => {
             let btn = document.createElement('button');
@@ -254,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
         pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
         pomoLogoIcon.textContent = pomoSettings.icon;
+        
         chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
         if (pomoSettings.aiEnabled === 'no') chatWindow.classList.remove('open');
 
@@ -302,13 +315,17 @@ document.addEventListener("DOMContentLoaded", () => {
         pomoSettings.zenMode = document.getElementById('pomo-setting-zen').value;
 
         const checkedBoxes = Array.from(document.querySelectorAll('#module-checkbox-grid .mod-checkbox:checked')).map(cb => cb.value);
-        if (checkedBoxes.length > 0) pomoSettings.activeModules = checkedBoxes;
+        if (checkedBoxes.length > 0) {
+            pomoSettings.activeModules = checkedBoxes;
+        }
 
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
+        
         if (!isPomoRunning) {
             pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
             updatePomoDisplay();
         }
+
         renderDynamicTopNav();
         applyPomoSettingsUI();
         modalOverlay.classList.remove('open');
@@ -449,14 +466,19 @@ document.addEventListener("DOMContentLoaded", () => {
     function filterAndRender() {
         if (masterLibrary.length === 0) return;
         const query = searchBar.value.toLowerCase().trim();
-        let filteredBooks = currentRoot === "FAVORITES" 
-            ? masterLibrary.filter(book => starredBooks.includes(book.title))
-            : masterLibrary.filter(book => {
+        let filteredBooks = [];
+
+        if (currentRoot === "FAVORITES") {
+            filteredBooks = masterLibrary.filter(book => starredBooks.includes(book.title));
+        } else {
+            filteredBooks = masterLibrary.filter(book => {
                 const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
-                return meta.includes(query) && 
-                       (currentSubject === "All" || meta.includes(currentSubject.toLowerCase())) &&
-                       book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                const matchesSearch = meta.includes(query);
+                const matchesSubj = currentSubject === "All" || meta.includes(currentSubject.toLowerCase());
+                const matchesRoot = book.folders && book.folders[0].toUpperCase() === currentRoot.toUpperCase();
+                return matchesSearch && matchesSubj && matchesRoot;
             });
+        }
         renderTree(filteredBooks);
     }
 
@@ -528,10 +550,12 @@ document.addEventListener("DOMContentLoaded", () => {
             e.stopPropagation();
             if (starredBooks.includes(book.title)) {
                 starredBooks = starredBooks.filter(t => t !== book.title);
-                starBtn.innerHTML = '☆'; starBtn.classList.remove('starred');
+                starBtn.innerHTML = '☆'; 
+                starBtn.classList.remove('starred');
             } else {
                 starredBooks.push(book.title);
-                starBtn.innerHTML = '⭐'; starBtn.classList.add('starred');
+                starBtn.innerHTML = '⭐'; 
+                starBtn.classList.add('starred');
             }
             localStorage.setItem('library-starred', JSON.stringify(starredBooks));
             if (currentRoot === "FAVORITES") filterAndRender();
@@ -548,8 +572,10 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem('library-completed', JSON.stringify(completedBooks));
         };
         
-        actions.appendChild(starBtn); actions.appendChild(check);
-        div.appendChild(content); div.appendChild(actions);
+        actions.appendChild(starBtn); 
+        actions.appendChild(check);
+        div.appendChild(content); 
+        div.appendChild(actions);
         div.onclick = () => loadBook(book, div);
         return div;
     }
@@ -571,7 +597,8 @@ document.addEventListener("DOMContentLoaded", () => {
             playlistDropdown.innerHTML = '';
             book.playlist.forEach((vid, index) => {
                 let opt = document.createElement('option');
-                opt.value = vid.url; opt.textContent = vid.title || `Lecture ${index + 1}`;
+                opt.value = vid.url; 
+                opt.textContent = vid.title || `Lecture ${index + 1}`;
                 playlistDropdown.appendChild(opt);
             });
             playlistDropdown.style.display = 'block';
@@ -596,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
             sidebar.classList.add('collapsed');
             desktopSidebarToggle.textContent = '▶';
         }
+
         if (window.innerWidth <= 800) toggleMobileMenu(); 
     }
 
@@ -604,15 +632,9 @@ document.addEventListener("DOMContentLoaded", () => {
     chatClose.onclick = () => chatWindow.classList.remove('open');
 
     let savedChat = localStorage.getItem('ai_chat_history');
-    if (savedChat) { chatBody.innerHTML = savedChat; chatBody.scrollTop = chatBody.scrollHeight; }
-
-    function appendMsg(html, isUser) {
-        const d = document.createElement('div');
-        d.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
-        d.innerHTML = html;
-        chatBody.appendChild(d);
-        chatBody.scrollTop = chatBody.scrollHeight;
-        localStorage.setItem('ai_chat_history', chatBody.innerHTML);
+    if (savedChat) { 
+        chatBody.innerHTML = savedChat; 
+        chatBody.scrollTop = chatBody.scrollHeight; 
     }
 
     async function handleChatSubmit() {
@@ -636,7 +658,9 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 appendMsg("AI Engine is offline.", false);
             }
-        } catch(e) { appendMsg("Error processing query.", false); }
+        } catch(e) { 
+            appendMsg("Error processing query.", false); 
+        }
     }
 
     window._openAIBook = (title) => {
@@ -649,8 +673,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'b') { e.preventDefault(); desktopSidebarToggle.click(); }
-        if (e.ctrlKey && e.key === ' ') { e.preventDefault(); chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click(); }
+        if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+            e.preventDefault();
+            desktopSidebarToggle.click();
+        }
+        if (e.ctrlKey && e.key === ' ') {
+            e.preventDefault();
+            chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
+        }
         if (e.key === 'Escape') {
             modalOverlay.classList.remove('open');
             musicModalOverlay.classList.remove('open');
