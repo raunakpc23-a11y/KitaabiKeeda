@@ -33,8 +33,14 @@
 
         /* Sidebar & Header */
         .sidebar { width: 400px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.02); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-header h2 { font-size: 1.25em; font-weight: 700; letter-spacing: -0.5px; }
+        .sidebar-header { padding: 18px 22px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .sidebar-header h2 { font-size: 1.2em; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
+
+        /* Pomodoro Widget Styling */
+        .pomodoro-widget { display: flex; align-items: center; gap: 6px; background: var(--folder-bg); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75em; font-weight: 600; }
+        .pomodoro-display { font-family: monospace; font-size: 1em; font-weight: bold; color: var(--highlight-text); }
+        .pomo-btn { background: none; border: none; cursor: pointer; font-size: 0.9em; padding: 2px 4px; border-radius: 4px; transition: background 0.2s; color: var(--text-color); }
+        .pomo-btn:hover { background: var(--border-color); }
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 90; backdrop-filter: blur(2px); transition: opacity 0.3s; opacity: 0; }
         .sidebar-overlay.open { display: block; opacity: 1; }
@@ -146,6 +152,15 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
+            
+            <!-- Pomodoro Widget Integrated cleanly into Header -->
+            <div class="pomodoro-widget">
+                <span id="pomo-label">🍅</span>
+                <span class="pomodoro-display" id="pomo-time">25:00</span>
+                <button class="pomo-btn" id="pomo-toggle" title="Start/Pause">▶️</button>
+                <button class="pomo-btn" id="pomo-reset" title="Reset">🔄</button>
+            </div>
+
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
 
@@ -219,27 +234,77 @@
 
     <script>
         // --- MASTER LIBRARY GENERATOR ---
-        // This safely builds one massive array out of whichever files loaded correctly
         let masterLibrary = [];
 
         setTimeout(() => {
-            // Push Books
-            if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) {
-                masterLibrary.push(...allBooks);
-            }
-            // Push Lectures
-            if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) {
-                masterLibrary.push(...lectureVideos);
-            }
-            // Push Mock Tests
-            if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) {
-                masterLibrary.push(...mockTests);
-            }
-            
-            // Draw the dashboard
+            if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
+            if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
+            if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
             filterAndRender();
-        }, 300); // Waits exactly 0.3 seconds to ensure large data files finish loading
-        // --------------------------------
+        }, 300);
+
+        // --- POMODORO STUDY TIMER WIDGET LOGIC ---
+        let pomoSeconds = 25 * 60;
+        let pomoInterval = null;
+        let isPomoRunning = false;
+        let isFocusMode = true;
+
+        const pomoTimeDisplay = document.getElementById('pomo-time');
+        const pomoToggleBtn = document.getElementById('pomo-toggle');
+        const pomoResetBtn = document.getElementById('pomo-reset');
+        const pomoLabel = document.getElementById('pomo-label');
+
+        function updatePomoDisplay() {
+            let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+            let s = String(pomoSeconds % 60).padStart(2, '0');
+            pomoTimeDisplay.textContent = `${m}:${s}`;
+        }
+
+        pomoToggleBtn.onclick = () => {
+            if (isPomoRunning) {
+                clearInterval(pomoInterval);
+                isPomoRunning = false;
+                pomoToggleBtn.textContent = '▶️';
+            } else {
+                isPomoRunning = true;
+                pomoToggleBtn.textContent = '⏸️';
+                pomoInterval = setInterval(() => {
+                    if (pomoSeconds > 0) {
+                        pomoSeconds--;
+                        updatePomoDisplay();
+                    } else {
+                        clearInterval(pomoInterval);
+                        isPomoRunning = false;
+                        pomoToggleBtn.textContent = '▶️';
+                        
+                        if (isFocusMode) {
+                            alert("🍅 Pomodoro Session Complete! Take a 5-minute break.");
+                            pomoSeconds = 5 * 60;
+                            pomoLabel.textContent = "☕";
+                            isFocusMode = false;
+                        } else {
+                            alert("⚡ Break over! Back to focus.");
+                            pomoSeconds = 25 * 60;
+                            pomoLabel.textContent = "🍅";
+                            isFocusMode = true;
+                        }
+                        updatePomoDisplay();
+                    }
+                }, 1000);
+            }
+        };
+
+        pomoResetBtn.onclick = () => {
+            clearInterval(pomoInterval);
+            isPomoRunning = false;
+            isFocusMode = true;
+            pomoLabel.textContent = "🍅";
+            pomoSeconds = 25 * 60;
+            pomoToggleBtn.textContent = '▶️';
+            updatePomoDisplay();
+        };
+
+        updatePomoDisplay();
 
         let currentRoot = "CLASS 10"; 
         let currentSubject = "All";
@@ -314,7 +379,6 @@
         });
 
         function filterAndRender() {
-            // Now reading from masterLibrary instead of allBooks!
             if (masterLibrary.length === 0) return;
             const query = searchBar.value.toLowerCase();
             
