@@ -17,11 +17,24 @@ const ALL_MODULES = [
     { id: 'FLASHCARDS', label: '📇 Flashcards' }
 ];
 
-let pomoSettings = JSON.parse(localStorage.getItem('pomo_settings')) || {
+// --- SAFE-MERGE PROTOCOL (Fixes the crash from old cached settings) ---
+const defaultSettings = {
     enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
     aiEnabled: 'yes', activeModules: ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'],
     fontSize: 'font-medium', autoStart: 'no', volume: 0.5
 };
+
+let savedData = {};
+try { savedData = JSON.parse(localStorage.getItem('pomo_settings')) || {}; } catch(e) {}
+
+// Merges your old saved data with the new default features seamlessly
+let pomoSettings = { ...defaultSettings, ...savedData };
+
+// Failsafe: Ensures active modules always exist so the UI never breaks
+if (!pomoSettings.activeModules || !Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
+    pomoSettings.activeModules = ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'];
+}
+
 let pomoTasks = JSON.parse(localStorage.getItem('pomo_tasks')) || [];
 
 // INITIALIZE THEME & FONT
@@ -111,7 +124,7 @@ window.switchPomoTab = (evt, tabId) => {
     document.getElementById(tabId).classList.add('active');
 };
 
-// Populate Settings
+// Populate Settings safely
 document.getElementById('pomo-setting-theme-shade').value = pomoSettings.themeShade;
 document.getElementById('pomo-setting-enable').value = pomoSettings.enabled;
 document.getElementById('pomo-setting-focus').value = pomoSettings.focusTime;
@@ -122,10 +135,10 @@ document.getElementById('pomo-setting-vibrate').value = pomoSettings.vibrate;
 document.getElementById('pomo-setting-icon').value = pomoSettings.icon;
 document.getElementById('pomo-setting-bubbles').value = pomoSettings.bubbles;
 document.getElementById('pomo-setting-highlight').value = pomoSettings.highlightTask;
-document.getElementById('pomo-setting-ai').value = pomoSettings.aiEnabled || 'yes';
-document.getElementById('pomo-setting-fontsize').value = pomoSettings.fontSize || 'font-medium';
-document.getElementById('pomo-setting-autostart').value = pomoSettings.autoStart || 'no';
-document.getElementById('pomo-setting-volume').value = pomoSettings.volume || 0.5;
+document.getElementById('pomo-setting-ai').value = pomoSettings.aiEnabled;
+document.getElementById('pomo-setting-fontsize').value = pomoSettings.fontSize;
+document.getElementById('pomo-setting-autostart').value = pomoSettings.autoStart;
+document.getElementById('pomo-setting-volume').value = pomoSettings.volume;
 
 function renderModuleCheckboxes() {
     const grid = document.getElementById('module-checkbox-grid');
@@ -645,7 +658,6 @@ function handleNavigateToResource(bookIndex) {
     const book = masterLibrary[bookIndex];
     if (!book) return;
 
-    // Intelligent root switching
     const rootCategory = book.folders ? book.folders[0].toUpperCase() : 'CLASS 10';
     document.querySelectorAll('.mode-btn').forEach(btn => {
         if (btn.getAttribute('data-root') === rootCategory) {
