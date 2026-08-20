@@ -26,19 +26,28 @@
         .header-title { font-weight: 600; font-size: 1.15em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%; color: #e2e8f0; }
         .header-actions { display: flex; gap: 12px; align-items: center; }
         .timer { font-size: 1.25em; font-weight: bold; font-family: monospace; background: #1e293b; color: #fbbf24; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color); }
-        .btn-top { background: #d97706; color: white; border: none; padding: 8px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 0.9em; transition: background 0.2s; }
+        .btn-top { background: #d97706; color: white; border: none; padding: 8px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 0.9em; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-top:hover { background: #b45309; }
 
         /* Workspace */
         .workspace { display: flex; width: 100%; margin-top: 60px; height: calc(100vh - 60px); }
 
-        /* Left: PDF Viewer */
+        /* Left: PDF / JSON Viewer */
         .pdf-section { flex-grow: 1; display: flex; flex-direction: column; background: #1e293b; position: relative; padding: 12px; }
         iframe { flex-grow: 1; width: 100%; border: none; border-radius: 8px; background: #ffffff; display: none; }
         
-        #coming-soon { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1e293b; text-align: center; padding: 20px; border-radius: 8px; border: 1px dashed var(--border-color); }
-        #coming-soon h2 { color: var(--text-main); font-size: 2.2em; margin-bottom: 10px; letter-spacing: 1px; }
+        #coming-soon { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1e293b; text-align: center; padding: 20px; border-radius: 8px; border: 1px dashed var(--border-color); gap: 15px; }
+        #coming-soon h2 { color: var(--text-main); font-size: 2.2em; margin-bottom: 5px; letter-spacing: 1px; }
         #coming-soon p { color: var(--text-muted); font-size: 1.1em; }
+        
+        /* Custom JSON Question Card UI inside the viewer area when uploaded */
+        #json-viewer-container { flex-grow: 1; background: #1e293b; border-radius: 8px; padding: 30px; display: none; flex-direction: column; justify-content: center; overflow-y: auto; }
+        .json-q-box { background: #0f172a; border: 1px solid var(--border-color); padding: 24px; border-radius: 12px; max-width: 700px; margin: 0 auto; width: 100%; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .json-q-text { font-size: 1.2em; font-weight: bold; margin-bottom: 20px; color: var(--text-main); line-height: 1.5; }
+        .json-opt-list { display: flex; flex-direction: column; gap: 10px; }
+        .json-opt-item { padding: 12px 16px; background: #1e293b; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s; color: var(--text-muted); }
+        .json-opt-item:hover { border-color: var(--accent-blue); color: var(--text-main); }
+        .json-opt-item.selected { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
 
         /* Right: OMR Panel */
         .omr-section { width: 400px; background: var(--panel-bg); display: flex; flex-direction: column; flex-shrink: 0; border-left: 1px solid var(--border-color); box-shadow: -4px 0 15px rgba(0,0,0,0.2); }
@@ -103,6 +112,13 @@
         <div class="header-actions">
             <a id="new-tab-btn" class="btn-top" href="#" target="_blank">Pop-out Paper</a>
             <button id="toggle-key-btn" class="btn-top" onclick="togglePdf()">Show Solutions</button>
+            
+            <!-- NEW: Upload JSON Mock Test Button integrated into header actions -->
+            <label class="btn-top" style="background: #2563eb; cursor: pointer;">
+                📁 Upload JSON Test
+                <input type="file" id="json-file-input" accept=".json" style="display: none;" onchange="handleJsonUpload(event)">
+            </label>
+
             <span class="timer" id="timer">03:00:00</span>
         </div>
     </div>
@@ -112,8 +128,17 @@
             <div id="coming-soon">
                 <h2>🚧 COMING SOON</h2>
                 <p id="missing-text">The PDF for this section is currently unassigned or missing.</p>
+                <p style="font-size: 0.9em; color: #3b82f6;">Tip: You can click "Upload JSON Test" above to load custom interactive questions!</p>
             </div>
             <iframe id="pdf-frame" src=""></iframe>
+            
+            <!-- Custom JSON Render Engine Container -->
+            <div id="json-viewer-container">
+                <div class="json-q-box">
+                    <div class="json-q-text" id="json-q-text">Loading question...</div>
+                    <div class="json-opt-list" id="json-opt-list"></div>
+                </div>
+            </div>
         </div>
 
         <div class="omr-section">
@@ -172,8 +197,9 @@
 
         let isShowingKey = false;
         let activeQ = 1;
-        const totalQ = 90;
+        let totalQ = 90;
         let data = JSON.parse(localStorage.getItem(`exam_state_${testTitle}`)) || {}; 
+        let customJsonQuestions = null; // Stores uploaded JSON test data
 
         window.onload = function() {
             loadIframe(qUrl || aUrl);
@@ -188,6 +214,46 @@
             loadQ(1);
             startTimer();
         };
+
+        // --- JSON TEST UPLOADER PARSER ---
+        function handleJsonUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const jsonContent = JSON.parse(e.target.result);
+                    if (jsonContent.questions && Array.isArray(jsonContent.questions)) {
+                        customJsonQuestions = jsonContent.questions;
+                        totalQ = customJsonQuestions.length;
+                        document.getElementById('test-title').innerText = jsonContent.title || file.name;
+                        
+                        // Re-initialize state for JSON length
+                        data = {};
+                        for(let i=1; i<=totalQ; i++) {
+                            data[i] = { ans: null, status: 'unvisited', note: '' };
+                        }
+                        
+                        // Hide PDF iframe and show interactive JSON viewer box
+                        document.getElementById('pdf-frame').style.display = 'none';
+                        document.getElementById('coming-soon').style.display = 'none';
+                        document.getElementById('json-viewer-container').style.display = 'flex';
+                        document.getElementById('new-tab-btn').style.display = 'none';
+                        document.getElementById('toggle-key-btn').style.display = 'none';
+
+                        buildPalette();
+                        loadQ(1);
+                        alert(`Successfully loaded "${jsonContent.title || file.name}" with ${totalQ} questions!`);
+                    } else {
+                        alert("Invalid JSON format. Make sure it contains a 'questions' array.");
+                    }
+                } catch(err) {
+                    alert("Error parsing JSON file. Check file syntax.");
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
 
         // --- PERSISTENCE & TIMER ---
         function persistState() {
@@ -207,7 +273,7 @@
 
         // --- KEYBOARD SHORTCUTS (QoL) ---
         document.addEventListener('keydown', (e) => {
-            if(e.target.tagName === 'INPUT') return; // Don't trigger if typing in notes or numerical input
+            if(e.target.tagName === 'INPUT') return;
             const key = e.key.toUpperCase();
             if(['A', 'B', 'C', 'D'].includes(key)) {
                 setMCQ(key);
@@ -222,6 +288,8 @@
             const frame = document.getElementById('pdf-frame');
             const placeholder = document.getElementById('coming-soon');
             const newTabBtn = document.getElementById('new-tab-btn');
+
+            if (customJsonQuestions) return; // Don't override if JSON is active
 
             if (url && url.trim() !== '' && url !== 'null' && url !== 'undefined') {
                 frame.src = url;
@@ -251,7 +319,7 @@
             pal.innerHTML = '';
             for(let i=1; i<=totalQ; i++) {
                 let btn = document.createElement('div');
-                btn.className = `q-node ${data[i].status}`;
+                btn.className = `q-node ${data[i] ? data[i].status : 'unvisited'}`;
                 btn.id = `qbtn-${i}`;
                 btn.innerText = i;
                 btn.onclick = () => loadQ(i);
@@ -260,18 +328,38 @@
         }
 
         function loadQ(num) {
-            if(data[activeQ].status === 'unvisited') updateStatus(activeQ, 'not-ans');
-            document.getElementById(`qbtn-${activeQ}`).classList.remove('active');
+            if(data[activeQ] && data[activeQ].status === 'unvisited') updateStatus(activeQ, 'not-ans');
+            let prevBtn = document.getElementById(`qbtn-${activeQ}`);
+            if(prevBtn) prevBtn.classList.remove('active');
             
             activeQ = num;
-            document.getElementById(`qbtn-${activeQ}`).classList.add('active');
+            let currentBtn = document.getElementById(`qbtn-${activeQ}`);
+            if(currentBtn) currentBtn.classList.add('active');
             document.getElementById('current-q-label').innerText = `Question ${num}`;
 
             document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('num-input').value = '';
-            document.getElementById('q-note').value = data[activeQ].note || '';
+            document.getElementById('q-note').value = data[activeQ] ? (data[activeQ].note || '') : '';
 
-            let ans = data[activeQ].ans;
+            // Render Custom JSON Question if loaded
+            if (customJsonQuestions && customJsonQuestions[num - 1]) {
+                const qData = customJsonQuestions[num - 1];
+                document.getElementById('json-q-text').innerText = `${num}. ${qData.question}`;
+                const optList = document.getElementById('json-opt-list');
+                optList.innerHTML = '';
+                
+                const optionLetters = ['A', 'B', 'C', 'D'];
+                qData.options.forEach((optText, index) => {
+                    const lettr = optionLetters[index] || String(index + 1);
+                    const optDiv = document.createElement('div');
+                    optDiv.className = `json-opt-item ${data[activeQ].ans === lettr ? 'selected' : ''}`;
+                    optDiv.innerHTML = `<strong>(${lettr})</strong> ${optText}`;
+                    optDiv.onclick = () => setMCQ(lettr);
+                    optList.appendChild(optDiv);
+                });
+            }
+
+            let ans = data[activeQ] ? data[activeQ].ans : null;
             if (ans) {
                 if (['A','B','C','D'].includes(ans)) {
                     document.querySelectorAll('.opt-btn').forEach(b => { if(b.innerText === ans) b.classList.add('selected'); });
@@ -287,6 +375,14 @@
             document.querySelectorAll('.opt-btn').forEach(b => {
                 b.classList.toggle('selected', b.innerText === opt);
             });
+            
+            // Sync with custom JSON view items if active
+            if (customJsonQuestions) {
+                const optionLetters = ['A', 'B', 'C', 'D'];
+                document.querySelectorAll('.json-opt-item').forEach((item, index) => {
+                    item.classList.toggle('selected', optionLetters[index] === opt);
+                });
+            }
             persistState();
         }
 
