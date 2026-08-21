@@ -296,3 +296,33 @@ body.theme-slate .chat-window { background: rgba(30, 41, 59, 0.90); }
 .grid-box.rev { background: #a855f7; color: white; border-color: #a855f7; }
 .btn-review { font-size: 0.75em; padding: 2px 6px; border-radius: 4px; background: var(--folder-bg); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-color); }
 .btn-review.active { background: #a855f7; color: white; border-color: #a855f7; }
+/* GAMIFICATION BADGE */
+.level-badge { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4); margin-right: 4px; }
+
+/* UTILITIES MENU */
+.utility-menu-btn { background: var(--folder-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 16px; border-radius: 12px; font-size: 1em; font-weight: 600; text-align: left; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+.utility-menu-btn:hover { background: var(--highlight); color: var(--highlight-text); border-color: var(--highlight-text); transform: translateY(-2px); }
+
+/* EXAM OMR JUMP GRID */
+.omr-jump-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; padding: 15px; border-bottom: 1px solid var(--border-color); background: var(--reader-bg); max-height: 150px; overflow-y: auto; }
+.grid-box { aspect-ratio: 1; border-radius: 4px; font-size: 0.7em; font-weight: bold; display: flex; align-items: center; justify-content: center; background: var(--folder-bg); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-color); }
+.grid-box.ans { background: var(--success); color: white; border-color: var(--success); }
+.grid-box.rev { background: #a855f7; color: white; border-color: #a855f7; }
+.btn-review { font-size: 0.75em; padding: 2px 6px; border-radius: 4px; background: var(--folder-bg); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-color); }
+.btn-review.active { background: #a855f7; color: white; border-color: #a855f7; }
+
+/* ANALYTICS */
+.stat-card { flex: 1; background: var(--folder-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; text-align: center; box-shadow: var(--card-shadow); }
+.stat-value { font-size: 1.8em; font-weight: 800; margin-bottom: 4px; }
+.stat-label { font-size: 0.8em; opacity: 0.8; font-weight: 600; text-transform: uppercase; }
+.heatmap-container { background: var(--sidebar-bg); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color); width: 100%; max-width: 900px; margin: 0 auto; }
+.heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
+.heatmap-box { width: 100%; aspect-ratio: 1; border-radius: 4px; background: var(--border-color); }
+.heatmap-box.lvl-1 { background: #86efac; }
+.heatmap-box.lvl-2 { background: #22c55e; }
+.heatmap-box.lvl-3 { background: #16a34a; }
+.heatmap-box.lvl-4 { background: #15803d; }
+
+/* WHITEBOARD */
+.color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color); cursor: pointer; transition: transform 0.1s; }
+.color-btn.active { transform: scale(1.2); border-color: var(--highlight-text); }
