@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const defaultSettings = {
         enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
         aiEnabled: 'yes', activeModules: ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'], // DEFAULT TABS FIX
-        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no'
+        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no', scratchpad: 'no' // STRICT TOGGLE FIX
     };
 
     let pomoSettings = { ...defaultSettings };
@@ -51,6 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let pomoInterval = null;
     let isPomoRunning = false;
     let isFocusMode = true;
+
+    // Split Screen Resizer State
+    let isSplitLocked = false;
+    let isResizing = false;
 
     // Apply Initial Themes
     document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
@@ -86,6 +90,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const downloadBtn = document.getElementById('download-btn');
     const startExamBtn = document.getElementById('start-exam-btn');
     const splitScreenBtn = document.getElementById('split-screen-btn');
+    const splitLockBtn = document.getElementById('split-lock-btn');
+    const resizer = document.getElementById('split-resizer');
     const fullscreenBtn = document.getElementById('fullscreen-btn');
     const selectorBox = document.getElementById('dynamic-mode-selector');
 
@@ -162,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (type === 'ambient-brown') {
                 lastOut = (lastOut + (0.02 * white)) / 1.02;
                 output[i] = lastOut * 1.5;
-            } else { // Synthesize Rain
+            } else { 
                 b0 = 0.99886 * b0 + white * 0.0555179;
                 b1 = 0.99332 * b1 + white * 0.0750759;
                 b2 = 0.96900 * b2 + white * 0.1538520;
@@ -305,6 +311,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (chatFab) chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
         if (pomoSettings.aiEnabled === 'no' && chatWindow) chatWindow.classList.remove('open');
 
+        // Toggle visibility of scratchpad in utilities
+        const utilWb = document.getElementById('util-sidebar-whiteboard');
+        if (utilWb) utilWb.style.display = pomoSettings.scratchpad === 'yes' ? 'flex' : 'none';
+
         document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
 
         setSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
@@ -322,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setSettingVal('pomo-setting-autostart', pomoSettings.autoStart);
         setSettingVal('pomo-setting-volume', pomoSettings.volume);
         setSettingVal('pomo-setting-zen', pomoSettings.zenMode);
+        setSettingVal('pomo-setting-scratchpad', pomoSettings.scratchpad || 'no');
 
         if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
             let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
@@ -349,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
             pomoSettings.autoStart = getSettingVal('pomo-setting-autostart', pomoSettings.autoStart);
             pomoSettings.volume = getSettingVal('pomo-setting-volume', pomoSettings.volume);
             pomoSettings.zenMode = getSettingVal('pomo-setting-zen', pomoSettings.zenMode);
+            pomoSettings.scratchpad = getSettingVal('pomo-setting-scratchpad', 'no');
 
             const checkedBoxes = Array.from(document.querySelectorAll('#module-checkbox-grid .mod-checkbox:checked')).map(cb => cb.value);
             if (checkedBoxes.length > 0) pomoSettings.activeModules = checkedBoxes;
@@ -419,6 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const utilView = document.getElementById('utilities-sidebar-view');
                 const phBox = document.getElementById('placeholder-box');
                 const mainContainer = document.getElementById('reader-container-main');
+                const utilWorkspace = document.getElementById('utilities-workspace');
 
                 if (currentRoot === 'UTILITIES') {
                     if (libView) libView.style.display = 'none';
@@ -428,12 +441,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         phBox.querySelector('p').innerText = "Select a tool from the sidebar to launch it.";
                         phBox.style.display = 'block';
                     }
+                    if (utilWorkspace) utilWorkspace.style.display = 'none';
                     if (viewerWrapper) viewerWrapper.style.display = 'none';
                     if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none';
                     const omrPanel = document.getElementById('omr-panel');
                     if (omrPanel) omrPanel.style.display = 'none';
                     if (splitScreenBtn) splitScreenBtn.style.display = 'none';
+                    if (splitLockBtn) splitLockBtn.style.display = 'none';
                     if (startExamBtn) startExamBtn.style.display = 'none';
+                    if (resizer) resizer.style.display = 'none';
                     if (mainContainer) mainContainer.classList.remove('split-active');
                     isSplitActive = false;
                 } else {
@@ -445,6 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         phBox.querySelector('p').innerText = "This was made with AI and the person who gave the command is busy with other shit.";
                         phBox.style.display = 'block';
                     }
+                    if (utilWorkspace) utilWorkspace.style.display = 'none';
                     if (viewerWrapper) viewerWrapper.style.display = 'none';
                     if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none';
                     const omrPanel = document.getElementById('omr-panel');
@@ -521,7 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     pomoToggleBtn.textContent = '▶️';
                     if (pomoCard) pomoCard.classList.remove('running');
                     
-                    // Analytics & Level Up
+                    // Add to analytics & Level Up!
                     studyStats[todayStr]++;
                     localStorage.setItem('study_stats', JSON.stringify(studyStats));
                     updateGamification();
@@ -576,7 +593,80 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // QoL 3: Context-Aware Notes Drawer
+    // Split Screen Draggable Logic
+    if (splitScreenBtn) {
+        splitScreenBtn.addEventListener('click', () => {
+            isSplitActive = !isSplitActive;
+            const mainContainer = document.getElementById('reader-container-main');
+            
+            if (!mainContainer || !viewerWrapperSplit || !bookFrameSplit) return;
+
+            if (isSplitActive) {
+                mainContainer.classList.add('split-active');
+                viewerWrapperSplit.style.display = 'block';
+                if (bookFrame) bookFrameSplit.src = bookFrame.src;
+                splitScreenBtn.style.backgroundColor = 'var(--success)';
+                const omrPanel = document.getElementById('omr-panel');
+                if (omrPanel) omrPanel.style.display = 'none'; 
+                
+                if (resizer) resizer.style.display = 'block';
+                if (splitLockBtn) splitLockBtn.style.display = 'flex';
+                if (viewerWrapper) viewerWrapper.style.width = '50%';
+                if (viewerWrapperSplit) viewerWrapperSplit.style.width = '50%';
+            } else {
+                mainContainer.classList.remove('split-active');
+                viewerWrapperSplit.style.display = 'none';
+                bookFrameSplit.src = '';
+                splitScreenBtn.style.backgroundColor = '';
+                
+                if (resizer) resizer.style.display = 'none';
+                if (splitLockBtn) splitLockBtn.style.display = 'none';
+                if (viewerWrapper) viewerWrapper.style.width = '100%';
+            }
+        });
+    }
+
+    if (splitLockBtn && resizer) {
+        splitLockBtn.addEventListener('click', () => {
+            isSplitLocked = !isSplitLocked;
+            splitLockBtn.textContent = isSplitLocked ? '🔒' : '🔓';
+            if (isSplitLocked) resizer.classList.add('locked');
+            else resizer.classList.remove('locked');
+        });
+
+        resizer.addEventListener('mousedown', (e) => {
+            if (isSplitLocked) return;
+            isResizing = true;
+            resizer.classList.add('dragging');
+            document.body.style.cursor = 'col-resize';
+            if (viewerWrapper) viewerWrapper.style.pointerEvents = 'none';
+            if (viewerWrapperSplit) viewerWrapperSplit.style.pointerEvents = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const mainContainer = document.getElementById('reader-container-main');
+            if (!mainContainer) return;
+            const containerRect = mainContainer.getBoundingClientRect();
+            let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+            if (newWidth < 20) newWidth = 20;
+            if (newWidth > 80) newWidth = 80;
+            if (viewerWrapper) viewerWrapper.style.width = `${newWidth}%`;
+            if (viewerWrapperSplit) viewerWrapperSplit.style.width = `${100 - newWidth}%`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                resizer.classList.remove('dragging');
+                document.body.style.cursor = 'default';
+                if (viewerWrapper) viewerWrapper.style.pointerEvents = 'auto';
+                if (viewerWrapperSplit) viewerWrapperSplit.style.pointerEvents = 'auto';
+            }
+        });
+    }
+
+    // Context Notes Logic
     let currentNoteKey = 'quick_notes_general';
     if (notesToggleBtn && notesPanel) notesToggleBtn.addEventListener('click', () => notesPanel.classList.toggle('open'));
     if (closeNotesBtn && notesPanel) closeNotesBtn.addEventListener('click', () => notesPanel.classList.remove('open'));
@@ -620,98 +710,127 @@ document.addEventListener("DOMContentLoaded", () => {
     // 10. UTILITIES LOGIC (Analytics & Whiteboard)
     // ==========================================
     document.getElementById('util-sidebar-analytics')?.addEventListener('click', () => {
-        const analyticsModal = document.getElementById('analytics-modal-overlay');
-        if (!analyticsModal) return;
+        const utilWorkspace = document.getElementById('utilities-workspace');
+        const phBox = document.getElementById('placeholder-box');
+        if (!utilWorkspace || !phBox) return;
+        
+        phBox.style.display = 'none';
+        utilWorkspace.style.display = 'flex';
         
         let total = 0; let streak = 0; let currDate = new Date();
         for (let date in studyStats) total += studyStats[date];
         
-        const totalEl = document.getElementById('stat-total-pomos');
-        const hoursEl = document.getElementById('stat-hours');
-        const streakEl = document.getElementById('stat-streak');
-        if (totalEl) totalEl.innerText = total;
-        if (hoursEl) hoursEl.innerText = ((total * pomoSettings.focusTime) / 60).toFixed(1);
-
         while(true) {
             let dStr = currDate.toISOString().split('T')[0];
             if (studyStats[dStr] && studyStats[dStr] > 0) {
                 streak++; currDate.setDate(currDate.getDate() - 1);
             } else break;
         }
-        if (streakEl) streakEl.innerText = `${streak} 🔥`;
 
-        const grid = document.getElementById('heatmap-container');
-        if (grid) {
-            grid.innerHTML = '';
-            let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 27); 
-            for(let i=0; i<28; i++) {
-                let box = document.createElement('div');
-                box.className = 'heatmap-box';
-                let str = heatDate.toISOString().split('T')[0];
-                let count = studyStats[str] || 0;
-                if (count > 0) box.classList.add('lvl-1');
-                if (count > 2) box.classList.add('lvl-2');
-                if (count > 4) box.classList.add('lvl-3');
-                if (count > 6) box.classList.add('lvl-4');
-                box.title = `${str}: ${count} sessions`;
-                grid.appendChild(box);
-                heatDate.setDate(heatDate.getDate() + 1);
-            }
+        let heatHTML = '';
+        let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 41); 
+        for(let i=0; i<42; i++) {
+            let str = heatDate.toISOString().split('T')[0];
+            let count = studyStats[str] || 0;
+            let lvl = count > 6 ? 'lvl-4' : count > 4 ? 'lvl-3' : count > 2 ? 'lvl-2' : count > 0 ? 'lvl-1' : '';
+            heatHTML += `<div class="heatmap-box ${lvl}" title="${str}: ${count} sessions"></div>`;
+            heatDate.setDate(heatDate.getDate() + 1);
         }
-        analyticsModal.classList.add('open');
-    });
 
-    document.getElementById('analytics-close-modal')?.addEventListener('click', () => {
-        document.getElementById('analytics-modal-overlay')?.classList.remove('open');
+        utilWorkspace.innerHTML = `
+            <div class="util-workspace-inner">
+                <h2 style="font-size:2em; margin-bottom:30px;">📊 Study Analytics</h2>
+                <div class="util-dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">Total Focus Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color:var(--danger);">${streak} 🔥</div>
+                        <div class="stat-label">Current Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${((total * pomoSettings.focusTime) / 60).toFixed(1)}</div>
+                        <div class="stat-label">Hours Studied</div>
+                    </div>
+                </div>
+                <div class="heatmap-container">
+                    <label style="font-weight:bold; opacity:0.8;">Focus History (Last 6 Weeks)</label>
+                    <div class="heatmap-grid" style="grid-template-columns: repeat(14, 1fr);">${heatHTML}</div>
+                </div>
+            </div>
+        `;
+
+        if (window.innerWidth <= 800) {
+            sidebar?.classList.remove('open');
+            document.getElementById('sidebar-overlay')?.classList.remove('open');
+        }
     });
 
     document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => {
-        const wbOverlay = document.getElementById('whiteboard-overlay');
-        const canvas = document.getElementById('wb-canvas');
-        if (!wbOverlay || !canvas) return;
+        const utilWorkspace = document.getElementById('utilities-workspace');
+        const phBox = document.getElementById('placeholder-box');
+        if (!utilWorkspace || !phBox) return;
         
-        wbOverlay.classList.add('open');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 60;
+        phBox.style.display = 'none';
+        utilWorkspace.style.display = 'flex';
+
+        utilWorkspace.innerHTML = `
+            <div style="display:flex; flex-direction:column; height:100%; width:100%;">
+                <div style="padding:10px 20px; display:flex; justify-content:space-between; background:var(--folder-bg); border-bottom:1px solid var(--border-color);">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <span style="font-weight:bold;">🖌️ Scratchpad</span>
+                        <button class="color-btn active" data-color="#f8fafc" style="background:#f8fafc;"></button>
+                        <button class="color-btn" data-color="#ef4444" style="background:#ef4444;"></button>
+                        <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6;"></button>
+                        <button class="color-btn" data-color="#22c55e" style="background:#22c55e;"></button>
+                        <button class="icon-btn" id="wb-eraser">🧹</button>
+                        <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
+                    </div>
+                    <button class="icon-btn" id="wb-clear">🗑️ Clear</button>
+                </div>
+                <canvas id="main-canvas" style="flex-grow:1; cursor:crosshair;"></canvas>
+            </div>
+        `;
+
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false, color = '#f8fafc', size = 3;
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight - 50;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', e => {
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            color = e.target.getAttribute('data-color');
+        }));
+        document.getElementById('wb-eraser')?.addEventListener('click', () => color = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim());
+        document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0,0, canvas.width, canvas.height));
+        document.getElementById('wb-size')?.addEventListener('input', e => size = e.target.value);
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+        }
+        canvas.addEventListener('mousedown', e => { drawing = true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+        canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle=color; ctx.lineWidth=size; ctx.lineCap='round'; ctx.stroke(); });
+        canvas.addEventListener('mouseup', () => drawing = false);
+        canvas.addEventListener('mouseout', () => drawing = false);
+
+        if (window.innerWidth <= 800) {
+            sidebar?.classList.remove('open');
+            document.getElementById('sidebar-overlay')?.classList.remove('open');
+        }
     });
 
     document.getElementById('util-sidebar-settings')?.addEventListener('click', () => {
         document.getElementById('pomo-open-settings')?.click();
     });
-
-    // WHITEBOARD DRAWING
-    const wbCanvas = document.getElementById('wb-canvas');
-    if (wbCanvas) {
-        const ctx = wbCanvas.getContext('2d');
-        let isDrawing = false, currentColor = '#f8fafc', currentSize = 3;
-
-        document.getElementById('wb-close')?.addEventListener('click', () => document.getElementById('whiteboard-overlay')?.classList.remove('open'));
-        
-        document.querySelectorAll('.color-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentColor = e.target.getAttribute('data-color');
-            });
-        });
-
-        document.getElementById('wb-eraser')?.addEventListener('click', () => currentColor = getComputedStyle(document.body).getPropertyValue('--primary-bg').trim());
-        document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0, 0, wbCanvas.width, wbCanvas.height));
-        document.getElementById('wb-size')?.addEventListener('input', (e) => currentSize = e.target.value);
-        document.getElementById('wb-download')?.addEventListener('click', () => {
-            const link = document.createElement('a'); link.download = 'scratchpad.png'; link.href = wbCanvas.toDataURL(); link.click();
-        });
-
-        function getMousePos(e) {
-            const rect = wbCanvas.getBoundingClientRect();
-            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
-        }
-
-        wbCanvas.addEventListener('mousedown', (e) => { isDrawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); });
-        wbCanvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const pos = getMousePos(e); ctx.lineTo(pos.x, pos.y); ctx.strokeStyle = currentColor; ctx.lineWidth = currentSize; ctx.lineCap = 'round'; ctx.stroke(); });
-        wbCanvas.addEventListener('mouseup', () => isDrawing = false);
-        wbCanvas.addEventListener('mouseout', () => isDrawing = false);
-    }
 
     // ==========================================
     // 11. NATIVE OMR SIMULATOR (QoL 5)
@@ -785,6 +904,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none'; 
             startExamBtn.style.display = 'none';
             
+            if (resizer) resizer.style.display = 'block';
+            if (splitLockBtn) splitLockBtn.style.display = 'flex';
+            if (viewerWrapper) viewerWrapper.style.width = '50%';
+            
             renderOMRSheet();
             examSeconds = 10800;
             
@@ -814,6 +937,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const mainContainer = document.getElementById('reader-container-main');
         if (mainContainer) mainContainer.classList.remove('split-active');
         if (omrPanel) omrPanel.style.display = 'none';
+        if (resizer) resizer.style.display = 'none';
+        if (splitLockBtn) splitLockBtn.style.display = 'none';
         isSplitActive = false;
         if (startExamBtn) startExamBtn.style.display = 'flex';
     });
@@ -975,21 +1100,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const titleText = document.getElementById('current-book-title');
         const breadcrumbText = document.getElementById('current-book-breadcrumb');
         const phBox = document.getElementById('placeholder-box');
+        const utilWorkspace = document.getElementById('utilities-workspace');
 
         if (titleText) titleText.textContent = book.title || "File";
         if (breadcrumbText) breadcrumbText.textContent = book.folders ? book.folders.join(" > ") : (book.title || "");
         if (phBox) phBox.style.display = 'none';
+        if (utilWorkspace) utilWorkspace.style.display = 'none';
         
         if (fullscreenBtn) fullscreenBtn.style.display = 'flex';
         if (notesToggleBtn) notesToggleBtn.style.display = 'flex';
         
-        // Hide/Show correct buttons based on SIMULATOR
+        // Handle Action Buttons Visibility
         if (currentRoot === 'SIMULATOR') {
             if (startExamBtn) startExamBtn.style.display = 'flex';
             if (splitScreenBtn) splitScreenBtn.style.display = 'none';
+            if (splitLockBtn) splitLockBtn.style.display = 'none';
         } else {
             if (startExamBtn) startExamBtn.style.display = 'none';
             if (splitScreenBtn) splitScreenBtn.style.display = 'flex';
+            if (splitLockBtn) splitLockBtn.style.display = isSplitActive ? 'flex' : 'none';
             const omrPanel = document.getElementById('omr-panel');
             if (omrPanel) omrPanel.style.display = 'none';
             
@@ -1074,8 +1203,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             if (typeof processAIQuery !== 'undefined') {
                 const safeLibrary = masterLibrary.filter(b => b && typeof b === 'object' && b.title);
-                
-                // QoL 4: Passing currentActiveBook to AI
                 const res = await processAIQuery(val, safeLibrary, window.currentActiveBook);
                 
                 if (res && res.type === 'fact') {
@@ -1130,8 +1257,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (musicModalOverlay) musicModalOverlay.classList.remove('open');
             const analyticsModal = document.getElementById('analytics-modal-overlay');
             if (analyticsModal) analyticsModal.classList.remove('open');
-            const wbOverlay = document.getElementById('whiteboard-overlay');
-            if (wbOverlay) wbOverlay.classList.remove('open');
             if (chatWindow) chatWindow.classList.remove('open');
             if (notesPanel) notesPanel.classList.remove('open');
         }
