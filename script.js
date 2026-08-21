@@ -712,71 +712,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 10. UTILITIES LOGIC (Analytics, Timetable, Syllabus, Whiteboard)
     // ==========================================
     
-    // ANALYTICS
-    document.getElementById('util-sidebar-analytics')?.addEventListener('click', () => {
-        const utilWorkspace = document.getElementById('utilities-workspace');
-        const phBox = document.getElementById('placeholder-box');
-        if (!utilWorkspace || !phBox) return;
-        
-        phBox.style.display = 'none';
-        utilWorkspace.style.display = 'flex';
-        
-        let total = 0; let streak = 0; let currDate = new Date();
-        for (let date in studyStats) total += studyStats[date];
-        
-        while(true) {
-            let dStr = currDate.toISOString().split('T')[0];
-            if (studyStats[dStr] && studyStats[dStr] > 0) {
-                streak++; currDate.setDate(currDate.getDate() - 1);
-            } else break;
-        }
-
-        let heatHTML = '';
-        let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 41); 
-        for(let i=0; i<42; i++) {
-            let str = heatDate.toISOString().split('T')[0];
-            let count = studyStats[str] || 0;
-            let lvl = count > 6 ? 'lvl-4' : count > 4 ? 'lvl-3' : count > 2 ? 'lvl-2' : count > 0 ? 'lvl-1' : '';
-            heatHTML += `<div class="heatmap-box ${lvl}" title="${str}: ${count} sessions"></div>`;
-            heatDate.setDate(heatDate.getDate() + 1);
-        }
-
-        utilWorkspace.innerHTML = `
-            <div class="util-workspace-inner">
-                <h2 style="font-size:2em; margin-bottom:30px;">📊 Study Analytics</h2>
-                <div class="util-dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">${total}</div>
-                        <div class="stat-label">Total Focus Sessions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" style="color:var(--danger);">${streak} 🔥</div>
-                        <div class="stat-label">Current Streak</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${((total * pomoSettings.focusTime) / 60).toFixed(1)}</div>
-                        <div class="stat-label">Hours Studied</div>
-                    </div>
-                </div>
-                <div class="heatmap-container">
-                    <label style="font-weight:bold; opacity:0.8;">Focus History (Last 6 Weeks)</label>
-                    <div class="heatmap-grid" style="grid-template-columns: repeat(14, 1fr);">${heatHTML}</div>
-                </div>
-            </div>
-        `;
-
-        if (window.innerWidth <= 800) {
-            sidebar?.classList.remove('open');
-            document.getElementById('sidebar-overlay')?.classList.remove('open');
-        }
-    });
-
-    document.getElementById('analytics-close-modal')?.addEventListener('click', () => {
-        document.getElementById('analytics-modal-overlay')?.classList.remove('open');
-    });
-
-    // TIMETABLE PLANNER
-    document.getElementById('util-sidebar-timetable')?.addEventListener('click', () => {
+    function openUtilityWorkspace(type) {
         const utilWorkspace = document.getElementById('utilities-workspace');
         const phBox = document.getElementById('placeholder-box');
         if (!utilWorkspace || !phBox) return;
@@ -784,200 +720,314 @@ document.addEventListener("DOMContentLoaded", () => {
         phBox.style.display = 'none';
         utilWorkspace.style.display = 'flex';
 
-        utilWorkspace.innerHTML = `
-            <div class="util-workspace-inner">
-                <h2 style="font-size:2em; margin-bottom:20px;">📅 Weekly Study Timetable</h2>
-                <div class="timetable-container">
-                    <table class="timetable-table">
-                        <thead>
-                            <tr><th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>
-                        </thead>
-                        <tbody id="timetable-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-        const tbody = document.getElementById('timetable-body');
-        const defaultHours = ["08:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM", "08:00 PM", "10:00 PM"];
-        let ttData = JSON.parse(localStorage.getItem('study_timetable')) || {};
-
-        defaultHours.forEach(time => {
-            let tr = document.createElement('tr');
-            let tdTime = document.createElement('td');
-            tdTime.style.fontWeight = 'bold';
-            tdTime.innerText = time;
-            tr.appendChild(tdTime);
-
-            for(let day=0; day<7; day++) {
-                let td = document.createElement('td');
-                let div = document.createElement('div');
-                div.className = 'tt-cell';
-                div.contentEditable = true;
-                let cellKey = `${time}-${day}`;
-                div.innerText = ttData[cellKey] || '';
-                div.addEventListener('input', (e) => {
-                    ttData[cellKey] = e.target.innerText;
-                    localStorage.setItem('study_timetable', JSON.stringify(ttData));
-                });
-                td.appendChild(div);
-                tr.appendChild(td);
+        if (type === 'analytics') {
+            let total = 0; let streak = 0; let currDate = new Date();
+            for (let date in studyStats) total += studyStats[date];
+            
+            while(true) {
+                let dStr = currDate.toISOString().split('T')[0];
+                if (studyStats[dStr] && studyStats[dStr] > 0) {
+                    streak++; currDate.setDate(currDate.getDate() - 1);
+                } else break;
             }
-            tbody.appendChild(tr);
-        });
 
-        if (window.innerWidth <= 800) {
-            sidebar?.classList.remove('open');
-            document.getElementById('sidebar-overlay')?.classList.remove('open');
-        }
-    });
-
-    // SYLLABUS TRACKER
-    document.getElementById('util-sidebar-syllabus')?.addEventListener('click', () => {
-        const utilWorkspace = document.getElementById('utilities-workspace');
-        const phBox = document.getElementById('placeholder-box');
-        if (!utilWorkspace || !phBox) return;
-        
-        phBox.style.display = 'none';
-        utilWorkspace.style.display = 'flex';
-
-        const defaultSyllabus = {
-            "Physics": ["Kinematics", "Laws of Motion", "Work Power Energy", "Rotational Motion", "Gravitation", "Thermodynamics", "Electrostatics", "Current Electricity", "Magnetism", "Optics", "Modern Physics"],
-            "Chemistry": ["Mole Concept", "Atomic Structure", "Chemical Bonding", "Thermodynamics", "Equilibrium", "Coordination Compounds", "GOC", "Hydrocarbons", "Alcohols", "Aldehydes"],
-            "Maths": ["Sets & Relations", "Quadratic Equations", "Complex Numbers", "Binomial Theorem", "Sequence & Series", "Straight Lines", "Conic Sections", "Calculus", "Vectors & 3D", "Probability"]
-        };
-        let sylData = JSON.parse(localStorage.getItem('jee_syllabus')) || {};
-
-        utilWorkspace.innerHTML = `
-            <div class="util-workspace-inner">
-                <h2 style="font-size:2em; margin-bottom:10px;">📑 JEE Syllabus Tracker</h2>
-                <div class="overall-progress-bar" style="max-width:1000px; width:100%;"><div class="overall-progress-fill" id="syllabus-progress"></div></div>
-                <p style="margin-bottom:20px; font-weight:bold; opacity:0.8;" id="syllabus-progress-text">0% Completed</p>
-                <div class="syllabus-container" id="syllabus-container"></div>
-            </div>
-        `;
-
-        const container = document.getElementById('syllabus-container');
-        const states = [
-            { text: '⚪ Unstudied', color: 'var(--text-color)', bg: 'var(--folder-bg)' },
-            { text: '🟡 Theory', color: '#000', bg: '#fde047' },
-            { text: '🔵 PYQs', color: '#fff', bg: '#3b82f6' },
-            { text: '🟢 Mastered', color: '#fff', bg: '#22c55e' }
-        ];
-
-        function updateSylProgress() {
-            let total = 0; let score = 0;
-            for(let subj in defaultSyllabus) {
-                defaultSyllabus[subj].forEach(chap => {
-                    total += 3;
-                    score += (sylData[chap] || 0);
-                });
+            let heatHTML = '';
+            let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 41); 
+            for(let i=0; i<42; i++) {
+                let str = heatDate.toISOString().split('T')[0];
+                let count = studyStats[str] || 0;
+                let lvl = count > 6 ? 'lvl-4' : count > 4 ? 'lvl-3' : count > 2 ? 'lvl-2' : count > 0 ? 'lvl-1' : '';
+                heatHTML += `<div class="heatmap-box ${lvl}" title="${str}: ${count} sessions"></div>`;
+                heatDate.setDate(heatDate.getDate() + 1);
             }
-            let pct = total === 0 ? 0 : Math.round((score/total)*100);
-            const pBar = document.getElementById('syllabus-progress');
-            const pText = document.getElementById('syllabus-progress-text');
-            if (pBar) pBar.style.width = `${pct}%`;
-            if (pText) pText.innerText = `Overall Readiness: ${pct}%`;
+
+            utilWorkspace.innerHTML = `
+                <div class="util-workspace-inner">
+                    <h2 style="font-size:2em; margin-bottom:30px;">📊 Study Analytics</h2>
+                    <div class="util-dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">${total}</div>
+                            <div class="stat-label">Total Focus Sessions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" style="color:var(--danger);">${streak} 🔥</div>
+                            <div class="stat-label">Current Streak</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${((total * pomoSettings.focusTime) / 60).toFixed(1)}</div>
+                            <div class="stat-label">Hours Studied</div>
+                        </div>
+                    </div>
+                    <div class="heatmap-container">
+                        <label style="font-weight:bold; opacity:0.8;">Focus History (Last 6 Weeks)</label>
+                        <div class="heatmap-grid" style="grid-template-columns: repeat(14, 1fr);">${heatHTML}</div>
+                    </div>
+                </div>
+            `;
         }
+        else if (type === 'timetable') {
+            utilWorkspace.innerHTML = `
+                <div class="util-workspace-inner" style="padding: 20px;">
+                    <div class="tt-layout">
+                        <div class="tt-monthly">
+                            <h3>🎯 Monthly Goals</h3>
+                            <textarea id="tt-monthly-goals" placeholder="What are we conquering this month?"></textarea>
+                        </div>
+                        <div class="tt-daily">
+                            <div class="tt-tabs" id="tt-tabs-container"></div>
+                            <div class="tt-hours-container" id="tt-hours-container"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-        for (let subj in defaultSyllabus) {
-            let subjDiv = document.createElement('div');
-            subjDiv.className = 'syllabus-subject';
-            subjDiv.innerHTML = `<div class="syllabus-subject-header">${subj}</div><div class="syllabus-chapter-list" id="list-${subj}"></div>`;
-            container.appendChild(subjDiv);
+            // Initialize 10 Dates
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const dateList = [];
+            for (let i = -1; i <= 8; i++) {
+                let d = new Date(today);
+                d.setDate(d.getDate() + i);
+                dateList.push(d);
+            }
 
-            const list = subjDiv.querySelector(`#list-${subj}`);
-            defaultSyllabus[subj].forEach(chap => {
-                let chapState = sylData[chap] || 0;
-                let cDiv = document.createElement('div');
-                cDiv.className = 'syllabus-chapter';
-                cDiv.innerHTML = `<span>${chap}</span><button class="status-btn" style="background:${states[chapState].bg}; color:${states[chapState].color}">${states[chapState].text}</button>`;
-                
-                let btn = cDiv.querySelector('.status-btn');
-                btn.addEventListener('click', () => {
-                    chapState = (chapState + 1) % 4;
-                    sylData[chap] = chapState;
-                    localStorage.setItem('jee_syllabus', JSON.stringify(sylData));
-                    btn.innerText = states[chapState].text;
-                    btn.style.background = states[chapState].bg;
-                    btn.style.color = states[chapState].color;
-                    updateSylProgress();
-                });
-                list.appendChild(cDiv);
+            let ttData = JSON.parse(localStorage.getItem('study_timetable_pro')) || {};
+            
+            document.getElementById('tt-monthly-goals').value = ttData.monthly || "";
+            document.getElementById('tt-monthly-goals').addEventListener('input', (e) => {
+                ttData.monthly = e.target.value;
+                localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
             });
+
+            const tabsContainer = document.getElementById('tt-tabs-container');
+            const hoursContainer = document.getElementById('tt-hours-container');
+
+            function renderDay(dateObj) {
+                hoursContainer.innerHTML = '';
+                const dateKey = dateObj.toISOString().split('T')[0];
+                
+                for(let hour = 6; hour <= 23; hour++) {
+                    let ampm = hour >= 12 ? 'PM' : 'AM';
+                    let displayHour = hour % 12 === 0 ? 12 : hour % 12;
+                    let timeStr = `${String(displayHour).padStart(2, '0')}:00 ${ampm}`;
+                    let slotKey = `${dateKey}_${timeStr}`;
+
+                    let row = document.createElement('div');
+                    row.className = 'tt-hour-row';
+                    row.innerHTML = `
+                        <div class="tt-time">${timeStr}</div>
+                        <div class="tt-input" contenteditable="true" placeholder="Plan for ${timeStr}..."></div>
+                    `;
+                    
+                    let inputDiv = row.querySelector('.tt-input');
+                    inputDiv.innerText = ttData[slotKey] || "";
+                    inputDiv.addEventListener('input', (e) => {
+                        ttData[slotKey] = e.target.innerText;
+                        localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
+                    });
+
+                    hoursContainer.appendChild(row);
+                }
+            }
+
+            dateList.forEach((d, idx) => {
+                let tab = document.createElement('div');
+                tab.className = 'tt-tab';
+                if(idx === 1) tab.classList.add('active'); // Today is idx 1
+                
+                let dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+                let monthDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                let label = idx === 1 ? "Today" : `${dayName}, ${monthDate}`;
+                tab.innerText = label;
+
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tt-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderDay(d);
+                });
+                tabsContainer.appendChild(tab);
+            });
+
+            renderDay(dateList[1]); // Render Today
         }
-        updateSylProgress();
+        else if (type === 'syllabus') {
+            const deepSyllabus = {
+                "Class12": {
+                    "Physics": ["Electric Charges & Fields", "Electrostatic Potential", "Current Electricity", "Moving Charges & Magnetism", "Magnetism & Matter", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics", "Wave Optics", "Dual Nature", "Atoms", "Nuclei", "Semiconductors"],
+                    "Chemistry": ["Solutions", "Electrochemistry", "Chemical Kinetics", "d and f Block", "Coordination Compounds", "Haloalkanes", "Alcohols, Phenols", "Aldehydes, Ketones", "Amines", "Biomolecules"],
+                    "Maths": ["Relations & Functions", "Inverse Trigonometric Functions", "Matrices", "Determinants", "Continuity & Differentiability", "Application of Derivatives", "Integrals", "Application of Integrals", "Differential Equations", "Vector Algebra", "3D Geometry", "Linear Programming", "Probability"]
+                },
+                "JEEMains": {
+                    "Physics": ["Physics & Measurement", "Kinematics", "Laws of Motion", "Work, Energy & Power", "Rotational Motion", "Gravitation", "Properties of Matter", "Thermodynamics", "Kinetic Theory", "Oscillations & Waves", "Electrostatics", "Current Electricity", "Magnetic Effects", "EMI & AC", "EM Waves", "Optics", "Dual Nature", "Atoms & Nuclei", "Electronic Devices", "Experimental Skills"],
+                    "Chemistry": ["Basic Concepts", "Atomic Structure", "Chemical Bonding", "Thermodynamics", "Solutions", "Equilibrium", "Redox Reactions", "Chemical Kinetics", "Classification", "p-Block", "d & f Block", "Coordination", "Purification", "Hydrocarbons", "Halogens", "Oxygen Compounds", "Nitrogen Compounds", "Biomolecules", "Practical Chemistry"],
+                    "Maths": ["Sets & Functions", "Complex Numbers", "Matrices & Determinants", "Permutations & Combinations", "Binomial Theorem", "Sequence & Series", "Limit & Continuity", "Integral Calculus", "Differential Equations", "Coordinate Geometry", "3D Geometry", "Vector Algebra", "Statistics & Probability", "Trigonometry"]
+                },
+                "JEEAdv": {
+                    "Physics": ["General Physics", "Mechanics", "Thermal Physics", "Electricity & Magnetism", "Electromagnetic Waves", "Optics", "Modern Physics"],
+                    "Chemistry": ["General Topics", "Gaseous & Liquid States", "Atomic Structure & Bonding", "Energetics", "Chemical Equilibrium", "Electrochemistry", "Chemical Kinetics", "Solid State", "Solutions", "Surface Chemistry", "Nuclear Chemistry", "Isolation of Metals", "Transition Elements", "Basic Organic", "Reaction Mechanisms", "Polymers & Biomolecules"],
+                    "Maths": ["Algebra", "Matrices", "Probability", "Trigonometry", "Analytical Geometry (2D & 3D)", "Differential Calculus", "Integral Calculus", "Vectors"]
+                }
+            };
 
-        if (window.innerWidth <= 800) {
-            sidebar?.classList.remove('open');
-            document.getElementById('sidebar-overlay')?.classList.remove('open');
-        }
-    });
+            const states = [
+                { text: '⚪ Unstudied', color: 'var(--text-color)', bg: 'transparent' },
+                { text: '🟡 Theory', color: '#000', bg: '#fde047' },
+                { text: '🔵 PYQs', color: '#fff', bg: '#3b82f6' },
+                { text: '🟢 Mastered', color: '#fff', bg: '#22c55e' }
+            ];
 
-    // WHITEBOARD
-    document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => {
-        const utilWorkspace = document.getElementById('utilities-workspace');
-        const phBox = document.getElementById('placeholder-box');
-        if (!utilWorkspace || !phBox) return;
-        
-        phBox.style.display = 'none';
-        utilWorkspace.style.display = 'flex';
+            let sylData = JSON.parse(localStorage.getItem('study_syllabus_pro')) || {};
 
-        utilWorkspace.innerHTML = `
-            <div style="display:flex; flex-direction:column; height:100%; width:100%;">
-                <div style="padding:10px 20px; display:flex; justify-content:space-between; background:var(--folder-bg); border-bottom:1px solid var(--border-color);">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <span style="font-weight:bold;">🖌️ Scratchpad</span>
-                        <button class="color-btn active" data-color="#f8fafc" style="background:#f8fafc;"></button>
-                        <button class="color-btn" data-color="#ef4444" style="background:#ef4444;"></button>
-                        <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6;"></button>
-                        <button class="color-btn" data-color="#22c55e" style="background:#22c55e;"></button>
-                        <button class="icon-btn" id="wb-eraser">🧹</button>
-                        <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
+            utilWorkspace.innerHTML = `
+                <div class="util-workspace-inner" style="padding: 20px;">
+                    <div class="syl-layout">
+                        <h2 style="font-size:2.2em; margin-bottom:10px; text-align:center;">📑 Immersive Syllabus Tracker</h2>
+                        <div class="syl-tabs">
+                            <button class="syl-tab active" data-target="Class12">Class 12 Boards</button>
+                            <button class="syl-tab" data-target="JEEMains">JEE Mains</button>
+                            <button class="syl-tab" data-target="JEEAdv">JEE Advanced</button>
+                        </div>
+                        <div class="overall-progress-bar"><div class="overall-progress-fill" id="syllabus-progress"></div></div>
+                        <p style="margin-bottom:20px; font-weight:bold; opacity:0.8; text-align:center; margin-top:5px;" id="syllabus-progress-text">0% Completed</p>
+                        <div class="syl-content-area" id="syl-content-area"></div>
                     </div>
-                    <button class="icon-btn" id="wb-clear">🗑️ Clear</button>
                 </div>
-                <canvas id="main-canvas" style="flex-grow:1; cursor:crosshair;"></canvas>
-            </div>
-        `;
+            `;
 
-        const canvas = document.getElementById('main-canvas');
-        const ctx = canvas.getContext('2d');
-        let drawing = false, color = '#f8fafc', size = 3;
+            const contentArea = document.getElementById('syl-content-area');
 
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight - 50;
+            function updateSylProgress() {
+                let total = 0; let score = 0;
+                for(let page in deepSyllabus) {
+                    for(let subj in deepSyllabus[page]) {
+                        deepSyllabus[page][subj].forEach(chap => {
+                            let dbKey = `${page}_${subj}_${chap}`;
+                            total += 3;
+                            score += (sylData[dbKey] || 0);
+                        });
+                    }
+                }
+                let pct = total === 0 ? 0 : Math.round((score/total)*100);
+                const pBar = document.getElementById('syllabus-progress');
+                const pText = document.getElementById('syllabus-progress-text');
+                if (pBar) pBar.style.width = `${pct}%`;
+                if (pText) pText.innerText = `Overall Readiness: ${pct}%`;
+            }
+
+            function renderSyllabusPage(pageKey) {
+                contentArea.innerHTML = '';
+                const pageData = deepSyllabus[pageKey];
+                
+                for(let subj in pageData) {
+                    let detail = document.createElement('details');
+                    detail.className = 'syl-subject';
+                    detail.open = true;
+                    detail.innerHTML = `<summary>${subj} (${pageData[subj].length} Chapters)</summary> <div class="syl-grid" id="grid-${subj}"></div>`;
+                    contentArea.appendChild(detail);
+
+                    const grid = detail.querySelector(`#grid-${subj}`);
+                    pageData[subj].forEach(chap => {
+                        let dbKey = `${pageKey}_${subj}_${chap}`;
+                        let stIdx = sylData[dbKey] || 0;
+                        
+                        let item = document.createElement('div');
+                        item.className = 'syl-item';
+                        item.innerHTML = `
+                            <div class="syl-item-title">${chap}</div>
+                            <button class="syl-btn" style="background:${states[stIdx].bg}; color:${states[stIdx].color}; border-color:${stIdx===0?'var(--border-color)':'transparent'}">${states[stIdx].text}</button>
+                        `;
+
+                        let btn = item.querySelector('.syl-btn');
+                        btn.addEventListener('click', () => {
+                            stIdx = (stIdx + 1) % 4;
+                            sylData[dbKey] = stIdx;
+                            localStorage.setItem('study_syllabus_pro', JSON.stringify(sylData));
+                            btn.innerText = states[stIdx].text;
+                            btn.style.background = states[stIdx].bg;
+                            btn.style.color = states[stIdx].color;
+                            btn.style.borderColor = stIdx === 0 ? 'var(--border-color)' : 'transparent';
+                            updateSylProgress();
+                        });
+                        grid.appendChild(item);
+                    });
+                }
+            }
+
+            document.querySelectorAll('.syl-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    document.querySelectorAll('.syl-tab').forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderSyllabusPage(e.target.getAttribute('data-target'));
+                });
+            });
+
+            renderSyllabusPage('Class12');
+            updateSylProgress();
         }
-        window.addEventListener('resize', resize);
-        resize();
+        else if (type === 'whiteboard') {
+            utilWorkspace.innerHTML = `
+                <div style="display:flex; flex-direction:column; height:100%; width:100%;">
+                    <div style="padding:10px 20px; display:flex; justify-content:space-between; background:var(--folder-bg); border-bottom:1px solid var(--border-color);">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <span style="font-weight:bold;">🖌️ Scratchpad</span>
+                            <button class="color-btn active" data-color="#f8fafc" style="background:#f8fafc;"></button>
+                            <button class="color-btn" data-color="#ef4444" style="background:#ef4444;"></button>
+                            <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6;"></button>
+                            <button class="color-btn" data-color="#22c55e" style="background:#22c55e;"></button>
+                            <button class="icon-btn" id="wb-eraser">🧹</button>
+                            <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
+                        </div>
+                        <button class="icon-btn" id="wb-clear">🗑️ Clear</button>
+                    </div>
+                    <canvas id="main-canvas" style="flex-grow:1; cursor:crosshair;"></canvas>
+                </div>
+            `;
 
-        document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', e => {
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            color = e.target.getAttribute('data-color');
-        }));
-        document.getElementById('wb-eraser')?.addEventListener('click', () => color = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim());
-        document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0,0, canvas.width, canvas.height));
-        document.getElementById('wb-size')?.addEventListener('input', e => size = e.target.value);
+            const canvas = document.getElementById('main-canvas');
+            const ctx = canvas.getContext('2d');
+            let drawing = false, color = '#f8fafc', size = 3;
 
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+            function resize() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight - 50;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', e => {
+                document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                color = e.target.getAttribute('data-color');
+            }));
+            document.getElementById('wb-eraser')?.addEventListener('click', () => color = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim());
+            document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0,0, canvas.width, canvas.height));
+            document.getElementById('wb-size')?.addEventListener('input', e => size = e.target.value);
+
+            function getPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+            }
+            canvas.addEventListener('mousedown', e => { drawing = true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+            canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle=color; ctx.lineWidth=size; ctx.lineCap='round'; ctx.stroke(); });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseout', () => drawing = false);
         }
-        canvas.addEventListener('mousedown', e => { drawing = true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-        canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle=color; ctx.lineWidth=size; ctx.lineCap='round'; ctx.stroke(); });
-        canvas.addEventListener('mouseup', () => drawing = false);
-        canvas.addEventListener('mouseout', () => drawing = false);
-
+        
         if (window.innerWidth <= 800) {
             sidebar?.classList.remove('open');
             document.getElementById('sidebar-overlay')?.classList.remove('open');
         }
-    });
+    }
 
-    document.getElementById('util-sidebar-settings')?.addEventListener('click', () => {
-        document.getElementById('pomo-open-settings')?.click();
-    });
+    // Attach Event Listeners to Sidebar Buttons
+    document.getElementById('util-sidebar-analytics')?.addEventListener('click', () => openUtilityWorkspace('analytics'));
+    document.getElementById('util-sidebar-timetable')?.addEventListener('click', () => openUtilityWorkspace('timetable'));
+    document.getElementById('util-sidebar-syllabus')?.addEventListener('click', () => openUtilityWorkspace('syllabus'));
+    document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => openUtilityWorkspace('whiteboard'));
+    document.getElementById('util-sidebar-settings')?.addEventListener('click', () => document.getElementById('pomo-open-settings')?.click());
+
+    // Legacy Analytics Button from header
+    document.getElementById('analytics-btn')?.addEventListener('click', () => openUtilityWorkspace('analytics'));
 
     // ==========================================
     // 11. NATIVE OMR SIMULATOR (QoL 5)
@@ -1328,7 +1378,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         for (let i = 0; i < localStorage.length; i++) {
             let k = localStorage.key(i);
-            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable' || k === 'jee_syllabus')) {
+            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable_pro' || k === 'jee_syllabus')) {
                 backupData.notes[k] = localStorage.getItem(k);
             }
         }
@@ -1519,7 +1569,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Keyboard Shortcuts (including Spotlight Ctrl+K)
+    // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
             e.preventDefault();
