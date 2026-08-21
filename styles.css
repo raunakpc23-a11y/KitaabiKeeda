@@ -189,6 +189,7 @@ body.theme-slate .pomo-modal { background: rgba(30, 41, 59, 0.90); }
 details { margin-bottom: 4px; }
 summary { padding: 8px 12px; cursor: pointer; font-weight: 600; border-radius: 8px; display: flex; align-items: center; background-color: var(--folder-bg); user-select: none; font-size: 0.86em; color: var(--sidebar-text); border: 1px solid var(--border-color); }
 summary:hover { background-color: var(--highlight); color: var(--highlight-text); border-color: var(--highlight-text); }
+summary.active-path { color: var(--highlight-text); font-weight: 700; border-bottom: 2px solid var(--highlight-text); border-radius: 8px 8px 0 0; }
 summary::marker { display: none; content: ""; } 
 summary::-webkit-details-marker { display: none; }
 summary::before { content: "📁"; margin-right: 8px; font-size: 1.1em; }
@@ -274,4 +275,4 @@ body.theme-slate .chat-window { background: rgba(30, 41, 59, 0.90); }
     #mobile-menu-btn { display: flex; }
     .notes-panel { width: 100%; right: -100%; }
     .chat-window { width: calc(100vw - 30px); right: 15px; bottom: 75px; }
-}
+}s
