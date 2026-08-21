@@ -64,9 +64,10 @@
                 
                 <div class="search-row">
                     <div class="search-wrapper">
-                        <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+                        <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press 'Ctrl+K')">
                     </div>
                     <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
+                    <button class="folder-toggle-btn" id="open-add-resource-modal" title="Add Custom Resource to Library">➕</button>
                     <label class="local-file-btn" title="Open any PDF/file from your device">
                         📂
                         <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
@@ -138,6 +139,7 @@
                 <button class="pomo-tab-btn" data-tab="tab-ui">🎨 Theme</button>
                 <button class="pomo-tab-btn" data-tab="tab-modules">🧩 Modules</button>
                 <button class="pomo-tab-btn" data-tab="tab-audio">🔔 Audio</button>
+                <button class="pomo-tab-btn" data-tab="tab-data">💾 Data Backup</button>
             </div>
 
             <div class="pomo-modal-body">
@@ -289,11 +291,75 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- TAB 5: DATA SAFETY BACKUP (PHASE 1) -->
+                <div class="pomo-tab-content" id="tab-data">
+                    <div class="pomo-setting-group">
+                        <label>🛡️ Backup & Transfer Progress:</label>
+                        <p style="font-size:0.8em; opacity:0.8; margin-bottom:6px;">Export all your study statistics, completed books, notes, and custom library entries as a JSON file.</p>
+                        <button class="primary-btn" id="export-data-btn" style="justify-content:center; margin-bottom:10px;">💾 Export All Data (.json)</button>
+                    </div>
+                    <div class="pomo-setting-group" style="border-top:1px solid var(--border-color); padding-top:10px;">
+                        <label>📥 Restore Progress:</label>
+                        <p style="font-size:0.8em; opacity:0.8; margin-bottom:6px;">Upload a previously exported backup file to restore your progress.</p>
+                        <label class="primary-btn" style="justify-content:center; cursor:pointer; background:#3b82f6;">
+                            📂 Select Backup File
+                            <input type="file" id="import-data-input" accept=".json" style="display:none;">
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="pomo-modal-footer">
                 <button class="primary-btn" id="pomo-save-settings">Save Settings</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ADD RESOURCE MODAL (PHASE 2) -->
+    <div class="pomo-modal-overlay" id="add-resource-modal-overlay">
+        <div class="pomo-modal" style="width: 440px;">
+            <div class="pomo-modal-header">
+                <span>➕ Add Resource to Library</span>
+                <button class="icon-btn" id="add-resource-close-btn">✖</button>
+            </div>
+            <div class="pomo-modal-body">
+                <div class="pomo-setting-group">
+                    <label>Title:</label>
+                    <input type="text" id="new-res-title" placeholder="e.g. Kinematics Revision Sheet">
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Root Category:</label>
+                    <select id="new-res-root">
+                        <option value="IIT-JEE">IIT-JEE</option>
+                        <option value="CLASS 10">Class 10</option>
+                        <option value="LECTURES">Lectures</option>
+                        <option value="SIMULATOR">Simulator</option>
+                    </select>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Folder Name / Path:</label>
+                    <input type="text" id="new-res-folder" placeholder="e.g. Physics > Mechanics">
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Resource URL (Drive/PDF/YouTube):</label>
+                    <input type="text" id="new-res-url" placeholder="https://drive.google.com/file/d/.../preview">
+                </div>
+            </div>
+            <div class="pomo-modal-footer">
+                <button class="primary-btn" id="save-new-resource-btn">Add to Library</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL COMMAND PALETTE (PHASE 2: Ctrl+K) -->
+    <div class="spotlight-overlay" id="spotlight-overlay">
+        <div class="spotlight-box">
+            <div class="spotlight-input-wrapper">
+                <span>🔍</span>
+                <input type="text" id="spotlight-input" placeholder="Type a file name, command, or subject... (Esc to exit)">
+            </div>
+            <div class="spotlight-results" id="spotlight-results"></div>
         </div>
     </div>
 
@@ -388,18 +454,14 @@
                 
                 <div id="omr-jump-grid" class="omr-jump-grid" style="display:none;"></div>
 
-                <div id="omr-questions-container" class="omr-questions-container">
-                    <!-- JS Injected 75 Questions -->
-                </div>
+                <div id="omr-questions-container" class="omr-questions-container"></div>
                 <div class="omr-footer">
                     <button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam & Score</button>
                 </div>
             </div>
 
             <!-- UTILITIES FULL-SCREEN WORKSPACE -->
-            <div id="utilities-workspace" style="display:none; width:100%; height:100%; background:var(--reader-bg); flex-direction:column;">
-                <!-- Content Injected via JS -->
-            </div>
+            <div id="utilities-workspace" style="display:none; width:100%; height:100%; background:var(--reader-bg); flex-direction:column;"></div>
         </div>
 
         <!-- QUICK NOTES DRAWER -->
