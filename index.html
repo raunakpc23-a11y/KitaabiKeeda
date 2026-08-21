@@ -17,7 +17,10 @@
     <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>📚 Study Library</h2>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h2>📚 Study Library</h2>
+                <div id="user-level-badge" class="level-badge" title="Complete Focus Sessions to Level Up!">Lvl 1</div>
+            </div>
             <div class="header-controls-group">
                 <button class="icon-btn-header" id="music-open-btn" title="Open Ambient & Music Hub">🎵</button>
                 <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
@@ -49,29 +52,36 @@
         <!-- DYNAMIC SEGMENTED CONTROL -->
         <div class="mode-selector" id="dynamic-mode-selector"></div>
 
-        <!-- SEARCH CONTAINER -->
-        <div class="search-container">
-            <div class="subject-filters" id="subject-filters">
-                <button class="subj-chip active" data-subj="All">All</button>
-                <button class="subj-chip" data-subj="Physics">Physics</button>
-                <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
-                <button class="subj-chip" data-subj="Maths">Maths</button>
-            </div>
-            
-            <div class="search-row">
-                <div class="search-wrapper">
-                    <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+        <!-- LIBRARY VIEW (Search + List) -->
+        <div id="library-sidebar-view" style="display:flex; flex-direction:column; flex-grow:1; overflow:hidden;">
+            <div class="search-container">
+                <div class="subject-filters" id="subject-filters">
+                    <button class="subj-chip active" data-subj="All">All</button>
+                    <button class="subj-chip" data-subj="Physics">Physics</button>
+                    <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
+                    <button class="subj-chip" data-subj="Maths">Maths</button>
                 </div>
-                <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
-                <label class="local-file-btn" title="Open any PDF/file from your device">
-                    📂
-                    <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
-                </label>
+                
+                <div class="search-row">
+                    <div class="search-wrapper">
+                        <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+                    </div>
+                    <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
+                    <label class="local-file-btn" title="Open any PDF/file from your device">
+                        📂
+                        <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
+                    </label>
+                </div>
             </div>
+            <div class="book-list" id="book-list"></div>
         </div>
-        
-        <!-- BOOK/FILE LIST -->
-        <div class="book-list" id="book-list"></div>
+
+        <!-- UTILITIES VIEW (Hidden by default) -->
+        <div id="utilities-sidebar-view" style="display:none; padding: 20px; flex-direction:column; gap:12px;">
+            <button class="utility-menu-btn" id="util-btn-analytics">📊 Open Analytics Dashboard</button>
+            <button class="utility-menu-btn" id="util-btn-whiteboard">🖌️ Open Digital Scratchpad</button>
+            <button class="utility-menu-btn" id="util-btn-settings">⚙️ System Preferences</button>
+        </div>
     </div>
 
     <!-- MUSIC & AMBIENT HUB MODAL -->
@@ -192,7 +202,6 @@
                             <option value="🐉">🐉 Komodo Dragon</option>
                             <option value="⚡">⚡ Lightning</option>
                             <option value="🧠">🧠 Brain</option>
-                            <option value="🦦">🦦 Capybara</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
@@ -344,19 +353,20 @@
             <div class="header-actions">
                 <button id="download-btn" class="icon-btn" style="display:none;"></button>
                 <button id="start-exam-btn" class="primary-btn" style="display:none; background-color:#ef4444;">⏱️ Start Exam</button>
+                
                 <div style="width:1px; height:24px; background:var(--border-color); margin:0 4px;"></div>
-                <button id="analytics-btn" class="icon-btn" title="Analytics Dashboard">📊</button>
-                <button id="whiteboard-btn" class="icon-btn" title="Digital Scratchpad">🖌️</button>
-                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
+                
+                <button id="split-lock-btn" class="icon-btn" title="Toggle Split Lock" style="display:none;">🔓</button>
                 <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
+                <button id="notes-toggle-btn" class="icon-btn" title="Context Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
         
         <div class="reader-container" id="reader-container-main">
             <div class="placeholder-container" id="placeholder-box">
-                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">READY TO STUDY</h2>
-                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
+                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
+                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
             </div>
             
             <!-- Viewer 1 (Main) -->
@@ -366,19 +376,30 @@
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
+
+            <!-- QoL 3: Draggable Split Resizer -->
+            <div id="split-resizer" class="resizer" style="display:none;"></div>
             
-            <!-- Viewer 2 (Split Screen) -->
+            <!-- Viewer 2 (Standard Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
             </div>
 
-            <!-- Viewer 3 (OMR Simulator Panel) -->
+            <!-- Viewer 3 (Native OMR Simulator Panel) -->
             <div id="omr-panel" class="omr-panel" style="display:none;">
                 <div class="omr-header">
-                    <h3>Exam OMR Sheet</h3>
-                    <div id="omr-timer" class="omr-timer">03:00:00</div>
+                    <h3>Exam OMR</h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button id="omr-grid-toggle" class="icon-btn" style="font-size:0.85em; border: 1px solid var(--border-color);">🔢 Grid</button>
+                        <div id="omr-timer" class="omr-timer">03:00:00</div>
+                    </div>
                 </div>
-                <div id="omr-questions-container" class="omr-questions-container"></div>
+                <!-- QoL 5: Exam Jump Grid -->
+                <div id="omr-jump-grid" class="omr-jump-grid" style="display:none;"></div>
+
+                <div id="omr-questions-container" class="omr-questions-container">
+                    <!-- JS Injected 75 Questions -->
+                </div>
                 <div class="omr-footer">
                     <button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam & Score</button>
                 </div>
@@ -388,7 +409,7 @@
         <!-- QUICK NOTES DRAWER -->
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
-                <span>📝 Quick Notes</span>
+                <span id="notes-title-label">📝 Quick Notes</span>
                 <div style="display: flex; gap: 4px;">
                     <button class="icon-btn" id="notes-copy-btn" title="Copy to Clipboard">📋</button>
                     <button class="icon-btn" id="notes-dl-btn" title="Download Notes">💾</button>
@@ -420,7 +441,6 @@
         </div>
     </div>
 
-    <!-- CORE SCRIPTS -->
     <script src="ai.js"></script>
     <script src="script.js"></script>
 </body>
