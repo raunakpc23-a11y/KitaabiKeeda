@@ -3,12 +3,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. STATE & STORAGE INITIALIZATION
     // ==========================================
     let masterLibrary = [];
-    let currentRoot = "IIT-JEE"; // DEFAULT TABS FIX
+    let currentRoot = "IIT-JEE"; 
     let currentSubject = "All";
-    window.currentActiveBook = null; // QoL 4 Context Tracking
+    window.currentActiveBook = null; 
 
     let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
     let starredBooks = JSON.parse(localStorage.getItem('library-starred')) || [];
+    let customLibrary = JSON.parse(localStorage.getItem('custom_library')) || [];
     let searchTimeout;
     let isTreeExpanded = false; 
     let isSplitActive = false;
@@ -19,11 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!studyStats[todayStr]) studyStats[todayStr] = 0;
 
     const ALL_MODULES = [
-        { id: 'CLASS 10', label: '🎓 Class 10' }, // PROPER NAMING
+        { id: 'CLASS 10', label: '🎓 Class 10' },
         { id: 'IIT-JEE', label: '⚡ IIT-JEE' },
         { id: 'LECTURES', label: '📺 Lectures' },
         { id: 'SIMULATOR', label: '⏱️ Simulator' },
-        { id: 'UTILITIES', label: '🛠️ Utilities' }, // UTILITIES ADDED
+        { id: 'UTILITIES', label: '🛠️ Utilities' },
         { id: 'PAST PAPERS', label: '📄 Past Papers' },
         { id: 'FLASHCARDS', label: '📇 Flashcards' },
         { id: 'FAVORITES', label: '⭐ Favorites' }
@@ -31,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const defaultSettings = {
         enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
-        aiEnabled: 'yes', activeModules: ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'], // DEFAULT TABS FIX
-        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no', scratchpad: 'no' // STRICT TOGGLE FIX
+        aiEnabled: 'yes', activeModules: ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'],
+        fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no', scratchpad: 'no'
     };
 
     let pomoSettings = { ...defaultSettings };
@@ -41,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (saved && typeof saved === 'object') pomoSettings = { ...defaultSettings, ...saved };
     } catch(e) {}
 
-    // Ensure valid active modules array
     if (!Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
         pomoSettings.activeModules = ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'];
     }
@@ -113,15 +113,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const notesDlBtn = document.getElementById('notes-dl-btn');
 
     // ==========================================
-    // 3. GAMIFICATION ENGINE (QoL 6)
+    // 3. GAMIFICATION ENGINE
     // ==========================================
     function updateGamification() {
         const lvlBadge = document.getElementById('user-level-badge');
         if (!lvlBadge) return;
         let totalMins = 0;
-        for (let date in studyStats) totalMins += (studyStats[date] * pomoSettings.focusTime);
-        
+        for (let date in studyStats) {
+            totalMins += (studyStats[date] * pomoSettings.focusTime);
+        }
         let lvl = Math.floor(Math.sqrt(totalMins / 30)) + 1;
+        
         let title = "Novice";
         if (lvl > 3) title = "Scholar";
         if (lvl > 10) title = "Capybara Sage";
@@ -131,12 +133,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 4. LOAD EXTERNAL LIBRARIES
+    // 4. LOAD LIBRARIES & MERGE CUSTOMS
     // ==========================================
     setTimeout(() => {
         if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
         if (typeof lectureVideos !== 'undefined' && Array.isArray(lectureVideos)) masterLibrary.push(...lectureVideos);
         if (typeof mockTests !== 'undefined' && Array.isArray(mockTests)) masterLibrary.push(...mockTests);
+        if (Array.isArray(customLibrary)) masterLibrary.push(...customLibrary);
+        
         renderDynamicTopNav();
         updateGamification();
     }, 150);
@@ -311,7 +315,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (chatFab) chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
         if (pomoSettings.aiEnabled === 'no' && chatWindow) chatWindow.classList.remove('open');
 
-        // Toggle visibility of scratchpad in utilities
         const utilWb = document.getElementById('util-sidebar-whiteboard');
         if (utilWb) utilWb.style.display = pomoSettings.scratchpad === 'yes' ? 'flex' : 'none';
 
@@ -538,7 +541,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     pomoToggleBtn.textContent = '▶️';
                     if (pomoCard) pomoCard.classList.remove('running');
                     
-                    // Add to analytics & Level Up!
                     studyStats[todayStr]++;
                     localStorage.setItem('study_stats', JSON.stringify(studyStats));
                     updateGamification();
@@ -593,7 +595,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Split Screen Draggable Logic
     if (splitScreenBtn) {
         splitScreenBtn.addEventListener('click', () => {
             isSplitActive = !isSplitActive;
@@ -937,8 +938,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const mainContainer = document.getElementById('reader-container-main');
         if (mainContainer) mainContainer.classList.remove('split-active');
         if (omrPanel) omrPanel.style.display = 'none';
-        if (resizer) resizer.style.display = 'none';
-        if (splitLockBtn) splitLockBtn.style.display = 'none';
         isSplitActive = false;
         if (startExamBtn) startExamBtn.style.display = 'flex';
     });
@@ -1110,7 +1109,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fullscreenBtn) fullscreenBtn.style.display = 'flex';
         if (notesToggleBtn) notesToggleBtn.style.display = 'flex';
         
-        // Handle Action Buttons Visibility
         if (currentRoot === 'SIMULATOR') {
             if (startExamBtn) startExamBtn.style.display = 'flex';
             if (splitScreenBtn) splitScreenBtn.style.display = 'none';
@@ -1166,7 +1164,137 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 13. AI COPILOT CHAT
+    // 13. PHASE 1 & 2: SPOTLIGHT, DATA & CUSTOM LIB
+    // ==========================================
+    // Data Backup (Phase 1)
+    document.getElementById('export-data-btn')?.addEventListener('click', () => {
+        const backupData = {
+            libraryCompleted: completedBooks,
+            libraryStarred: starredBooks,
+            studyStats: studyStats,
+            pomoSettings: pomoSettings,
+            pomoTasks: pomoTasks,
+            customLibrary: customLibrary,
+            notes: {}
+        };
+        for (let i = 0; i < localStorage.length; i++) {
+            let k = localStorage.key(i);
+            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_'))) {
+                backupData.notes[k] = localStorage.getItem(k);
+            }
+        }
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `StudyLibrary_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    });
+
+    document.getElementById('import-data-input')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (data.libraryCompleted) localStorage.setItem('library-completed', JSON.stringify(data.libraryCompleted));
+                if (data.libraryStarred) localStorage.setItem('library-starred', JSON.stringify(data.libraryStarred));
+                if (data.studyStats) localStorage.setItem('study_stats', JSON.stringify(data.studyStats));
+                if (data.pomoSettings) localStorage.setItem('pomo_settings', JSON.stringify(data.pomoSettings));
+                if (data.pomoTasks) localStorage.setItem('pomo_tasks', JSON.stringify(data.pomoTasks));
+                if (data.customLibrary) localStorage.setItem('custom_library', JSON.stringify(data.customLibrary));
+                if (data.notes) {
+                    for (let k in data.notes) localStorage.setItem(k, data.notes[k]);
+                }
+                alert("Backup restored successfully! Refreshing...");
+                location.reload();
+            } catch (err) {
+                alert("Invalid backup file.");
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Custom Resource Modal (Phase 2)
+    const addResModal = document.getElementById('add-resource-modal-overlay');
+    document.getElementById('open-add-resource-modal')?.addEventListener('click', () => addResModal?.classList.add('open'));
+    document.getElementById('add-resource-close-btn')?.addEventListener('click', () => addResModal?.classList.remove('open'));
+
+    document.getElementById('save-new-resource-btn')?.addEventListener('click', () => {
+        const title = document.getElementById('new-res-title').value.trim();
+        const root = document.getElementById('new-res-root').value;
+        const folder = document.getElementById('new-res-folder').value.trim();
+        const url = document.getElementById('new-res-url').value.trim();
+
+        if (!title || !url) {
+            alert("Please fill in Title and URL!");
+            return;
+        }
+
+        const foldersArr = [root];
+        if (folder) {
+            folder.split('>').map(f => f.trim()).forEach(f => { if(f) foldersArr.push(f); });
+        }
+
+        const newBook = { title, folders: foldersArr, url };
+        customLibrary.push(newBook);
+        masterLibrary.push(newBook);
+        localStorage.setItem('custom_library', JSON.stringify(customLibrary));
+
+        addResModal?.classList.remove('open');
+        document.getElementById('new-res-title').value = '';
+        document.getElementById('new-res-folder').value = '';
+        document.getElementById('new-res-url').value = '';
+
+        filterAndRender();
+        alert("Resource added to library successfully!");
+    });
+
+    // Spotlight Command Palette (Phase 2)
+    const spotlightOverlay = document.getElementById('spotlight-overlay');
+    const spotlightInput = document.getElementById('spotlight-input');
+    const spotlightResults = document.getElementById('spotlight-results');
+
+    function openSpotlight() {
+        if (!spotlightOverlay || !spotlightInput) return;
+        spotlightOverlay.classList.add('open');
+        spotlightInput.value = '';
+        renderSpotlightResults('');
+        setTimeout(() => spotlightInput.focus(), 50);
+    }
+
+    function closeSpotlight() {
+        if (spotlightOverlay) spotlightOverlay.classList.remove('open');
+    }
+
+    function renderSpotlightResults(q) {
+        if (!spotlightResults) return;
+        spotlightResults.innerHTML = '';
+        const query = q.toLowerCase().trim();
+
+        let matches = masterLibrary.filter(b => b && b.title && b.title.toLowerCase().includes(query)).slice(0, 8);
+        
+        if (matches.length === 0) {
+            spotlightResults.innerHTML = `<div style="padding:15px; text-align:center; opacity:0.6; font-size:0.9em;">No matching files found.</div>`;
+            return;
+        }
+
+        matches.forEach(b => {
+            let item = document.createElement('div');
+            item.className = 'spotlight-item';
+            item.innerHTML = `<span>📄 ${b.title}</span><span style="font-size:0.75em; opacity:0.6;">${b.folders ? b.folders.join(' > ') : ''}</span>`;
+            item.addEventListener('click', () => {
+                loadBook(b, null);
+                closeSpotlight();
+            });
+            spotlightResults.appendChild(item);
+        });
+    }
+
+    spotlightInput?.addEventListener('input', (e) => renderSpotlightResults(e.target.value));
+
+    // ==========================================
+    // 14. AI COPILOT CHAT
     // ==========================================
     if (chatFab && chatWindow) {
         chatFab.addEventListener('click', () => chatWindow.classList.add('open'));
@@ -1242,8 +1370,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Keyboard Shortcuts
+    // Keyboard Shortcuts (including Spotlight Ctrl+K)
     document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            spotlightOverlay?.classList.contains('open') ? closeSpotlight() : openSpotlight();
+        }
         if (e.ctrlKey && e.key.toLowerCase() === 'b' && desktopSidebarToggle) {
             e.preventDefault();
             desktopSidebarToggle.click();
@@ -1253,6 +1385,8 @@ document.addEventListener("DOMContentLoaded", () => {
             chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
         }
         if (e.key === 'Escape') {
+            closeSpotlight();
+            addResModal?.classList.remove('open');
             if (modalOverlay) modalOverlay.classList.remove('open');
             if (musicModalOverlay) musicModalOverlay.classList.remove('open');
             const analyticsModal = document.getElementById('analytics-modal-overlay');
