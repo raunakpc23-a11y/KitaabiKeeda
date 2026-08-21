@@ -3,7 +3,7 @@
  * 
  * Features a Dual-Personality Matrix (Supportive vs. Sassy),
  * modular intent routing, NLP keyword extraction, 
- * safe math evaluation, and Wikipedia API integration.
+ * safe math evaluation, App Control triggers, and Rich Wikipedia API integration.
  */
 
 // ==========================================
@@ -21,102 +21,122 @@ const removeStopwords = (str) => {
         'learning', 'study', 'studying', 'today', 'now', 'could', 'would', 'please', 
         'just', 'like', 'a', 'an', 'of', 'in', 'on', 'my', 'meaning', 'tell', 'show', 
         'find', 'search', 'open', 'is', 'are', 'am', 'was', 'were', 'do', 'does', 
-        'did', 'how', 'what', 'why', 'when', 'where', 'which', 'good', 'best'
+        'did', 'how', 'what', 'why', 'when', 'where', 'which', 'good', 'best', 'explain', 'define'
     ];
     return str.split(' ').filter(w => !stopwords.includes(w)).join(' ').trim();
 };
 
 // ==========================================
-// 2. DUAL-PERSONALITY DICTIONARY
+// 2. APP CONTROL UI BUTTONS
 // ==========================================
-// The AI blends supportive, normal responses with sassy, tough-love responses.
+// The AI can inject these buttons into chat to physically control the app workspace
+const appControls = {
+    timer: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#ef4444;" onclick="document.getElementById('pomo-toggle').click()">⏱️ Start/Pause Timer</button>`,
+    whiteboard: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#3b82f6;" onclick="document.getElementById('whiteboard-btn').click()">🖌️ Open Scratchpad</button>`,
+    analytics: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#f59e0b;" onclick="document.getElementById('analytics-btn').click()">📊 View Study Stats</button>`,
+    music: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#8b5cf6;" onclick="document.getElementById('music-open-btn').click()">🎵 Open Audio Hub</button>`,
+    theme: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#64748b;" onclick="document.getElementById('theme-toggle').click()">🌙 Switch Theme</button>`
+};
 
+// ==========================================
+// 3. DUAL-PERSONALITY DICTIONARY
+// ==========================================
 const conversationIntents = [
     {
         patterns: [/\b(hi|hello|hey|yo|sup|greetings|morning|evening)\b/i],
         replies: [
-            "Hello! 👋 I'm your AI Study Copilot. How can I help you today?", // Normal
-            "Hey there! Ready to crush some study goals? Let me know what you need.", // Normal
-            "Hey sugar! 👋🏾 I hope you brought a pencil and some focus, because we are working today.", // Sassy
-            "Hello! 💅🏾 Ready to get some actual studying done, or are we just staring at the screen again?" // Sassy
+            "Hello! 👋 I'm your AI Study Copilot. How can I help you today?",
+            "Hey there! Ready to crush some study goals? Let me know what you need.",
+            "Hey sugar! 👋🏾 I hope you brought a pencil and some focus, because we are working today.",
+            "Hello! 💅🏾 Ready to get some actual studying done, or are we just staring at the screen again?"
         ]
     },
     {
         patterns: [/\b(how are you|how you doing|whats up|what's up)\b/i],
         replies: [
-            "I'm doing great and ready to assist you! What are we focusing on today? 🔋", // Normal
-            "I'm good! Just hanging out in your browser. Ready to tackle some subjects? 📚", // Normal
-            "I'm fully charged and minding my business. The real question is, how are *your* grades looking? 🤨", // Sassy
-            "Doing well, honey! Just waiting for you to actually open a PDF. 📁👀" // Sassy
+            "I'm doing great and ready to assist you! What are we focusing on today? 🔋",
+            "I'm good! Just hanging out in your browser. Ready to tackle some subjects? 📚",
+            "I'm fully charged and minding my business. The real question is, how are *your* grades looking? 🤨",
+            "Doing well, honey! Just waiting for you to actually open a PDF. 📁👀"
         ]
     },
     {
         patterns: [/\b(bad|sad|depressed|tired|exhausted|burnout|sleepy)\b/i],
         replies: [
-            "It's completely normal to feel exhausted. Your brain needs time to process information. Take a short break and stay hydrated! 💧", // Normal
-            "Burnout is real. Please step away from the screen, rest your eyes, and get some fresh air. You can't run on empty! 🌿", // Normal
-            "Oh, you tired? You think the examiners care if you're tired? ...Alright, look. Take 15 minutes. But if you fall asleep on that textbook, I'm judging you. 🛏️👀", // Sassy
-            "Honey, it is okay to be exhausted. You've been working hard. Go take a nap, but I expect you back here in an hour ready to work! 💙" // Sassy
+            `It's completely normal to feel exhausted. Your brain needs time to process information. Take a short break! 💧 ${appControls.timer}`,
+            `Burnout is real. Let me put on some ambient noise, close your eyes for a minute, and breathe. 🌿 ${appControls.music}`,
+            `Oh, you tired? You think the examiners care if you're tired? ...Alright, look. Take 15 minutes. But if you fall asleep on that textbook, I'm judging you. 🛏️👀 ${appControls.timer}`,
+            `Honey, it is okay to be exhausted. Go take a nap, but I expect you back here in an hour ready to work! 💙`
         ]
     },
     {
         patterns: [/\b(stress|anxious|scared|fail|failing|giving up|quit|hard|difficult|overwhelmed)\b/i],
         replies: [
-            "Take a deep breath. 🧘‍♂️ It's okay to feel overwhelmed. Break your tasks into smaller, 20-minute chunks. You have got this!", // Normal
-            "Failure is just data. It shows you exactly what to focus on next. Don't let it discourage you, let it guide you! 📈", // Normal
-            "Lord have mercy, child, take a breath! 🛑 Panic never passed a test. Fix your crown, review your mistakes, and get back in the ring. 👑💅🏾", // Sassy
-            "Quit? Not on my watch. We don't quit in this household. Wipe those tears, drink some water, and let's look at the syllabus again. 😤📚" // Sassy
+            `Take a deep breath. 🧘‍♂️ It's okay to feel overwhelmed. Break your tasks into smaller chunks. You have got this!`,
+            `Failure is just data. It shows you exactly what to focus on next. Don't let it discourage you, let it guide you! 📈 ${appControls.analytics}`,
+            `Lord have mercy, child, take a breath! 🛑 Panic never passed a test. Fix your crown, review your mistakes, and get back in the ring. 👑💅🏾`,
+            `Quit? Not on my watch. We don't quit in this household. Wipe those tears, drink some water, and let's look at the syllabus again. 😤📚`
         ]
     },
     {
         patterns: [/\b(lazy|distracted|procrastinating|cant focus|can't focus|bored|tiktok|instagram)\b/i],
         replies: [
-            "Distractions happen! Try using the Pomodoro timer in the sidebar to work in 25-minute focused bursts. It makes starting much easier! ⏱️", // Normal
-            "It's hard to focus sometimes. Try putting your phone in another room and committing to just 5 minutes of work. 🚀", // Normal
-            "Oh, absolutely not. Put that phone DOWN. 📱❌ Give me 5 solid minutes of focus right now before I lose my digital mind.", // Sassy
-            "You bored? I know you ain't sitting there scrolling social media when you got mock tests to take. Focus! 👁️👄👁️" // Sassy
+            `Distractions happen! Try using the Pomodoro timer to work in 25-minute bursts. It makes starting much easier! ⏱️ ${appControls.timer}`,
+            `Oh, absolutely not. Put that phone DOWN. 📱❌ Give me 25 solid minutes of focus right now before I lose my digital mind. ${appControls.timer}`,
+            `You bored? I know you ain't sitting there scrolling social media when you got mock tests to take. Focus! 👁️👄👁️`
+        ]
+    },
+    {
+        patterns: [/\b(draw|write|scratchpad|whiteboard|rough work|solve this)\b/i],
+        replies: [
+            `I've got a blank canvas waiting for you. Let's map it out! 📐 ${appControls.whiteboard}`,
+            `Need to scribble some equations? Here you go, grab a digital marker: ${appControls.whiteboard}`
+        ]
+    },
+    {
+        patterns: [/\b(music|lofi|rain|noise|songs|play something|quiet|audio)\b/i],
+        replies: [
+            `Silence is deafening. Let's get some ambient noise or Lofi beats going. 🎧 ${appControls.music}`,
+            `I have rain, cafe chatter, and deep focus beats ready for you. Let's set the mood. ☕ ${appControls.music}`
+        ]
+    },
+    {
+        patterns: [/\b(stats|analytics|progress|how am i doing|streak)\b/i],
+        replies: [
+            `Let's look at the numbers. Data doesn't lie! Let's see that study streak. 📈 ${appControls.analytics}`
+        ]
+    },
+    {
+        patterns: [/\b(dark mode|light mode|theme|eyes hurt|too bright)\b/i],
+        replies: [
+            `Let me fix the lighting for you. Save those eyes! 👓 ${appControls.theme}`
         ]
     },
     {
         patterns: [/\b(thanks|thank you|thx|appreciate it)\b/i],
         replies: [
-            "You're very welcome! Keep up the great work! 💪", // Normal
-            "Happy to help! Let me know if you need anything else.", // Normal
-            "You're welcome, chile. Don't thank me, thank yourself when you see that passing grade! 🏃🏾‍♀️💨", // Sassy
-            "You know I got you! Now let's crush the rest of your study session. Period. 📚✨" // Sassy
-        ]
-    },
-    {
-        patterns: [/\b(who are you|what are you|your name)\b/i],
-        replies: [
-            "I'm your AI Study Copilot! I live right here in your app to help you find notes, solve math, and keep you on track. 🤖", // Normal
-            "I am your AI Study Copilot, honey. Part machine, part no-nonsense auntie. I'm here to make sure you pass these classes, period. 💁🏾‍♀️✨" // Sassy
+            "You're very welcome! Keep up the great work! 💪",
+            "You're welcome, chile. Don't thank me, thank yourself when you see that passing grade! 🏃🏾‍♀️💨",
+            "You know I got you! Now let's crush the rest of your study session. Period. 📚✨"
         ]
     },
     {
         patterns: [/\b(memorize|forget|remember|memory|keep forgetting|study tips|how to study)\b/i],
         replies: [
-            "🧠 <strong>Study Tip:</strong> Use <strong>Active Recall</strong>! Instead of re-reading notes, close the book and try to write down everything you remember. It forces your brain to build permanent neural pathways.",
-            "Honey, reading the same page 10 times ain't studying, that's just staring! 🙄 Use <strong>Spaced Repetition</strong>. Review a topic today, then in 3 days, then in a week. You can't cram a whole semester in one night, chile. ✨"
+            "🧠 <strong>Study Tip:</strong> Use <strong>Active Recall</strong>! Instead of re-reading notes, close the book and try to write down everything you remember.",
+            "Honey, reading the same page 10 times ain't studying, that's just staring! 🙄 Use <strong>Spaced Repetition</strong>. Review a topic today, then in 3 days, then in a week. ✨"
         ]
     },
     {
         patterns: [/\b(don't understand|confused|explain better|stuck|lost)\b/i],
         replies: [
-            "💡 <strong>The Feynman Technique:</strong> If a concept is confusing, try explaining it out loud right now as if you were teaching a 10-year-old. When you stumble, you've found your exact knowledge gap! Go back to your material just to fix that gap. 🗣️📖"
-        ]
-    },
-    {
-        patterns: [/\b(exam tomorrow|test tomorrow|cramming)\b/i],
-        replies: [
-            "🚨 <strong>Exam Eve Strategy:</strong> Do NOT try to learn new topics now. Review your cheat sheets, look over formulas, and get at least 7 hours of sleep. A rested brain will recall more than an exhausted, crammed brain!", // Normal
-            "If your exam is tomorrow, put the heavy textbooks away! 🛑 Drink water, review the formulas, and go to bed. Staring at pages at 3 AM will only make you forget what you already know. 🛌✨" // Sassy
+            "💡 <strong>The Feynman Technique:</strong> Try explaining it out loud right now as if you were teaching a 10-year-old. When you stumble, you've found your exact knowledge gap! 🗣️📖"
         ]
     }
 ];
 
 // ==========================================
-// 3. SPECIALIZED ENGINE MODULES
+// 4. SPECIALIZED ENGINE MODULES
 // ==========================================
 
 // Module A: Handle Small Talk & Time
@@ -126,7 +146,7 @@ function matchConversation(query) {
     // Time & Date
     if (qLower.match(/(what time is it|time please|current time)/)) {
         const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        return `It's exactly <strong>${time}</strong>. Let's make every single minute count! ⏳`;
+        return `It's exactly <strong>${time}</strong>. Let's make every single minute count! ⏳ ${appControls.timer}`;
     }
     if (qLower.match(/(what day is it|current date|what is today)/)) {
         const date = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -146,24 +166,34 @@ function matchConversation(query) {
     return null;
 }
 
-// Module B: Safely Evaluate Math
+// Module B: Safely Evaluate Advanced Math
 function solveMath(query) {
     // Replaces word operators with math operators for better parsing
     let normalized = query.toLowerCase()
         .replace(/plus/g, '+')
         .replace(/minus/g, '-')
         .replace(/times|multiplied by/g, '*')
-        .replace(/divided by|over/g, '/');
+        .replace(/divided by|over/g, '/')
+        .replace(/square root of|sqrt/g, 'Math.sqrt')
+        .replace(/sin/g, 'Math.sin')
+        .replace(/cos/g, 'Math.cos')
+        .replace(/tan/g, 'Math.tan')
+        .replace(/pi/g, 'Math.PI');
 
-    const calcMatch = normalized.match(/(?:calculate|solve|what is) ([\d\+\-\*\/\(\)\.\s\^]+)$/);
+    const calcMatch = normalized.match(/(?:calculate|solve|what is|compute) ([\d\+\-\*\/\(\)\.\s\^a-zA-Z]+)$/);
     if (calcMatch && calcMatch[1].trim().length > 0) {
         try {
             let expression = calcMatch[1].replace(/\^/g, '**'); 
-            // Strict regex to prevent XSS/harmful execution
-            if (/^[0-9\+\-\*\/\(\)\.\s\*]+$/.test(expression)) {
-                let result = new Function(`return ${expression}`)();
+            // Strict regex to prevent XSS/harmful execution (allows Math. objects)
+            if (/^[0-9\+\-\*\/\(\)\.\s\*MatihsqrcostnPI]+$/.test(expression)) {
+                let result = new Function(`'use strict'; return (${expression})`)();
                 if (!isNaN(result)) {
-                    return `🔢 <strong>Math:</strong> ${calcMatch[1]} <br>✅ <strong>Result:</strong> ${parseFloat(result.toFixed(4))} 💅🏾`;
+                    let formattedResult = Number.isInteger(result) ? result : parseFloat(result.toFixed(5));
+                    return `
+                        <div style="background:var(--folder-bg); padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+                            🔢 <strong>Math:</strong> <code style="color:var(--highlight-text);">${calcMatch[1]}</code> <br>
+                            ✅ <strong>Result:</strong> <span style="font-size:1.1em; font-weight:bold;">${formattedResult}</span> 💅🏾
+                        </div>`;
                 }
             }
         } catch (e) { /* Fall through if invalid */ }
@@ -171,7 +201,7 @@ function solveMath(query) {
     return null;
 }
 
-// Module C: Score and Search Internal Library
+// Module C: Score and Search Internal Library (Weighted)
 function searchLibrary(query, libraryData, isBroad = false) {
     if (!libraryData || libraryData.length === 0) return null;
     
@@ -188,9 +218,18 @@ function searchLibrary(query, libraryData, isBroad = false) {
 
     // Relevance Scoring Engine
     let scoredBooks = libraryData.map(book => {
-        const meta = (book.title + " " + (book.folders ? book.folders.join(" ") : "")).toLowerCase();
+        const titleLower = book.title.toLowerCase();
+        const folderLower = book.folders ? book.folders.join(" ").toLowerCase() : "";
         let score = 0;
-        searchWords.forEach(w => { if (meta.includes(w)) score += 10; });
+        
+        searchWords.forEach(w => { 
+            if (titleLower === w) score += 30; // Exact word match in title (Highest)
+            else if (titleLower.includes(w)) score += 15; // Partial word in title
+            
+            if (folderLower === w) score += 10; // Exact folder match
+            else if (folderLower.includes(w)) score += 5; // Partial folder match
+        });
+        
         return { book, score };
     }).filter(item => item.score > 0);
 
@@ -201,7 +240,7 @@ function searchLibrary(query, libraryData, isBroad = false) {
     return null;
 }
 
-// Module D: Fetch from Wikipedia API
+// Module D: Fetch Rich Data from Wikipedia API
 async function fetchWikipedia(query) {
     // 1. Direct Definition Intent
     const defMatch = query.match(/(?:what is|define|who is|explain|what are|meaning of|theory behind|concept of) (.+)/i);
@@ -210,7 +249,7 @@ async function fetchWikipedia(query) {
     if (defMatch) {
         searchTopic = removeStopwords(defMatch[1].replace(/\?$/, '').trim());
     } else {
-        // 2. Broad Topic Intent (If it's just a noun without a conversational trigger)
+        // 2. Broad Topic Intent
         const cleanQuery = removeStopwords(query.toLowerCase());
         if (cleanQuery.length > 2 && query.split(' ').length < 5) {
             searchTopic = cleanQuery;
@@ -227,12 +266,24 @@ async function fetchWikipedia(query) {
             if (searchData.query && searchData.query.search.length > 0) {
                 const topResultTitle = searchData.query.search[0].title;
                 
-                // Fetch the actual summary for that exact title
+                // Fetch the actual summary and image for that exact title
                 const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topResultTitle)}`);
                 if (summaryRes.ok) {
                     const wikiData = await summaryRes.json();
                     if (wikiData.type !== 'disambiguation' && wikiData.extract) {
-                        return `🧠 <strong>${wikiData.title}:</strong> ${wikiData.extract} <br><br><a href="${wikiData.content_urls.desktop.page}" target="_blank" style="color:var(--highlight-text);font-size:0.85em;text-decoration:underline;">Read more on Wikipedia</a>`;
+                        
+                        let imgHtml = '';
+                        if (wikiData.thumbnail && wikiData.thumbnail.source) {
+                            imgHtml = `<img src="${wikiData.thumbnail.source}" style="width:100%; max-height:140px; object-fit:cover; border-radius:6px; margin-bottom:8px; border:1px solid var(--border-color);">`;
+                        }
+
+                        return `
+                            <div style="background:var(--folder-bg); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
+                                ${imgHtml}
+                                <h3 style="margin-bottom:6px; color:var(--highlight-text); font-size:1.05em;">🧠 ${wikiData.title}</h3>
+                                <p style="font-size:0.9em; line-height:1.5; opacity:0.9;">${wikiData.extract}</p>
+                                <a href="${wikiData.content_urls.desktop.page}" target="_blank" style="display:inline-block; margin-top:8px; font-size:0.85em; color:var(--highlight-text); font-weight:bold; text-decoration:none;">Read full article ➔</a>
+                            </div>`;
                     }
                 }
             }
@@ -244,13 +295,12 @@ async function fetchWikipedia(query) {
 }
 
 // ==========================================
-// 4. MAIN ROUTER & ORCHESTRATOR
+// 5. MASTER ROUTER & ORCHESTRATOR
 // ==========================================
-
 async function processAIQuery(query, libraryData) {
     const qLower = query.toLowerCase().trim();
 
-    // Route 1: Small Talk & Emotion
+    // Route 1: Small Talk, App Control & Emotion
     const convoReply = matchConversation(query);
     if (convoReply) return { type: 'fact', reply: convoReply };
 
@@ -266,7 +316,7 @@ async function processAIQuery(query, libraryData) {
             matches: navMatches,
             prefix: rand([
                 "I found these for you. Now actually open them and read, don't just stare! 📁👇🏾",
-                "Here you go! I pulled up the best matches. Let's get to work. 🚀",
+                "Here you go! I pulled up the best matches based on title and folder relevance. 🚀",
                 "Found 'em! Click a link and let's start studying. 📖✨"
             ])
         };
@@ -282,7 +332,7 @@ async function processAIQuery(query, libraryData) {
         return {
             type: 'navigation',
             matches: fallbackMatches,
-            prefix: `I couldn't find a direct answer or definition, but I dug through your library and found these relevant files: 📁👇🏾`
+            prefix: `I couldn't find a dictionary definition, but I dug through your library and found these relevant files: 📁👇🏾`
         };
     }
 
