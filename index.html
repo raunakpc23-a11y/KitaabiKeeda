@@ -8,14 +8,12 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <!-- DATA FILES -->
-    <script src="data.js"></script>
-    <script src="lectures.js"></script>
-    <script src="mocktests.js"></script>
+    <script src="data.js?v=47"></script>
+    <script src="lectures.js?v=47"></script>
+    <script src="mocktests.js?v=47"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
@@ -47,7 +45,7 @@
             </div>
         </div>
 
-        <!-- DYNAMIC SEGMENTED CONTROL (MAX 4 MODULES) -->
+        <!-- DYNAMIC SEGMENTED CONTROL -->
         <div class="mode-selector" id="dynamic-mode-selector"></div>
 
         <!-- SEARCH CONTAINER -->
@@ -71,11 +69,10 @@
             </div>
         </div>
         
-        <!-- BOOK/FILE LIST -->
         <div class="book-list" id="book-list"></div>
     </div>
 
-    <!-- MUSIC & AMBIENT HUB MODAL -->
+    <!-- MUSIC PLAYER MODAL -->
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
@@ -139,7 +136,7 @@
                         <select id="pomo-setting-focus">
                             <option value="5">5 Minutes</option>
                             <option value="15">15 Minutes</option>
-                            <option value="25">25 Minutes (Standard)</option>
+                            <option value="25" selected>25 Minutes (Standard)</option>
                             <option value="45">45 Minutes (Deep Work)</option>
                             <option value="60">60 Minutes (1 Hour)</option>
                         </select>
@@ -147,7 +144,7 @@
                     <div class="pomo-setting-group">
                         <label>Break Duration:</label>
                         <select id="pomo-setting-break">
-                            <option value="5">5 Minutes</option>
+                            <option value="5" selected>5 Minutes</option>
                             <option value="10">10 Minutes</option>
                             <option value="15">15 Minutes</option>
                         </select>
@@ -155,7 +152,7 @@
                     <div class="pomo-setting-group">
                         <label>Auto-Start Next Session:</label>
                         <select id="pomo-setting-autostart">
-                            <option value="no">Disabled (Manual Start)</option>
+                            <option value="no" selected>Disabled (Manual Start)</option>
                             <option value="yes">Enabled (Continuous Flow)</option>
                         </select>
                     </div>
@@ -184,28 +181,37 @@
                         <label>App Font Size:</label>
                         <select id="pomo-setting-fontsize">
                             <option value="font-small">Small</option>
-                            <option value="font-medium">Medium (Default)</option>
+                            <option value="font-medium" selected>Medium (Default)</option>
                             <option value="font-large">Large</option>
+                        </select>
+                    </div>
+                    <div class="pomo-setting-group">
+                        <label>Pomodoro Icon Style:</label>
+                        <select id="pomo-setting-icon">
+                            <option value="🍅" selected>🍅 Tomato</option>
+                            <option value="🐉">🐉 Komodo Dragon</option>
+                            <option value="⚡">⚡ Lightning</option>
+                            <option value="🧠">🧠 Brain</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Zen Mode (Distraction Shield):</label>
                         <select id="pomo-setting-zen">
-                            <option value="no">Disabled (Normal View)</option>
+                            <option value="no" selected>Disabled (Normal View)</option>
                             <option value="yes">Enabled (Hides Sidebar on File View)</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Highlight Main Task on Main Page:</label>
                         <select id="pomo-setting-highlight">
-                            <option value="yes">Enabled (Show Banner)</option>
+                            <option value="yes" selected>Enabled (Show Banner)</option>
                             <option value="no">Disabled (Hidden)</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Motivational Bubbles:</label>
                         <select id="pomo-setting-bubbles">
-                            <option value="yes">Show Bubbles</option>
+                            <option value="yes" selected>Show Bubbles</option>
                             <option value="no">Hide Bubbles</option>
                         </select>
                     </div>
@@ -216,14 +222,14 @@
                     <div class="pomo-setting-group">
                         <label>AI Study Copilot (Chatbot):</label>
                         <select id="pomo-setting-ai">
-                            <option value="yes">Enabled</option>
+                            <option value="yes" selected>Enabled</option>
                             <option value="no">Disabled (Hide Copilot)</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Enable Pomodoro Widget:</label>
                         <select id="pomo-setting-enable">
-                            <option value="yes">Enabled</option>
+                            <option value="yes" selected>Enabled</option>
                             <option value="no">Disabled (Hidden)</option>
                         </select>
                     </div>
@@ -251,14 +257,14 @@
                         <label>Vibration Alert:</label>
                         <select id="pomo-setting-vibrate">
                             <option value="yes">Enabled</option>
-                            <option value="no">Disabled</option>
+                            <option value="no" selected>Disabled</option>
                         </select>
                     </div>
                     <div class="pomo-setting-group">
                         <label>Quote Rotation Speed:</label>
                         <select id="pomo-setting-rate">
                             <option value="10">Every 10 Seconds</option>
-                            <option value="30">Every 30 Seconds</option>
+                            <option value="30" selected>Every 30 Seconds</option>
                             <option value="60">Every 1 Minute</option>
                             <option value="300">Every 5 Minutes</option>
                         </select>
@@ -272,7 +278,7 @@
         </div>
     </div>
 
-    <!-- MAIN VIEWER & WORKSPACE -->
+    <!-- MAIN WORKSPACE -->
     <div class="main-content">
         <div class="reader-header">
             <div class="reader-header-info">
@@ -298,15 +304,12 @@
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
             </div>
             
-            <!-- Viewer 1 (Main) -->
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
-            
-            <!-- Viewer 2 (Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
             </div>
@@ -347,8 +350,8 @@
         </div>
     </div>
 
-    <!-- CORE SCRIPTS - MUST BE LOADED IN THIS ORDER -->
-    <script src="ai.js"></script>
-    <script src="script.js"></script>
+    <!-- CORE SCRIPTS -->
+    <script src="ai.js?v=47"></script>
+    <script src="script.js?v=47"></script>
 </body>
 </html>
