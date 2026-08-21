@@ -270,3 +270,24 @@ async function processAIQuery(query, libraryData, currentBook = null) {
         </div>`
     };
 }
+
+// UI HIJACKER (Auto-Rebrands HTML on load safely)
+document.addEventListener("DOMContentLoaded", () => {
+    const fab = document.getElementById('chat-fab-btn');
+    if (fab) { fab.innerHTML = '🦦'; fab.title = "Capybara Mate (Ctrl+Space)"; }
+
+    const headerSpan = document.querySelector('.chat-header span');
+    if (headerSpan) headerSpan.innerHTML = '🦦 Capybara Study Mate';
+
+    const introMsg = document.querySelector('.bot-msg');
+    if (introMsg && !localStorage.getItem('ai_chat_history')) {
+        introMsg.innerHTML = `
+            👋 <strong>Hi Mate! I'm Capybara, your Study Mate.</strong><br>
+            <i style="font-size:0.85em; opacity:0.8;">I am totally an AI. Definitely not a giant rodent.</i> 🦦<br><br>
+            • <strong>Search:</strong> <em>"Find math mock tests"</em><br>
+            • <strong>Read:</strong> <em>"What file am I looking at?"</em><br>
+            • <strong>App Tools:</strong> <em>"Open my scratchpad"</em><br>
+            • <strong>Or just say:</strong> <em>"Capybara"</em>
+        `;
+    }
+});
