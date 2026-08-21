@@ -360,17 +360,14 @@
                 
                 <div style="width:1px; height:24px; background:var(--border-color); margin:0 4px;"></div>
                 
-                <button id="analytics-btn" class="icon-btn" title="Analytics Dashboard">📊</button>
-                <button id="whiteboard-btn" class="icon-btn" title="Digital Scratchpad">🖌️</button>
-                
-                <button id="split-lock-btn" class="icon-btn" title="Toggle Split Lock" style="display:none;">🔓</button>
                 <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
-                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
+                <button id="notes-toggle-btn" class="icon-btn" title="Context Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
         
         <div class="reader-container" id="reader-container-main">
+            <!-- PLACEHOLDER -->
             <div class="placeholder-container" id="placeholder-box">
                 <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
@@ -384,9 +381,6 @@
                 </div>
             </div>
 
-            <!-- QoL 3: Draggable Split Resizer -->
-            <div id="split-resizer" class="resizer" style="display:none;"></div>
-            
             <!-- Viewer 2 (Standard Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
@@ -395,13 +389,13 @@
             <!-- Viewer 3 (Native OMR Simulator Panel) -->
             <div id="omr-panel" class="omr-panel" style="display:none;">
                 <div class="omr-header">
-                    <h3>Exam OMR Sheet</h3>
+                    <h3>Exam OMR</h3>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <button id="omr-grid-toggle" class="icon-btn" style="font-size:0.85em; border: 1px solid var(--border-color);">🔢 Grid</button>
                         <div id="omr-timer" class="omr-timer">03:00:00</div>
                     </div>
                 </div>
-                <!-- QoL 5: Exam Jump Grid -->
+                
                 <div id="omr-jump-grid" class="omr-jump-grid" style="display:none;"></div>
 
                 <div id="omr-questions-container" class="omr-questions-container">
@@ -423,7 +417,7 @@
                     <button class="icon-btn" id="close-notes-btn">✖</button>
                 </div>
             </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save!"></textarea>
+            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save specifically to the file you are reading!"></textarea>
         </div>
         
         <!-- AI COPILOT CHAT -->
@@ -448,6 +442,7 @@
         </div>
     </div>
 
+    <!-- CORE SCRIPTS -->
     <script src="ai.js"></script>
     <script src="script.js"></script>
 </body>
