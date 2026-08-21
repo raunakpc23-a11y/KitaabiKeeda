@@ -917,6 +917,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderDay(currentTTDate); 
         }
         else if (type === 'syllabus') {
+            // DETAILED JEE ADVANCED SYLLABUS INTEGRATED HERE
             const deepSyllabus = {
                 "Class12": {
                     "Physics": ["Electric Charges and Fields", "Electrostatic Potential and Capacitance", "Current Electricity", "Moving Charges and Magnetism", "Magnetism and Matter", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments", "Wave Optics", "Dual Nature of Radiation and Matter", "Atoms", "Nuclei", "Semiconductor Electronics"],
@@ -929,9 +930,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Maths": ["Sets Relations and Functions", "Complex Numbers and Quadratic Equations", "Matrices and Determinants", "Permutations and Combinations", "Binomial Theorem", "Sequence and Series", "Limit Continuity and Differentiability", "Integral Calculus", "Differential Equations", "Coordinate Geometry", "Three Dimensional Geometry", "Vector Algebra", "Statistics and Probability", "Trigonometry"]
                 },
                 "JEEAdv": {
-                    "Physics": ["General Physics", "Kinematics", "Laws of Motion", "Work Power Energy", "Conservation of Momentum", "Rigid Body Dynamics", "Gravitation", "Thermal Physics", "Electrostatics", "Current Electricity", "Magnetic Effects of Current", "Electromagnetic Induction", "Alternating Current", "Ray Optics", "Wave Optics", "Modern Physics"],
-                    "Chemistry": ["Concept of Atoms and Molecules", "Gaseous and Liquid States", "Atomic Structure", "Chemical Bonding", "Energetics", "Chemical Equilibrium", "Electrochemistry", "Chemical Kinetics", "Solid State", "Solutions", "Surface Chemistry", "Nuclear Chemistry", "Preparation and Properties of Non-Metals", "Preparation and Properties of Compounds", "Transition Elements", "Ores and Minerals", "Extractive Metallurgy", "Principles of Qualitative Analysis", "Basic Concepts of Organic Chemistry", "Alkanes Alkenes Alkynes", "Benzene", "Phenols", "Alkyl Halides", "Alcohols and Ethers", "Aldehydes and Ketones", "Carboxylic Acids and Derivatives", "Amines", "Carbohydrates Amino Acids and Peptides", "Practical Organic Chemistry"],
-                    "Maths": ["Algebra of Complex Numbers", "Quadratic Equations", "Sequences and Series", "Logarithms", "Permutations and Combinations", "Binomial Theorem", "Matrices and Determinants", "Probability", "Trigonometric Functions and Equations", "Solutions of Triangles", "Analytical Geometry 2D", "Analytical Geometry 3D", "Differential Calculus", "Integral Calculus", "Vectors"]
+                    "Physics": ["General Physics", "Kinematics", "Laws of Motion", "Work Power & Energy", "Center of Mass & Collision", "Rotational Dynamics", "Gravitation", "Properties of Matter & Fluid Mechanics", "Thermal Physics & Thermodynamics", "Electrostatics", "Current Electricity", "Magnetic Effects of Current", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics", "Wave Optics", "Dual Nature of Matter", "Atoms & Nuclei", "Semiconductors"],
+                    "Chemistry": ["Basic Concepts of Chemistry", "Atomic Structure", "Chemical Bonding", "Gaseous & Liquid States", "Chemical Thermodynamics", "Chemical Equilibrium", "Ionic Equilibrium", "Electrochemistry", "Chemical Kinetics", "Solid State", "Solutions", "Surface Chemistry", "Classification of Elements", "Hydrogen & s-Block", "p-Block Elements", "d & f-Block Elements", "Coordination Compounds", "Isolation of Metals", "Qualitative Salt Analysis", "GOC & Isomerism", "Hydrocarbons", "Alkyl & Aryl Halides", "Alcohols, Phenols & Ethers", "Aldehydes & Ketones", "Carboxylic Acids & Derivatives", "Amines", "Biomolecules & Polymers", "Practical Organic Chemistry (POC)"],
+                    "Maths": ["Sets, Relations & Functions", "Algebra of Complex Numbers", "Quadratic Equations", "Sequence & Series", "Logarithms", "Permutations & Combinations", "Binomial Theorem", "Matrices & Determinants", "Probability", "Trigonometric Functions & Equations", "Inverse Trigonometric Functions", "Properties of Triangles", "2D Geometry: Lines & Circles", "Conic Sections: Parabola", "Conic Sections: Ellipse & Hyperbola", "3D Geometry", "Limits & Continuity", "Differentiability & MOD", "Application of Derivatives", "Indefinite Integration", "Definite Integration", "Application of Integrals (Area)", "Differential Equations", "Vector Algebra"]
                 }
             };
 
@@ -1441,7 +1442,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         for (let i = 0; i < localStorage.length; i++) {
             let k = localStorage.key(i);
-            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable_pro_v2' || k === 'jee_syllabus')) {
+            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable_pro_v2' || k === 'study_syllabus_pro')) {
                 backupData.notes[k] = localStorage.getItem(k);
             }
         }
