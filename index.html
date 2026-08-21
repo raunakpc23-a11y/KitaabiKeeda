@@ -19,7 +19,6 @@
         <div class="sidebar-header">
             <div style="display:flex; align-items:center; gap:8px;">
                 <h2>📚 Study Library</h2>
-                <!-- QoL 6: Level Badge -->
                 <div id="user-level-badge" class="level-badge" title="Complete Focus Sessions to Level Up!">Lvl 1</div>
             </div>
             <div class="header-controls-group">
@@ -74,15 +73,14 @@
                     </label>
                 </div>
             </div>
-            
             <div class="book-list" id="book-list"></div>
         </div>
 
-        <!-- UTILITIES SIDEBAR MENU (Shown when Utilities is active) -->
+        <!-- UTILITIES SIDEBAR VIEW (Hidden by default) -->
         <div id="utilities-sidebar-view" style="display:none; padding: 20px; flex-direction:column; gap:12px;">
-            <button class="utility-menu-btn" id="util-btn-analytics">📊 Analytics Dashboard</button>
-            <button class="utility-menu-btn" id="util-btn-whiteboard">🖌️ Digital Scratchpad</button>
-            <button class="utility-menu-btn" id="util-btn-settings">⚙️ System Preferences</button>
+            <button class="utility-menu-btn" id="util-sidebar-analytics">📊 Open Analytics Dashboard</button>
+            <button class="utility-menu-btn" id="util-sidebar-whiteboard">🖌️ Open Digital Scratchpad</button>
+            <button class="utility-menu-btn" id="util-sidebar-settings">⚙️ System Preferences</button>
         </div>
     </div>
 
@@ -143,6 +141,7 @@
             </div>
 
             <div class="pomo-modal-body">
+                <!-- TAB 1: FOCUS -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
                         <label>Focus Duration:</label>
@@ -179,6 +178,7 @@
                     </div>
                 </div>
 
+                <!-- TAB 2: THEME -->
                 <div class="pomo-tab-content" id="tab-ui">
                     <div class="pomo-setting-group">
                         <label>Dark / Light Mode Shade:</label>
@@ -229,6 +229,7 @@
                     </div>
                 </div>
 
+                <!-- TAB 3: MODULES -->
                 <div class="pomo-tab-content" id="tab-modules">
                     <div class="pomo-setting-group">
                         <label>AI Study Copilot (Chatbot):</label>
@@ -250,6 +251,7 @@
                     </div>
                 </div>
 
+                <!-- TAB 4: AUDIO -->
                 <div class="pomo-tab-content" id="tab-audio">
                     <div class="pomo-setting-group">
                         <label>Alert Tone:</label>
@@ -288,6 +290,57 @@
         </div>
     </div>
 
+    <!-- ANALYTICS DASHBOARD MODAL -->
+    <div class="pomo-modal-overlay" id="analytics-modal-overlay">
+        <div class="pomo-modal" style="width: 520px;">
+            <div class="pomo-modal-header">
+                <span>📊 Study Analytics Dashboard</span>
+                <button class="icon-btn" id="analytics-close-modal">✖</button>
+            </div>
+            <div class="pomo-modal-body">
+                <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total-pomos">0</div>
+                        <div class="stat-label">Total Focus Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-streak" style="color: #ef4444;">0 🔥</div>
+                        <div class="stat-label">Current Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-hours">0.0</div>
+                        <div class="stat-label">Hours Studied</div>
+                    </div>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Last 30 Days Heatmap:</label>
+                    <div class="heatmap-grid" id="heatmap-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHITEBOARD OVERLAY -->
+    <div id="whiteboard-overlay" class="whiteboard-overlay">
+        <div class="whiteboard-header">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span style="font-weight:bold; margin-right:15px; font-size:1.1em;">🖌️ Scratchpad</span>
+                <button class="color-btn active" style="background:#f8fafc;" data-color="#f8fafc"></button>
+                <button class="color-btn" style="background:#ef4444;" data-color="#ef4444"></button>
+                <button class="color-btn" style="background:#3b82f6;" data-color="#3b82f6"></button>
+                <button class="color-btn" style="background:#22c55e;" data-color="#22c55e"></button>
+                <button class="icon-btn" id="wb-eraser" title="Eraser">🧹</button>
+                <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button class="icon-btn" id="wb-clear" title="Clear All">🗑️</button>
+                <button class="icon-btn" id="wb-download" title="Save PNG">💾</button>
+                <button class="icon-btn" id="wb-close" style="color:#ef4444;">✖</button>
+            </div>
+        </div>
+        <canvas id="wb-canvas"></canvas>
+    </div>
+
     <!-- MAIN WORKSPACE -->
     <div class="main-content">
         <div class="reader-header">
@@ -307,22 +360,23 @@
                 
                 <div style="width:1px; height:24px; background:var(--border-color); margin:0 4px;"></div>
                 
-                <!-- QoL 3: Split Lock Toggle -->
-                <button id="split-lock-btn" class="icon-btn" title="Lock Split Ratio" style="display:none;">🔓</button>
+                <button id="analytics-btn" class="icon-btn" title="Analytics Dashboard">📊</button>
+                <button id="whiteboard-btn" class="icon-btn" title="Digital Scratchpad">🖌️</button>
+                
+                <button id="split-lock-btn" class="icon-btn" title="Toggle Split Lock" style="display:none;">🔓</button>
                 <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
-                <button id="notes-toggle-btn" class="icon-btn" title="Context Notes" style="display:none;">📝</button>
+                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
         
         <div class="reader-container" id="reader-container-main">
-            <!-- PLACEHOLDER FIX -->
             <div class="placeholder-container" id="placeholder-box">
                 <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
             </div>
             
-            <!-- Viewer 1 (Main) -->
+            <!-- Viewer 1 (Main PDF/Video) -->
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
                 <div class="floating-nav" id="floating-nav">
@@ -333,36 +387,33 @@
             <!-- QoL 3: Draggable Split Resizer -->
             <div id="split-resizer" class="resizer" style="display:none;"></div>
             
-            <!-- Viewer 2 (Split) -->
+            <!-- Viewer 2 (Standard Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
             </div>
 
-            <!-- EXAM OMR PANEL -->
+            <!-- Viewer 3 (Native OMR Simulator Panel) -->
             <div id="omr-panel" class="omr-panel" style="display:none;">
                 <div class="omr-header">
-                    <h3>Exam OMR</h3>
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <!-- QoL 5: Grid Toggle Button -->
-                        <button id="omr-grid-toggle" class="icon-btn" style="font-size:0.9em; border: 1px solid var(--border-color);">🔢 Grid</button>
+                    <h3>Exam OMR Sheet</h3>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button id="omr-grid-toggle" class="icon-btn" style="font-size:0.85em; border: 1px solid var(--border-color);">🔢 Grid</button>
                         <div id="omr-timer" class="omr-timer">03:00:00</div>
                     </div>
                 </div>
-                
                 <!-- QoL 5: Exam Jump Grid -->
                 <div id="omr-jump-grid" class="omr-jump-grid" style="display:none;"></div>
 
-                <div id="omr-questions-container" class="omr-questions-container"></div>
-                <div class="omr-footer"><button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam</button></div>
-            </div>
-
-            <!-- UTILITIES FULL-SCREEN WORKSPACE -->
-            <div id="utilities-workspace" style="display:none; width:100%; height:100%; background:var(--reader-bg); flex-direction:column;">
-                <!-- Content Injected via JS (Analytics / Whiteboard) -->
+                <div id="omr-questions-container" class="omr-questions-container">
+                    <!-- JS Injected 75 Questions -->
+                </div>
+                <div class="omr-footer">
+                    <button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam & Score</button>
+                </div>
             </div>
         </div>
 
-        <!-- QUICK NOTES DRAWER (Context Aware) -->
+        <!-- QUICK NOTES DRAWER -->
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
                 <span id="notes-title-label">📝 Quick Notes</span>
@@ -372,7 +423,7 @@
                     <button class="icon-btn" id="close-notes-btn">✖</button>
                 </div>
             </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save specifically to the file you are reading!"></textarea>
+            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save!"></textarea>
         </div>
         
         <!-- AI COPILOT CHAT -->
@@ -397,7 +448,6 @@
         </div>
     </div>
 
-    <!-- CORE SCRIPTS -->
     <script src="ai.js"></script>
     <script src="script.js"></script>
 </body>
