@@ -3,9 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. STATE & STORAGE INITIALIZATION
     // ==========================================
     let masterLibrary = [];
-    let currentRoot = "IIT-JEE"; 
+    let currentRoot = "IIT-JEE"; // DEFAULT TABS UPDATE
     let currentSubject = "All";
-    window.currentActiveBook = null; // Exposed globally for AI context
+    window.currentActiveBook = null; // QoL 4 Context Variable
 
     let completedBooks = JSON.parse(localStorage.getItem('library-completed')) || [];
     let starredBooks = JSON.parse(localStorage.getItem('library-starred')) || [];
@@ -19,11 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!studyStats[todayStr]) studyStats[todayStr] = 0;
 
     const ALL_MODULES = [
-        { id: 'CLASS 10', label: '🎓 Class 10' },
+        { id: 'CLASS 10', label: '🎓 Class 10' }, // PROPER NAMING
         { id: 'IIT-JEE', label: '⚡ IIT-JEE' },
         { id: 'LECTURES', label: '📺 Lectures' },
         { id: 'SIMULATOR', label: '⏱️ Simulator' },
-        { id: 'UTILITIES', label: '🛠️ Utilities' },
+        { id: 'UTILITIES', label: '🛠️ Utilities' }, // ADDED UTILITIES
         { id: 'PAST PAPERS', label: '📄 Past Papers' },
         { id: 'FLASHCARDS', label: '📇 Flashcards' },
         { id: 'FAVORITES', label: '⭐ Favorites' }
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const defaultSettings = {
         enabled: 'yes', focusTime: 25, breakTime: 5, quoteRate: 30, sound: 'beep', vibrate: 'no', icon: '🍅', bubbles: 'yes', themeShade: 'theme-amoled', highlightTask: 'yes',
-        aiEnabled: 'yes', activeModules: ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'],
+        aiEnabled: 'yes', activeModules: ['IIT-JEE', 'LECTURES', 'SIMULATOR', 'UTILITIES'], // DEFAULT TABS
         fontSize: 'font-medium', autoStart: 'no', volume: 0.5, zenMode: 'no'
     };
 
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let isPomoRunning = false;
     let isFocusMode = true;
 
-    // Split Screen State
+    // Split Screen Resizer State
     let isSplitLocked = false;
     let isResizing = false;
 
@@ -60,71 +60,69 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
 
     // ==========================================
-    // 2. DOM CACHING (SAFE MODE)
+    // 2. DOM CACHING
     // ==========================================
     const D = {
-        sidebar: document.getElementById('sidebar'),
-        overlay: document.getElementById('sidebar-overlay'),
-        themeToggle: document.getElementById('theme-toggle'),
-        lvlBadge: document.getElementById('user-level-badge'),
-        
-        libView: document.getElementById('library-sidebar-view'),
-        utilView: document.getElementById('utilities-sidebar-view'),
-        modeSelector: document.getElementById('dynamic-mode-selector'),
-        bookList: document.getElementById('book-list'),
+        pomoTimeDisplay: document.getElementById('pomo-time'),
+        pomoToggleBtn: document.getElementById('pomo-toggle'),
+        pomoResetBtn: document.getElementById('pomo-reset'),
+        pomoStatusText: document.getElementById('pomo-status-text'),
+        pomoCard: document.getElementById('pomo-card'),
+        pomoBubble: document.getElementById('pomo-bubble'),
+        pomoContainer: document.getElementById('pomo-container'),
+        pomoLogoIcon: document.getElementById('pomo-logo-icon'),
+        pomoHighlightBox: document.getElementById('pomo-highlight-box'),
+        pomoHighlightText: document.getElementById('pomo-highlight-text'),
+
+        modalOverlay: document.getElementById('pomo-modal-overlay'),
+        musicModalOverlay: document.getElementById('music-modal-overlay'),
+        settingsSaveBtn: document.getElementById('pomo-save-settings'),
+
+        bookListElement: document.getElementById('book-list'),
         searchBar: document.getElementById('search-bar'),
-        
-        mainContainer: document.getElementById('reader-container-main'),
-        view1: document.getElementById('viewer-wrapper'),
-        view2: document.getElementById('viewer-wrapper-split'),
-        resizer: document.getElementById('split-resizer'),
-        phBox: document.getElementById('placeholder-box'),
-        utilWorkspace: document.getElementById('utilities-workspace'),
-        
+        themeToggle: document.getElementById('theme-toggle'),
+        viewerWrapper: document.getElementById('viewer-wrapper'),
+        viewerWrapperSplit: document.getElementById('viewer-wrapper-split'),
         bookFrame: document.getElementById('book-frame'),
         bookFrameSplit: document.getElementById('book-frame-split'),
         
-        btnSplit: document.getElementById('split-screen-btn'),
-        btnLock: document.getElementById('split-lock-btn'),
-        btnExam: document.getElementById('start-exam-btn'),
-        btnFull: document.getElementById('fullscreen-btn'),
-        btnNotes: document.getElementById('notes-toggle-btn'),
-        
-        notesPanel: document.getElementById('notes-panel'),
-        notesArea: document.getElementById('notes-area'),
-        notesLabel: document.getElementById('notes-title-label'),
-        closeNotesBtn: document.getElementById('close-notes-btn'),
-        notesCopyBtn: document.getElementById('notes-copy-btn'),
-        notesDlBtn: document.getElementById('notes-dl-btn'),
-        
-        omrPanel: document.getElementById('omr-panel'),
-        omrContainer: document.getElementById('omr-questions-container'),
-        omrGrid: document.getElementById('omr-jump-grid'),
-        
+        // Header Actions
+        playlistDropdown: document.getElementById('playlist-dropdown'),
+        downloadBtn: document.getElementById('download-btn'),
+        startExamBtn: document.getElementById('start-exam-btn'),
+        splitScreenBtn: document.getElementById('split-screen-btn'),
+        splitLockBtn: document.getElementById('split-lock-btn'),
+        fullscreenBtn: document.getElementById('fullscreen-btn'),
+        selectorBox: document.getElementById('dynamic-mode-selector'),
+
+        chatFab: document.getElementById('chat-fab-btn'),
         chatWindow: document.getElementById('chat-window'),
+        chatClose: document.getElementById('chat-close-btn'),
         chatBody: document.getElementById('chat-body'),
         chatInput: document.getElementById('chat-input'),
         chatSend: document.getElementById('chat-send-btn'),
-        chatFab: document.getElementById('chat-fab-btn'),
-        chatClose: document.getElementById('chat-close-btn')
+
+        desktopSidebarToggle: document.getElementById('desktop-sidebar-toggle'),
+        sidebar: document.getElementById('sidebar'),
+
+        notesPanel: document.getElementById('notes-panel'),
+        notesArea: document.getElementById('notes-area'),
+        notesToggleBtn: document.getElementById('notes-toggle-btn'),
+        closeNotesBtn: document.getElementById('close-notes-btn'),
+        notesCopyBtn: document.getElementById('notes-copy-btn'),
+        notesDlBtn: document.getElementById('notes-dl-btn'),
+        notesLabel: document.getElementById('notes-title-label'),
+
+        libView: document.getElementById('library-sidebar-view'),
+        utilView: document.getElementById('utilities-sidebar-view'),
+        phBox: document.getElementById('placeholder-box'),
+        resizer: document.getElementById('split-resizer'),
+        lvlBadge: document.getElementById('user-level-badge'),
+
+        omrPanel: document.getElementById('omr-panel'),
+        omrContainer: document.getElementById('omr-questions-container'),
+        omrGrid: document.getElementById('omr-jump-grid')
     };
-
-    const pomoTimeDisplay = document.getElementById('pomo-time');
-    const pomoToggleBtn = document.getElementById('pomo-toggle');
-    const pomoResetBtn = document.getElementById('pomo-reset');
-    const pomoCard = document.getElementById('pomo-card');
-    const pomoBubble = document.getElementById('pomo-bubble');
-    const pomoContainer = document.getElementById('pomo-container');
-    const pomoLogoIcon = document.getElementById('pomo-logo-icon');
-    const pomoHighlightBox = document.getElementById('pomo-highlight-box');
-    const pomoHighlightText = document.getElementById('pomo-highlight-text');
-
-    const modalOverlay = document.getElementById('pomo-modal-overlay');
-    const musicModalOverlay = document.getElementById('music-modal-overlay');
-    const settingsSaveBtn = document.getElementById('pomo-save-settings');
-
-    const playlistDropdown = document.getElementById('playlist-dropdown');
-    const desktopSidebarToggle = document.getElementById('desktop-sidebar-toggle');
 
     // ==========================================
     // 3. GAMIFICATION (Level Engine)
@@ -229,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const musicPresets = {
         'spotify-lofi': 'https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0',
         'spotify-focus': 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
+        'spotify-classical': 'https://open.spotify.com/embed/playlist/37i9dQZF1DWV0gynK7Pt6v?utm_source=generator&theme=0',
         'yt-lofi': 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=0'
     };
 
@@ -262,39 +261,43 @@ document.addEventListener("DOMContentLoaded", () => {
         const url = document.getElementById('custom-music-url').value.trim();
         if (!url) return;
         const musicFrame = document.getElementById('music-frame');
-        if(!musicFrame) return;
-
-        musicFrame.style.display = 'block';
-        if (url.includes('open.spotify.com')) {
-            musicFrame.src = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
-        } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            let videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1].split('?')[0];
-            if (videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
-        } else {
-            musicFrame.src = url;
+        
+        if (musicFrame) {
+            musicFrame.style.display = 'block';
+            if (url.includes('open.spotify.com')) {
+                musicFrame.src = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('youtu.be/')[1].split('?')[0];
+                if (videoId) musicFrame.src = `https://www.youtube.com/embed/${videoId}`;
+            } else {
+                musicFrame.src = url;
+            }
         }
     });
 
     // ==========================================
     // 6. SETTINGS & MODALS LOGIC
     // ==========================================
-    const openSettingsBtn = document.getElementById('pomo-open-settings');
-    if (openSettingsBtn) {
-        openSettingsBtn.addEventListener('click', () => { 
-            renderModuleCheckboxes(); 
-            if (modalOverlay) modalOverlay.classList.add('open'); 
+    document.getElementById('pomo-open-settings')?.addEventListener('click', () => { 
+        renderModuleCheckboxes(); 
+        if (D.modalOverlay) D.modalOverlay.classList.add('open'); 
+    });
+    
+    document.getElementById('pomo-close-modal')?.addEventListener('click', () => {
+        if (D.modalOverlay) D.modalOverlay.classList.remove('open');
+    });
+
+    if (D.modalOverlay) {
+        D.modalOverlay.addEventListener('click', (e) => { 
+            if (e.target === D.modalOverlay) D.modalOverlay.classList.remove('open'); 
         });
     }
 
-    const closeSettingsBtn = document.getElementById('pomo-close-modal');
-    if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => { if (modalOverlay) modalOverlay.classList.remove('open'); });
+    document.getElementById('music-open-btn')?.addEventListener('click', () => D.musicModalOverlay?.classList.add('open'));
+    document.getElementById('music-close-modal')?.addEventListener('click', () => D.musicModalOverlay?.classList.remove('open'));
+    if (D.musicModalOverlay) D.musicModalOverlay.addEventListener('click', (e) => { if (e.target === D.musicModalOverlay) D.musicModalOverlay.classList.remove('open'); });
 
-    if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove('open'); });
-
-    document.getElementById('music-open-btn')?.addEventListener('click', () => musicModalOverlay?.classList.add('open'));
-    document.getElementById('music-close-modal')?.addEventListener('click', () => musicModalOverlay?.classList.remove('open'));
-    if(musicModalOverlay) musicModalOverlay.addEventListener('click', (e) => { if (e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); });
-
+    // Modal Tabs
     document.querySelectorAll('.pomo-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.pomo-tab-btn').forEach(b => b.classList.remove('active'));
@@ -316,15 +319,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function applyPomoSettingsUI() {
-        if (pomoContainer) pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
-        if (pomoBubble) pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
-        if (pomoLogoIcon) pomoLogoIcon.textContent = pomoSettings.icon || '🍅';
+        if (D.pomoContainer) D.pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
+        if (D.pomoBubble) D.pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
+        if (D.pomoLogoIcon) D.pomoLogoIcon.textContent = pomoSettings.icon || '🍅';
         
         if (D.chatFab) D.chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
         if (pomoSettings.aiEnabled === 'no' && D.chatWindow) D.chatWindow.classList.remove('open');
 
         document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
 
+        // Safely prefill form fields
         setSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
         setSettingVal('pomo-setting-enable', pomoSettings.enabled);
         setSettingVal('pomo-setting-focus', pomoSettings.focusTime);
@@ -343,15 +347,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
             let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
-            if (pomoHighlightText) pomoHighlightText.textContent = firstIncomplete.text;
-            if (pomoHighlightBox) pomoHighlightBox.style.display = 'flex';
+            if (D.pomoHighlightText) D.pomoHighlightText.textContent = firstIncomplete.text;
+            if (D.pomoHighlightBox) D.pomoHighlightBox.style.display = 'flex';
         } else {
-            if (pomoHighlightBox) pomoHighlightBox.style.display = 'none';
+            if (D.pomoHighlightBox) D.pomoHighlightBox.style.display = 'none';
         }
     }
 
-    if (settingsSaveBtn) {
-        settingsSaveBtn.addEventListener('click', () => {
+    if (D.settingsSaveBtn) {
+        D.settingsSaveBtn.addEventListener('click', () => {
             pomoSettings.themeShade = getSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
             pomoSettings.enabled = getSettingVal('pomo-setting-enable', pomoSettings.enabled);
             pomoSettings.focusTime = parseInt(getSettingVal('pomo-setting-focus', pomoSettings.focusTime));
@@ -375,21 +379,21 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (!isPomoRunning) {
                 pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
-                if (pomoTimeDisplay) {
+                if (D.pomoTimeDisplay) {
                     let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
                     let s = String(pomoSeconds % 60).padStart(2, '0');
-                    pomoTimeDisplay.textContent = `${m}:${s}`;
+                    D.pomoTimeDisplay.textContent = `${m}:${s}`;
                 }
             }
 
             renderDynamicTopNav();
             applyPomoSettingsUI();
-            if (modalOverlay) modalOverlay.classList.remove('open');
+            if (D.modalOverlay) D.modalOverlay.classList.remove('open');
         });
     }
 
     // ==========================================
-    // 7. MODULE CHECKBOX & DYNAMIC NAV (QoL Top Nav)
+    // 7. MODULE CHECKBOX & DYNAMIC NAV
     // ==========================================
     function renderModuleCheckboxes() {
         const grid = document.getElementById('module-checkbox-grid');
@@ -414,8 +418,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderDynamicTopNav() {
-        if (!D.modeSelector) return;
-        D.modeSelector.innerHTML = '';
+        if (!D.selectorBox) return;
+        D.selectorBox.innerHTML = '';
         let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
         if (selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
@@ -431,159 +435,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentRoot = mod.id;
-                handleRootChange();
+                
+                // ROUTING: Utilities vs Library
+                if (currentRoot === 'UTILITIES') {
+                    if (D.libView) D.libView.style.display = 'none';
+                    if (D.utilView) D.utilView.style.display = 'flex';
+                    if (D.phBox) {
+                        D.phBox.querySelector('h2').innerText = "UTILITIES HUB";
+                        D.phBox.querySelector('p').innerText = "Select a tool from the sidebar to launch it.";
+                        D.phBox.style.display = 'block';
+                    }
+                    if (D.view1) D.view1.style.display = 'none';
+                    if (D.view2) D.view2.style.display = 'none';
+                    if (D.omrPanel) D.omrPanel.style.display = 'none';
+                    if (D.resizer) D.resizer.style.display = 'none';
+                    if (D.btnSplit) D.btnSplit.style.display = 'none';
+                    if (D.btnLock) D.btnLock.style.display = 'none';
+                    if (D.btnExam) D.btnExam.style.display = 'none';
+                } else {
+                    if (D.utilView) D.utilView.style.display = 'none';
+                    if (D.libView) D.libView.style.display = 'flex';
+                    if (D.searchBar) D.searchBar.value = ''; 
+                    if (D.phBox) {
+                        D.phBox.querySelector('h2').innerText = "COMING NEVER";
+                        D.phBox.querySelector('p').innerText = "This was made with AI and the person who gave the command is busy with other shit.";
+                        D.phBox.style.display = 'block';
+                    }
+                    if (D.view1) D.view1.style.display = 'none';
+                    if (D.view2) D.view2.style.display = 'none';
+                    if (D.omrPanel) D.omrPanel.style.display = 'none';
+                    filterAndRender();
+                }
             });
-            D.modeSelector.appendChild(btn);
+            D.selectorBox.appendChild(btn);
         });
-        handleRootChange();
-    }
-
-    function handleRootChange() {
-        if (D.utilWorkspace) D.utilWorkspace.style.display = 'none';
-        if (D.phBox) D.phBox.style.display = 'block';
-        if (D.view1) D.view1.style.display = 'none';
-        if (D.view2) D.view2.style.display = 'none';
-        if (D.omrPanel) D.omrPanel.style.display = 'none';
-        if (D.resizer) D.resizer.style.display = 'none';
-        if (D.btnExam) D.btnExam.style.display = 'none';
-        if (D.btnSplit) D.btnSplit.style.display = 'none';
-        if (D.btnLock) D.btnLock.style.display = 'none';
-        if (D.btnNotes) D.btnNotes.style.display = 'none';
-        
-        window.currentActiveBook = null; 
-        isSplitActive = false;
-        if (D.mainContainer) D.mainContainer.classList.remove('split-active');
-
-        if (currentRoot === 'UTILITIES') {
-            if (D.libView) D.libView.style.display = 'none';
-            if (D.utilView) D.utilView.style.display = 'flex';
-            if (D.phBox) {
-                D.phBox.querySelector('h2').innerText = "UTILITIES HUB";
-                D.phBox.querySelector('p').innerText = "Select a tool from the sidebar to launch the workspace.";
-            }
-        } else {
-            if (D.utilView) D.utilView.style.display = 'none';
-            if (D.libView) D.libView.style.display = 'block';
-            if (D.searchBar) D.searchBar.value = ''; 
-            if (D.phBox) {
-                D.phBox.querySelector('h2').innerText = "COMING NEVER";
-                D.phBox.querySelector('p').innerText = "This was made with AI and the person who gave the command is busy with other shit.";
-            }
-            filterAndRender();
-        }
+        filterAndRender();
     }
 
     // ==========================================
-    // 8. UTILITIES WORKSPACE (Analytics & Whiteboard)
-    // ==========================================
-    document.getElementById('util-btn-analytics')?.addEventListener('click', () => openUtilityWorkspace('analytics'));
-    document.getElementById('util-btn-whiteboard')?.addEventListener('click', () => openUtilityWorkspace('whiteboard'));
-    document.getElementById('util-btn-settings')?.addEventListener('click', () => document.getElementById('pomo-modal-overlay')?.classList.add('open'));
-
-    function openUtilityWorkspace(type) {
-        if (!D.utilWorkspace) return;
-        if (D.phBox) D.phBox.style.display = 'none';
-        D.utilWorkspace.style.display = 'flex';
-        
-        if (type === 'analytics') {
-            let total = 0; let streak = 0; let currDate = new Date();
-            for (let date in studyStats) total += studyStats[date];
-            while(true) {
-                let dStr = currDate.toISOString().split('T')[0];
-                if (studyStats[dStr] > 0) { streak++; currDate.setDate(currDate.getDate() - 1); } 
-                else break;
-            }
-
-            let heatHTML = '';
-            let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 41); 
-            for(let i=0; i<42; i++) {
-                let str = heatDate.toISOString().split('T')[0];
-                let count = studyStats[str] || 0;
-                let lvl = count > 6 ? 'lvl-4' : count > 4 ? 'lvl-3' : count > 2 ? 'lvl-2' : count > 0 ? 'lvl-1' : '';
-                heatHTML += `<div class="heatmap-box ${lvl}" title="${str}: ${count} sessions"></div>`;
-                heatDate.setDate(heatDate.getDate() + 1);
-            }
-
-            D.utilWorkspace.innerHTML = `
-                <div class="util-workspace-inner">
-                    <h2 style="font-size:2em; margin-bottom:30px;">📊 Study Analytics</h2>
-                    <div class="util-dashboard-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">${total}</div>
-                            <div class="stat-label">Total Focus Sessions</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value" style="color:var(--danger);">${streak} 🔥</div>
-                            <div class="stat-label">Current Streak</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">${((total * pomoSettings.focusTime) / 60).toFixed(1)}</div>
-                            <div class="stat-label">Hours Studied</div>
-                        </div>
-                    </div>
-                    <div class="heatmap-container">
-                        <label style="font-weight:bold; opacity:0.8;">Focus History (Last 6 Weeks)</label>
-                        <div class="heatmap-grid" style="grid-template-columns: repeat(14, 1fr);">${heatHTML}</div>
-                    </div>
-                </div>
-            `;
-        } 
-        else if (type === 'whiteboard') {
-            D.utilWorkspace.innerHTML = `
-                <div style="display:flex; flex-direction:column; height:100%; width:100%;">
-                    <div style="padding:10px 20px; display:flex; justify-content:space-between; background:var(--folder-bg); border-bottom:1px solid var(--border-color);">
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            <span style="font-weight:bold;">🖌️ Scratchpad</span>
-                            <button class="color-btn active" data-color="#f8fafc" style="background:#f8fafc;"></button>
-                            <button class="color-btn" data-color="#ef4444" style="background:#ef4444;"></button>
-                            <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6;"></button>
-                            <button class="color-btn" data-color="#22c55e" style="background:#22c55e;"></button>
-                            <button class="icon-btn" id="wb-eraser">🧹</button>
-                            <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
-                        </div>
-                        <button class="icon-btn" id="wb-clear">🗑️ Clear</button>
-                    </div>
-                    <canvas id="main-canvas" style="flex-grow:1; cursor:crosshair;"></canvas>
-                </div>
-            `;
-            initWhiteboard(document.getElementById('main-canvas'));
-        }
-        if (window.innerWidth <= 800 && sidebar) sidebar.classList.add('collapsed');
-    }
-
-    function initWhiteboard(canvas) {
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let drawing = false, color = '#f8fafc', size = 3;
-
-        function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight - 50;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        document.querySelectorAll('.color-btn').forEach(b => b.addEventListener('click', e => {
-            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
-            e.target.classList.add('active');
-            color = e.target.getAttribute('data-color');
-        }));
-        document.getElementById('wb-eraser')?.addEventListener('click', () => color = getComputedStyle(document.body).getPropertyValue('--reader-bg').trim());
-        document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0,0, canvas.width, canvas.height));
-        document.getElementById('wb-size')?.addEventListener('input', e => size = e.target.value);
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
-        }
-        canvas.addEventListener('mousedown', e => { drawing = true; const p=getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
-        canvas.addEventListener('mousemove', e => { if(!drawing) return; const p=getPos(e); ctx.lineTo(p.x, p.y); ctx.strokeStyle=color; ctx.lineWidth=size; ctx.lineCap='round'; ctx.stroke(); });
-        canvas.addEventListener('mouseup', () => drawing = false);
-        canvas.addEventListener('mouseout', () => drawing = false);
-    }
-
-    // ==========================================
-    // 9. TASKS & POMODORO LOGIC
+    // 8. TASKS & POMODORO LOGIC
     // ==========================================
     function renderTasks() {
         const listEl = document.getElementById('pomo-task-list');
@@ -618,22 +508,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function updatePomoDisplay() {
-        if (!pomoTimeDisplay) return;
+        if (!D.pomoTimeDisplay) return;
         let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
         let s = String(pomoSeconds % 60).padStart(2, '0');
-        pomoTimeDisplay.textContent = `${m}:${s}`;
+        D.pomoTimeDisplay.textContent = `${m}:${s}`;
     }
 
-    pomoToggleBtn?.addEventListener('click', () => {
+    D.pomoToggleBtn?.addEventListener('click', () => {
         if (isPomoRunning) {
             clearInterval(pomoInterval);
             isPomoRunning = false;
-            pomoToggleBtn.textContent = '▶️';
-            if (pomoCard) pomoCard.classList.remove('running');
+            D.pomoToggleBtn.textContent = '▶️';
+            if (D.pomoCard) D.pomoCard.classList.remove('running');
         } else {
             isPomoRunning = true;
-            pomoToggleBtn.textContent = '⏸️';
-            if (pomoCard) pomoCard.classList.add('running');
+            D.pomoToggleBtn.textContent = '⏸️';
+            if (D.pomoCard) D.pomoCard.classList.add('running');
             pomoInterval = setInterval(() => {
                 if (pomoSeconds > 0) {
                     pomoSeconds--;
@@ -641,10 +531,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     clearInterval(pomoInterval);
                     isPomoRunning = false;
-                    pomoToggleBtn.textContent = '▶️';
-                    if (pomoCard) pomoCard.classList.remove('running');
+                    D.pomoToggleBtn.textContent = '▶️';
+                    if (D.pomoCard) D.pomoCard.classList.remove('running');
                     
-                    // Add to analytics & Level Up!
+                    // Analytics & Level Up
                     studyStats[todayStr]++;
                     localStorage.setItem('study_stats', JSON.stringify(studyStats));
                     updateGamification();
@@ -655,75 +545,84 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    pomoResetBtn?.addEventListener('click', () => {
+    D.pomoResetBtn?.addEventListener('click', () => {
         clearInterval(pomoInterval);
         isPomoRunning = false;
         pomoSeconds = pomoSettings.focusTime * 60;
-        if (pomoToggleBtn) pomoToggleBtn.textContent = '▶️';
-        if (pomoCard) pomoCard.classList.remove('running');
+        if (D.pomoToggleBtn) D.pomoToggleBtn.textContent = '▶️';
+        if (D.pomoCard) D.pomoCard.classList.remove('running');
         updatePomoDisplay();
     });
 
     // ==========================================
-    // 10. HOTKEYS, SPLIT SCREEN & CONTEXT NOTES
+    // 9. FILE VIEWER, SPLIT SCREEN & UTILITIES
     // ==========================================
-    if (D.themeToggle) {
-        D.themeToggle.addEventListener('click', () => {
-            pomoSettings.themeShade = pomoSettings.themeShade === 'theme-light' ? 'theme-amoled' : 'theme-light';
-            D.themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
-            applyPomoSettingsUI();
-            localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
-        });
+    function toggleMobileMenu() {
+        if (D.sidebar) D.sidebar.classList.toggle('open');
+        if (D.overlay) D.overlay.classList.toggle('open');
     }
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', toggleMobileMenu);
+    D.overlay?.addEventListener('click', toggleMobileMenu);
 
-    if (D.desktopSidebarToggle && D.sidebar) {
-        D.desktopSidebarToggle.addEventListener('click', () => {
-            D.sidebar.classList.toggle('collapsed');
-            D.desktopSidebarToggle.textContent = D.sidebar.classList.contains('collapsed') ? '▶' : '◀';
-        });
-    }
+    D.desktopSidebarToggle?.addEventListener('click', () => {
+        if (D.sidebar) D.sidebar.classList.toggle('collapsed');
+        D.desktopSidebarToggle.textContent = D.sidebar.classList.contains('collapsed') ? '▶' : '◀';
+    });
 
-    if (D.fullscreenBtn) {
-        D.fullscreenBtn.addEventListener('click', () => {
-            if (!D.mainContainer) return;
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (D.mainContainer.requestFullscreen) D.mainContainer.requestFullscreen();
-                else if (D.mainContainer.webkitRequestFullscreen) D.mainContainer.webkitRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            }
-        });
-    }
+    D.themeToggle?.addEventListener('click', () => {
+        pomoSettings.themeShade = pomoSettings.themeShade === 'theme-light' ? 'theme-amoled' : 'theme-light';
+        D.themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
+        applyPomoSettingsUI();
+        localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
+    });
 
-    // Split Screen Draggable Logic (QoL 3)
-    if (D.btnSplit && D.resizer && D.mainContainer) {
+    D.fullscreenBtn?.addEventListener('click', () => {
+        const container = document.getElementById('reader-container-main');
+        if (!container) return;
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (container.requestFullscreen) container.requestFullscreen();
+            else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        }
+    });
+
+    // QoL 3: Split Screen & Draggable Resizer Logic
+    if (D.btnSplit) {
         D.btnSplit.addEventListener('click', () => {
             isSplitActive = !isSplitActive;
+            const mainContainer = document.getElementById('reader-container-main');
+            
+            if (!mainContainer || !D.viewerWrapperSplit || !D.bookFrameSplit) return;
+
             if (isSplitActive) {
-                D.mainContainer.classList.add('split-active');
-                if (D.view2) D.view2.style.display = 'block';
-                if (D.resizer) D.resizer.style.display = 'block';
-                if (D.btnLock) D.btnLock.style.display = 'flex';
-                if (D.bookFrameSplit && D.bookFrame) D.bookFrameSplit.src = D.bookFrame.src;
-                
-                if (D.view1) D.view1.style.width = '50%';
-                if (D.view2) D.view2.style.width = '50%';
+                mainContainer.classList.add('split-active');
+                D.viewerWrapperSplit.style.display = 'block';
+                if (D.bookFrame) D.bookFrameSplit.src = D.bookFrame.src;
                 D.btnSplit.style.backgroundColor = 'var(--success)';
                 if (D.omrPanel) D.omrPanel.style.display = 'none';
+                
+                // Show resizer and lock
+                if (D.resizer) D.resizer.style.display = 'block';
+                if (D.btnLock) D.btnLock.style.display = 'flex';
+                if (D.view1) D.view1.style.width = '50%';
+                if (D.view2) D.view2.style.width = '50%';
             } else {
-                D.mainContainer.classList.remove('split-active');
-                if (D.view2) D.view2.style.display = 'none';
+                mainContainer.classList.remove('split-active');
+                D.viewerWrapperSplit.style.display = 'none';
+                D.bookFrameSplit.src = '';
+                D.btnSplit.style.backgroundColor = '';
+                
+                // Hide resizer and lock
                 if (D.resizer) D.resizer.style.display = 'none';
                 if (D.btnLock) D.btnLock.style.display = 'none';
-                if (D.bookFrameSplit) D.bookFrameSplit.src = '';
-                
                 if (D.view1) D.view1.style.width = '100%';
-                D.btnSplit.style.backgroundColor = '';
             }
         });
+    }
 
-        // Toggle Lock
+    if (D.btnLock && D.resizer) {
         D.btnLock.addEventListener('click', () => {
             isSplitLocked = !isSplitLocked;
             D.btnLock.textContent = isSplitLocked ? '🔒' : '🔓';
@@ -736,14 +635,15 @@ document.addEventListener("DOMContentLoaded", () => {
             isResizing = true;
             D.resizer.classList.add('dragging');
             document.body.style.cursor = 'col-resize';
-            if(D.view1) D.view1.style.pointerEvents = 'none';
-            if(D.view2) D.view2.style.pointerEvents = 'none';
+            if (D.view1) D.view1.style.pointerEvents = 'none';
+            if (D.view2) D.view2.style.pointerEvents = 'none';
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (!isResizing) return;
+            if (!isResizing || !D.mainContainer) return;
             const containerRect = D.mainContainer.getBoundingClientRect();
             let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+            // Limit boundary 20% to 80%
             if (newWidth < 20) newWidth = 20;
             if (newWidth > 80) newWidth = 80;
             if (D.view1) D.view1.style.width = `${newWidth}%`;
@@ -755,16 +655,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 isResizing = false;
                 D.resizer.classList.remove('dragging');
                 document.body.style.cursor = 'default';
-                if(D.view1) D.view1.style.pointerEvents = 'auto';
-                if(D.view2) D.view2.style.pointerEvents = 'auto';
+                if (D.view1) D.view1.style.pointerEvents = 'auto';
+                if (D.view2) D.view2.style.pointerEvents = 'auto';
             }
         });
     }
 
-    // Context Aware Notes (QoL 2)
+    // QoL 2: Context Aware Notes
     let currentNoteKey = 'quick_notes_general';
-    if (D.notesArea) D.notesArea.addEventListener('input', () => localStorage.setItem(currentNoteKey, D.notesArea.value));
+    D.notesToggleBtn?.addEventListener('click', () => D.notesPanel?.classList.toggle('open'));
+    D.closeNotesBtn?.addEventListener('click', () => D.notesPanel?.classList.remove('open'));
     
+    if (D.notesArea) {
+        D.notesArea.addEventListener('input', () => localStorage.setItem(currentNoteKey, D.notesArea.value));
+    }
+
     function loadContextNotes(bookTitle) {
         if (!D.notesArea || !D.notesLabel) return;
         if (bookTitle) {
@@ -777,29 +682,119 @@ document.addEventListener("DOMContentLoaded", () => {
         D.notesArea.value = localStorage.getItem(currentNoteKey) || '';
     }
 
-    if (D.btnNotes && D.notesPanel) D.btnNotes.addEventListener('click', () => D.notesPanel.classList.toggle('open'));
-    if (D.closeNotesBtn && D.notesPanel) D.closeNotesBtn.addEventListener('click', () => D.notesPanel.classList.remove('open'));
+    D.notesCopyBtn?.addEventListener('click', () => {
+        if (!D.notesArea) return;
+        navigator.clipboard.writeText(D.notesArea.value).then(() => {
+            D.notesCopyBtn.textContent = '✅';
+            setTimeout(() => D.notesCopyBtn.textContent = '📋', 1500);
+        });
+    });
 
-    if (D.notesCopyBtn && D.notesArea) {
-        D.notesCopyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(D.notesArea.value).then(() => {
-                D.notesCopyBtn.textContent = '✅';
-                setTimeout(() => D.notesCopyBtn.textContent = '📋', 1500);
+    D.notesDlBtn?.addEventListener('click', () => {
+        if (!D.notesArea) return;
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([D.notesArea.value], { type: "text/plain" }));
+        a.download = "Study_Notes.txt";
+        a.click();
+    });
+
+    // UTILITIES TRIGGERS
+    document.getElementById('util-btn-analytics')?.addEventListener('click', () => {
+        const analyticsModal = document.getElementById('analytics-modal-overlay');
+        if (!analyticsModal) return;
+        
+        let total = 0; let streak = 0; let currDate = new Date();
+        for (let date in studyStats) total += studyStats[date];
+        
+        const totalEl = document.getElementById('stat-total-pomos');
+        const hoursEl = document.getElementById('stat-hours');
+        const streakEl = document.getElementById('stat-streak');
+        if (totalEl) totalEl.innerText = total;
+        if (hoursEl) hoursEl.innerText = ((total * pomoSettings.focusTime) / 60).toFixed(1);
+
+        while(true) {
+            let dStr = currDate.toISOString().split('T')[0];
+            if (studyStats[dStr] && studyStats[dStr] > 0) {
+                streak++; currDate.setDate(currDate.getDate() - 1);
+            } else break;
+        }
+        if (streakEl) streakEl.innerText = `${streak} 🔥`;
+
+        const grid = document.getElementById('heatmap-container');
+        if (grid) {
+            grid.innerHTML = '';
+            let heatDate = new Date(); heatDate.setDate(heatDate.getDate() - 27); 
+            for(let i=0; i<28; i++) {
+                let box = document.createElement('div');
+                box.className = 'heatmap-box';
+                let str = heatDate.toISOString().split('T')[0];
+                let count = studyStats[str] || 0;
+                if (count > 0) box.classList.add('lvl-1');
+                if (count > 2) box.classList.add('lvl-2');
+                if (count > 4) box.classList.add('lvl-3');
+                if (count > 6) box.classList.add('lvl-4');
+                box.title = `${str}: ${count} sessions`;
+                grid.appendChild(box);
+                heatDate.setDate(heatDate.getDate() + 1);
+            }
+        }
+        analyticsModal.classList.add('open');
+    });
+
+    document.getElementById('analytics-close-modal')?.addEventListener('click', () => {
+        document.getElementById('analytics-modal-overlay')?.classList.remove('open');
+    });
+
+    document.getElementById('util-btn-whiteboard')?.addEventListener('click', () => {
+        const wbOverlay = document.getElementById('whiteboard-overlay');
+        const canvas = document.getElementById('wb-canvas');
+        if (!wbOverlay || !canvas) return;
+        
+        wbOverlay.classList.add('open');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 60;
+    });
+
+    document.getElementById('util-btn-settings')?.addEventListener('click', () => {
+        document.getElementById('pomo-open-settings')?.click();
+    });
+
+    // WHITEBOARD DRAWING
+    const wbCanvas = document.getElementById('wb-canvas');
+    if (wbCanvas) {
+        const ctx = wbCanvas.getContext('2d');
+        let isDrawing = false, currentColor = '#f8fafc', currentSize = 3;
+
+        document.getElementById('wb-close')?.addEventListener('click', () => document.getElementById('whiteboard-overlay')?.classList.remove('open'));
+        
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentColor = e.target.getAttribute('data-color');
             });
         });
-    }
 
-    if (D.notesDlBtn && D.notesArea) {
-        D.notesDlBtn.addEventListener('click', () => {
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(new Blob([D.notesArea.value], { type: "text/plain" }));
-            a.download = "Study_Notes.txt";
-            a.click();
+        document.getElementById('wb-eraser')?.addEventListener('click', () => currentColor = getComputedStyle(document.body).getPropertyValue('--primary-bg').trim());
+        document.getElementById('wb-clear')?.addEventListener('click', () => ctx.clearRect(0, 0, wbCanvas.width, wbCanvas.height));
+        document.getElementById('wb-size')?.addEventListener('input', (e) => currentSize = e.target.value);
+        document.getElementById('wb-download')?.addEventListener('click', () => {
+            const link = document.createElement('a'); link.download = 'scratchpad.png'; link.href = wbCanvas.toDataURL(); link.click();
         });
+
+        function getMousePos(e) {
+            const rect = wbCanvas.getBoundingClientRect();
+            return { x: (e.clientX || e.touches[0].clientX) - rect.left, y: (e.clientY || e.touches[0].clientY) - rect.top };
+        }
+
+        wbCanvas.addEventListener('mousedown', (e) => { isDrawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); });
+        wbCanvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; const pos = getMousePos(e); ctx.lineTo(pos.x, pos.y); ctx.strokeStyle = currentColor; ctx.lineWidth = currentSize; ctx.lineCap = 'round'; ctx.stroke(); });
+        wbCanvas.addEventListener('mouseup', () => isDrawing = false);
+        wbCanvas.addEventListener('mouseout', () => isDrawing = false);
     }
 
     // ==========================================
-    // 11. EXAM SIMULATOR PRO (With Grid - QoL 5)
+    // 10. NATIVE OMR SIMULATOR (QoL 5)
     // ==========================================
     let examTimerInterval;
     let examSeconds = 10800; 
@@ -843,12 +838,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (!isSelected) {
                         e.target.classList.add('selected');
                         box.classList.add('ans'); box.classList.remove('rev');
-                        document.getElementById(`rev-${i}`).classList.remove('active');
+                        document.getElementById(`rev-${i}`)?.classList.remove('active');
                     } else { box.classList.remove('ans'); }
                 });
             });
 
-            document.getElementById(`rev-${i}`).addEventListener('click', (e) => {
+            document.getElementById(`rev-${i}`)?.addEventListener('click', (e) => {
                 e.target.classList.toggle('active');
                 if (e.target.classList.contains('active')) box.classList.add('rev');
                 else box.classList.remove('rev');
@@ -856,34 +851,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (D.btnExam && D.omrPanel) {
-        D.btnExam.addEventListener('click', () => {
-            isSplitActive = true;
-            if (D.mainContainer) D.mainContainer.classList.add('split-active');
-            D.omrPanel.style.display = 'flex';
-            if (D.view2) D.view2.style.display = 'none'; 
-            D.btnExam.style.display = 'none';
-            if (D.btnLock) D.btnLock.style.display = 'flex'; 
-            
-            renderOMRSheet();
-            examSeconds = 10800;
-            
-            clearInterval(examTimerInterval);
-            examTimerInterval = setInterval(() => {
-                if(examSeconds <= 0) {
-                    clearInterval(examTimerInterval);
-                    document.getElementById('omr-submit-btn')?.click();
-                } else {
-                    examSeconds--;
-                    let h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
-                    let m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
-                    let s = String(examSeconds % 60).padStart(2, '0');
-                    const timerEl = document.getElementById('omr-timer');
-                    if (timerEl) timerEl.innerText = `${h}:${m}:${s}`;
-                }
-            }, 1000);
-        });
-    }
+    D.btnExam?.addEventListener('click', () => {
+        isSplitActive = true;
+        if (D.mainContainer) D.mainContainer.classList.add('split-active');
+        if (D.omrPanel) D.omrPanel.style.display = 'flex';
+        if (D.view2) D.view2.style.display = 'none'; 
+        if (D.resizer) D.resizer.style.display = 'block'; // Allow resizer for OMR
+        if (D.btnLock) D.btnLock.style.display = 'flex';
+        
+        D.btnExam.style.display = 'none';
+        
+        renderOMRSheet();
+        examSeconds = 10800;
+        clearInterval(examTimerInterval);
+        examTimerInterval = setInterval(() => {
+            if(examSeconds <= 0) {
+                clearInterval(examTimerInterval);
+                document.getElementById('omr-submit-btn')?.click();
+            } else {
+                examSeconds--;
+                let h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
+                let m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
+                let s = String(examSeconds % 60).padStart(2, '0');
+                const timerEl = document.getElementById('omr-timer');
+                if (timerEl) timerEl.innerText = `${h}:${m}:${s}`;
+            }
+        }, 1000);
+    });
 
     document.getElementById('omr-submit-btn')?.addEventListener('click', () => {
         clearInterval(examTimerInterval);
@@ -893,33 +887,31 @@ document.addEventListener("DOMContentLoaded", () => {
         
         if (D.mainContainer) D.mainContainer.classList.remove('split-active');
         if (D.omrPanel) D.omrPanel.style.display = 'none';
+        if (D.resizer) D.resizer.style.display = 'none';
+        if (D.btnLock) D.btnLock.style.display = 'none';
         isSplitActive = false;
         if (D.btnExam) D.btnExam.style.display = 'flex';
-        if (D.btnLock) D.btnLock.style.display = 'none';
     });
 
     // ==========================================
-    // 12. LIBRARY FILTERING & RENDERING
+    // 11. LIBRARY FILTERING & RENDERING
     // ==========================================
-    if (D.searchBar) {
-        D.searchBar.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(filterAndRender, 200); 
+    D.searchBar?.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterAndRender, 200); 
+    });
+
+    document.querySelectorAll('.subj-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentSubject = chip.getAttribute('data-subj');
+            filterAndRender();
         });
-    }
-
-    const folderToggleBtn = document.getElementById('folder-toggle-btn');
-    if (folderToggleBtn) folderToggleBtn.addEventListener('click', () => { isTreeExpanded = !isTreeExpanded; document.querySelectorAll('#book-list details').forEach(d => d.open = isTreeExpanded); });
-
-    const localFileInput = document.getElementById('local-file-input');
-    if (localFileInput) localFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        loadBook({ title: file.name, folders: ["LOCAL FILES", file.name], url: URL.createObjectURL(file) }, {});
     });
 
     function filterAndRender() {
-        if (!D.bookList || masterLibrary.length === 0) return;
+        if (!D.bookListElement || masterLibrary.length === 0) return;
         const query = D.searchBar ? D.searchBar.value.toLowerCase().trim() : "";
         let filteredBooks = [];
 
@@ -939,15 +931,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderTree(booksArray) {
-        if (!D.bookList) return;
-        D.bookList.innerHTML = ''; 
+        if (!D.bookListElement) return;
+        D.bookListElement.innerHTML = ''; 
         if (booksArray.length === 0) {
-            D.bookList.innerHTML = `<div class="placeholder-text" style="font-size:0.85em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred files yet.' : 'No files found.'}</div>`; 
+            D.bookListElement.innerHTML = `<div class="placeholder-text" style="font-size:0.85em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred files yet.' : 'No files found.'}</div>`; 
             return;
         }
 
         if (currentRoot === "FAVORITES") {
-            booksArray.forEach(b => D.bookList.appendChild(createBookElement(b)));
+            booksArray.forEach(b => D.bookListElement.appendChild(createBookElement(b)));
             return;
         }
 
@@ -987,7 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return container;
         }
-        D.bookList.appendChild(buildNode(fileTree, D.searchBar && D.searchBar.value.length > 0));
+        D.bookListElement.appendChild(buildNode(fileTree, D.searchBar && D.searchBar.value.length > 0));
     }
 
     function createBookElement(book) {
@@ -1043,7 +1035,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (clickedElement && clickedElement.classList) clickedElement.classList.add('active');
         
         window.currentActiveBook = book; 
-        loadContextNotes(book.title);    
+        loadContextNotes(book.title); 
 
         const titleText = document.getElementById('current-book-title');
         const breadcrumbText = document.getElementById('current-book-breadcrumb');
@@ -1055,6 +1047,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (D.btnFull) D.btnFull.style.display = 'flex';
         if (D.btnNotes) D.btnNotes.style.display = 'flex';
         
+        // Handle Action Buttons Visibility
         if (currentRoot === 'SIMULATOR') {
             if (D.btnExam) D.btnExam.style.display = 'flex';
             if (D.btnSplit) D.btnSplit.style.display = 'none';
@@ -1069,16 +1062,16 @@ document.addEventListener("DOMContentLoaded", () => {
         let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
 
         if (book.playlist && book.playlist.length > 0) {
-            if (playlistDropdown) {
-                playlistDropdown.innerHTML = '';
+            if (D.playlistDropdown) {
+                D.playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url; 
                     opt.textContent = vid.title || `Lecture ${index + 1}`;
-                    playlistDropdown.appendChild(opt);
+                    D.playlistDropdown.appendChild(opt);
                 });
-                playlistDropdown.style.display = 'block';
-                playlistDropdown.onchange = (e) => {
+                D.playlistDropdown.style.display = 'block';
+                D.playlistDropdown.onchange = (e) => {
                     if (D.bookFrame) D.bookFrame.src = e.target.value;
                     if (isSplitActive && D.bookFrameSplit) D.bookFrameSplit.src = e.target.value;
                 };
@@ -1086,7 +1079,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (D.bookFrame) D.bookFrame.src = book.playlist[0].url;
             if (isSplitActive && D.bookFrameSplit) D.bookFrameSplit.src = book.playlist[0].url;
         } else {
-            if (playlistDropdown) playlistDropdown.style.display = 'none';
+            if (D.playlistDropdown) D.playlistDropdown.style.display = 'none';
             if (D.bookFrame) D.bookFrame.src = finalUrl;
             if (isSplitActive && currentRoot !== 'SIMULATOR' && D.bookFrameSplit) D.bookFrameSplit.src = finalUrl;
         }
@@ -1098,14 +1091,17 @@ document.addEventListener("DOMContentLoaded", () => {
             D.desktopSidebarToggle.textContent = '▶';
         }
 
-        if (window.innerWidth <= 800) toggleMobileMenu(); 
+        if (window.innerWidth <= 800) {
+            D.sidebar?.classList.remove('open');
+            D.overlay?.classList.remove('open');
+        }
     }
 
     // ==========================================
-    // 13. AI COPILOT CHAT
+    // 12. AI COPILOT CHAT & DECONTAMINATION
     // ==========================================
-    if (D.chatFab && D.chatWindow) D.chatFab.addEventListener('click', () => D.chatWindow.classList.add('open'));
-    if (D.chatClose && D.chatWindow) D.chatClose.addEventListener('click', () => D.chatWindow.classList.remove('open'));
+    D.chatFab?.addEventListener('click', () => D.chatWindow?.classList.add('open'));
+    D.chatClose?.addEventListener('click', () => D.chatWindow?.classList.remove('open'));
 
     if (D.chatBody) {
         let savedChat = localStorage.getItem('ai_chat_history');
@@ -1135,8 +1131,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             if (typeof processAIQuery !== 'undefined') {
                 const safeLibrary = masterLibrary.filter(b => b && typeof b === 'object' && b.title);
-                
-                // QoL 4: Passing currentActiveBook to AI
                 const res = await processAIQuery(val, safeLibrary, window.currentActiveBook);
                 
                 if (res && res.type === 'fact') {
@@ -1169,37 +1163,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    if (D.chatSend) D.chatSend.addEventListener('click', handleChatSubmit);
-    if (D.chatInput) {
-        D.chatInput.addEventListener('keypress', (e) => { 
-            if (e.key === 'Enter') handleChatSubmit(); 
-        });
-    }
+    D.chatSend?.addEventListener('click', handleChatSubmit);
+    D.chatInput?.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') handleChatSubmit(); 
+    });
 
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key.toLowerCase() === 'b' && D.desktopSidebarToggle) {
-            e.preventDefault();
-            D.desktopSidebarToggle.click();
+            e.preventDefault(); D.desktopSidebarToggle.click();
         }
         if (e.ctrlKey && e.key === ' ' && D.chatFab && D.chatWindow) {
             e.preventDefault();
             D.chatWindow.classList.contains('open') ? D.chatClose.click() : D.chatFab.click();
         }
         if (e.key === 'Escape') {
-            if (modalOverlay) modalOverlay.classList.remove('open');
-            if (musicModalOverlay) musicModalOverlay.classList.remove('open');
-            
-            const analyticsModal = document.getElementById('analytics-modal-overlay');
-            if (analyticsModal) analyticsModal.classList.remove('open');
-            
-            const wbOverlay = document.getElementById('whiteboard-overlay');
-            if (wbOverlay) wbOverlay.classList.remove('open');
-            
-            if (D.chatWindow) D.chatWindow.classList.remove('open');
-            if (D.notesPanel) D.notesPanel.classList.remove('open');
+            D.modalOverlay?.classList.remove('open');
+            D.musicModalOverlay?.classList.remove('open');
+            document.getElementById('analytics-modal-overlay')?.classList.remove('open');
+            document.getElementById('whiteboard-overlay')?.classList.remove('open');
+            D.chatWindow?.classList.remove('open');
+            D.notesPanel?.classList.remove('open');
         }
     });
 
-    applyPomoSettingsUI();
 });
