@@ -275,8 +275,9 @@ body.theme-slate .chat-window { background: rgba(30, 41, 59, 0.90); }
 }
 
 /* =========================================
-   NEW QoL FEATURES 
+   NEW QoL FEATURES & UTILITIES
    ========================================= */
+
 /* GAMIFICATION BADGE */
 .level-badge { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4); margin-right: 4px; }
 
@@ -298,9 +299,24 @@ body.theme-slate .chat-window { background: rgba(30, 41, 59, 0.90); }
 .heatmap-box.lvl-3 { background: #16a34a; } 
 .heatmap-box.lvl-4 { background: #15803d; }
 
-/* WHITEBOARD BUTTONS */
-.color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border-color); cursor: pointer; transition: transform 0.1s; }
-.color-btn.active { transform: scale(1.2); border-color: var(--highlight-text); }
+/* TIMETABLE PLANNER */
+.timetable-container { width: 100%; max-width: 1100px; overflow-x: auto; background: var(--sidebar-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; box-shadow: var(--card-shadow); }
+.timetable-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.timetable-table th, .timetable-table td { border: 1px solid var(--border-color); padding: 10px; text-align: center; font-size: 0.9em; }
+.timetable-table th { background: var(--folder-bg); color: var(--highlight-text); font-weight: bold; }
+.tt-cell { min-height: 50px; outline: none; padding: 8px; cursor: text; transition: background 0.2s; border-radius: 6px; }
+.tt-cell:focus { background: var(--folder-bg); box-shadow: inset 0 0 0 2px var(--highlight-text); }
+
+/* SYLLABUS TRACKER */
+.syllabus-container { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 1000px; margin: 0 auto;}
+.syllabus-subject { background: var(--sidebar-bg); border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--card-shadow); overflow: hidden; }
+.syllabus-subject-header { padding: 18px 20px; background: var(--folder-bg); border-bottom: 1px solid var(--border-color); font-size: 1.2em; font-weight: bold; color: var(--highlight-text); display: flex; justify-content: space-between; align-items: center; }
+.syllabus-chapter-list { padding: 10px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.syllabus-chapter { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--primary-bg); font-size: 0.9em; }
+.status-btn { padding: 6px 12px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border-color); background: var(--folder-bg); color: var(--text-color); font-size: 0.85em; font-weight: bold; user-select: none; transition: all 0.2s; }
+.status-btn:hover { filter: brightness(1.1); }
+.overall-progress-bar { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-top: 15px; }
+.overall-progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease; }
 
 /* DRAGGABLE DIVIDER */
 .resizer { width: 8px; cursor: col-resize; background: var(--border-color); border-radius: 4px; transition: background 0.2s; z-index: 10; }
