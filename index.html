@@ -8,12 +8,13 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <script src="data.js?v=47"></script>
-    <script src="lectures.js?v=47"></script>
-    <script src="mocktests.js?v=47"></script>
+    <script src="data.js"></script>
+    <script src="lectures.js"></script>
+    <script src="mocktests.js"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
@@ -69,10 +70,11 @@
             </div>
         </div>
         
+        <!-- BOOK/FILE LIST -->
         <div class="book-list" id="book-list"></div>
     </div>
 
-    <!-- MUSIC PLAYER MODAL -->
+    <!-- MUSIC & AMBIENT HUB MODAL -->
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
@@ -129,7 +131,7 @@
             </div>
 
             <div class="pomo-modal-body">
-                <!-- TAB 1: FOCUS & FLOW -->
+                <!-- TAB 1: FOCUS -->
                 <div class="pomo-tab-content active" id="tab-focus">
                     <div class="pomo-setting-group">
                         <label>Focus Duration:</label>
@@ -166,7 +168,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: THEME & UI -->
+                <!-- TAB 2: THEME -->
                 <div class="pomo-tab-content" id="tab-ui">
                     <div class="pomo-setting-group">
                         <label>Dark / Light Mode Shade:</label>
@@ -217,7 +219,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: MODULES & AI -->
+                <!-- TAB 3: MODULES -->
                 <div class="pomo-tab-content" id="tab-modules">
                     <div class="pomo-setting-group">
                         <label>AI Study Copilot (Chatbot):</label>
@@ -239,7 +241,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: AUDIO & ALERTS -->
+                <!-- TAB 4: AUDIO -->
                 <div class="pomo-tab-content" id="tab-audio">
                     <div class="pomo-setting-group">
                         <label>Alert Tone:</label>
@@ -278,6 +280,57 @@
         </div>
     </div>
 
+    <!-- ANALYTICS DASHBOARD MODAL -->
+    <div class="pomo-modal-overlay" id="analytics-modal-overlay">
+        <div class="pomo-modal" style="width: 520px;">
+            <div class="pomo-modal-header">
+                <span>📊 Study Analytics Dashboard</span>
+                <button class="icon-btn" id="analytics-close-modal">✖</button>
+            </div>
+            <div class="pomo-modal-body">
+                <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:10px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-total-pomos">0</div>
+                        <div class="stat-label">Total Focus Sessions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-streak" style="color: #ef4444;">0 🔥</div>
+                        <div class="stat-label">Current Day Streak</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-hours">0.0</div>
+                        <div class="stat-label">Hours Studied</div>
+                    </div>
+                </div>
+                <div class="pomo-setting-group">
+                    <label>Last 30 Days Heatmap:</label>
+                    <div class="heatmap-grid" id="heatmap-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHITEBOARD OVERLAY -->
+    <div id="whiteboard-overlay" class="whiteboard-overlay">
+        <div class="whiteboard-header">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <span style="font-weight:bold; margin-right:15px; font-size:1.1em;">🖌️ Scratchpad</span>
+                <button class="color-btn active" style="background:#f8fafc;" data-color="#f8fafc"></button>
+                <button class="color-btn" style="background:#ef4444;" data-color="#ef4444"></button>
+                <button class="color-btn" style="background:#3b82f6;" data-color="#3b82f6"></button>
+                <button class="color-btn" style="background:#22c55e;" data-color="#22c55e"></button>
+                <button class="icon-btn" id="wb-eraser" title="Eraser">🧹</button>
+                <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button class="icon-btn" id="wb-clear" title="Clear All">🗑️</button>
+                <button class="icon-btn" id="wb-download" title="Save PNG">💾</button>
+                <button class="icon-btn" id="wb-close" style="color:#ef4444;">✖</button>
+            </div>
+        </div>
+        <canvas id="wb-canvas"></canvas>
+    </div>
+
     <!-- MAIN WORKSPACE -->
     <div class="main-content">
         <div class="reader-header">
@@ -290,10 +343,18 @@
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
                 <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
+            
+            <!-- NEW: UTILITIES IN HEADER -->
             <div class="header-actions">
                 <button id="download-btn" class="icon-btn" style="display:none;"></button>
-                <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
+                <button id="start-exam-btn" class="primary-btn" style="display:none; background-color:#ef4444;">⏱️ Start Exam</button>
+                
+                <div style="width:1px; height:24px; background:var(--border-color); margin:0 4px;"></div>
+                
+                <button id="analytics-btn" class="icon-btn" title="Analytics Dashboard">📊</button>
+                <button id="whiteboard-btn" class="icon-btn" title="Digital Scratchpad">🖌️</button>
                 <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
+                <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
@@ -304,14 +365,31 @@
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
             </div>
             
+            <!-- Viewer 1 (Main PDF/Video) -->
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
+            
+            <!-- Viewer 2 (Standard Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
+            </div>
+
+            <!-- Viewer 3 (Native OMR Simulator Panel) -->
+            <div id="omr-panel" class="omr-panel" style="display:none;">
+                <div class="omr-header">
+                    <h3>Exam OMR Sheet</h3>
+                    <div id="omr-timer" class="omr-timer">03:00:00</div>
+                </div>
+                <div id="omr-questions-container" class="omr-questions-container">
+                    <!-- JS Injected 75 Questions -->
+                </div>
+                <div class="omr-footer">
+                    <button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam & Score</button>
+                </div>
             </div>
         </div>
 
@@ -350,8 +428,7 @@
         </div>
     </div>
 
-    <!-- CORE SCRIPTS -->
-    <script src="ai.js?v=47"></script>
-    <script src="script.js?v=47"></script>
+    <script src="ai.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
