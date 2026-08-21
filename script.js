@@ -561,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ==========================================
-    // 9. FILE VIEWER, SPLIT SCREEN & UTILITIES
+    // 9. FILE VIEWER, SPLIT SCREEN & CONTEXT NOTES
     // ==========================================
     function toggleMobileMenu() {
         if (sidebar) sidebar.classList.toggle('open');
@@ -595,6 +595,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Split Screen Draggable Logic
     if (splitScreenBtn) {
         splitScreenBtn.addEventListener('click', () => {
             isSplitActive = !isSplitActive;
@@ -708,8 +709,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 10. UTILITIES LOGIC (Analytics & Whiteboard)
+    // 10. UTILITIES LOGIC (Analytics, Timetable, Syllabus, Whiteboard)
     // ==========================================
+    
+    // ANALYTICS
     document.getElementById('util-sidebar-analytics')?.addEventListener('click', () => {
         const utilWorkspace = document.getElementById('utilities-workspace');
         const phBox = document.getElementById('placeholder-box');
@@ -768,6 +771,149 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    document.getElementById('analytics-close-modal')?.addEventListener('click', () => {
+        document.getElementById('analytics-modal-overlay')?.classList.remove('open');
+    });
+
+    // TIMETABLE PLANNER
+    document.getElementById('util-sidebar-timetable')?.addEventListener('click', () => {
+        const utilWorkspace = document.getElementById('utilities-workspace');
+        const phBox = document.getElementById('placeholder-box');
+        if (!utilWorkspace || !phBox) return;
+        
+        phBox.style.display = 'none';
+        utilWorkspace.style.display = 'flex';
+
+        utilWorkspace.innerHTML = `
+            <div class="util-workspace-inner">
+                <h2 style="font-size:2em; margin-bottom:20px;">📅 Weekly Study Timetable</h2>
+                <div class="timetable-container">
+                    <table class="timetable-table">
+                        <thead>
+                            <tr><th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>
+                        </thead>
+                        <tbody id="timetable-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+        const tbody = document.getElementById('timetable-body');
+        const defaultHours = ["08:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM", "08:00 PM", "10:00 PM"];
+        let ttData = JSON.parse(localStorage.getItem('study_timetable')) || {};
+
+        defaultHours.forEach(time => {
+            let tr = document.createElement('tr');
+            let tdTime = document.createElement('td');
+            tdTime.style.fontWeight = 'bold';
+            tdTime.innerText = time;
+            tr.appendChild(tdTime);
+
+            for(let day=0; day<7; day++) {
+                let td = document.createElement('td');
+                let div = document.createElement('div');
+                div.className = 'tt-cell';
+                div.contentEditable = true;
+                let cellKey = `${time}-${day}`;
+                div.innerText = ttData[cellKey] || '';
+                div.addEventListener('input', (e) => {
+                    ttData[cellKey] = e.target.innerText;
+                    localStorage.setItem('study_timetable', JSON.stringify(ttData));
+                });
+                td.appendChild(div);
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        });
+
+        if (window.innerWidth <= 800) {
+            sidebar?.classList.remove('open');
+            document.getElementById('sidebar-overlay')?.classList.remove('open');
+        }
+    });
+
+    // SYLLABUS TRACKER
+    document.getElementById('util-sidebar-syllabus')?.addEventListener('click', () => {
+        const utilWorkspace = document.getElementById('utilities-workspace');
+        const phBox = document.getElementById('placeholder-box');
+        if (!utilWorkspace || !phBox) return;
+        
+        phBox.style.display = 'none';
+        utilWorkspace.style.display = 'flex';
+
+        const defaultSyllabus = {
+            "Physics": ["Kinematics", "Laws of Motion", "Work Power Energy", "Rotational Motion", "Gravitation", "Thermodynamics", "Electrostatics", "Current Electricity", "Magnetism", "Optics", "Modern Physics"],
+            "Chemistry": ["Mole Concept", "Atomic Structure", "Chemical Bonding", "Thermodynamics", "Equilibrium", "Coordination Compounds", "GOC", "Hydrocarbons", "Alcohols", "Aldehydes"],
+            "Maths": ["Sets & Relations", "Quadratic Equations", "Complex Numbers", "Binomial Theorem", "Sequence & Series", "Straight Lines", "Conic Sections", "Calculus", "Vectors & 3D", "Probability"]
+        };
+        let sylData = JSON.parse(localStorage.getItem('jee_syllabus')) || {};
+
+        utilWorkspace.innerHTML = `
+            <div class="util-workspace-inner">
+                <h2 style="font-size:2em; margin-bottom:10px;">📑 JEE Syllabus Tracker</h2>
+                <div class="overall-progress-bar" style="max-width:1000px; width:100%;"><div class="overall-progress-fill" id="syllabus-progress"></div></div>
+                <p style="margin-bottom:20px; font-weight:bold; opacity:0.8;" id="syllabus-progress-text">0% Completed</p>
+                <div class="syllabus-container" id="syllabus-container"></div>
+            </div>
+        `;
+
+        const container = document.getElementById('syllabus-container');
+        const states = [
+            { text: '⚪ Unstudied', color: 'var(--text-color)', bg: 'var(--folder-bg)' },
+            { text: '🟡 Theory', color: '#000', bg: '#fde047' },
+            { text: '🔵 PYQs', color: '#fff', bg: '#3b82f6' },
+            { text: '🟢 Mastered', color: '#fff', bg: '#22c55e' }
+        ];
+
+        function updateSylProgress() {
+            let total = 0; let score = 0;
+            for(let subj in defaultSyllabus) {
+                defaultSyllabus[subj].forEach(chap => {
+                    total += 3;
+                    score += (sylData[chap] || 0);
+                });
+            }
+            let pct = total === 0 ? 0 : Math.round((score/total)*100);
+            const pBar = document.getElementById('syllabus-progress');
+            const pText = document.getElementById('syllabus-progress-text');
+            if (pBar) pBar.style.width = `${pct}%`;
+            if (pText) pText.innerText = `Overall Readiness: ${pct}%`;
+        }
+
+        for (let subj in defaultSyllabus) {
+            let subjDiv = document.createElement('div');
+            subjDiv.className = 'syllabus-subject';
+            subjDiv.innerHTML = `<div class="syllabus-subject-header">${subj}</div><div class="syllabus-chapter-list" id="list-${subj}"></div>`;
+            container.appendChild(subjDiv);
+
+            const list = subjDiv.querySelector(`#list-${subj}`);
+            defaultSyllabus[subj].forEach(chap => {
+                let chapState = sylData[chap] || 0;
+                let cDiv = document.createElement('div');
+                cDiv.className = 'syllabus-chapter';
+                cDiv.innerHTML = `<span>${chap}</span><button class="status-btn" style="background:${states[chapState].bg}; color:${states[chapState].color}">${states[chapState].text}</button>`;
+                
+                let btn = cDiv.querySelector('.status-btn');
+                btn.addEventListener('click', () => {
+                    chapState = (chapState + 1) % 4;
+                    sylData[chap] = chapState;
+                    localStorage.setItem('jee_syllabus', JSON.stringify(sylData));
+                    btn.innerText = states[chapState].text;
+                    btn.style.background = states[chapState].bg;
+                    btn.style.color = states[chapState].color;
+                    updateSylProgress();
+                });
+                list.appendChild(cDiv);
+            });
+        }
+        updateSylProgress();
+
+        if (window.innerWidth <= 800) {
+            sidebar?.classList.remove('open');
+            document.getElementById('sidebar-overlay')?.classList.remove('open');
+        }
+    });
+
+    // WHITEBOARD
     document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => {
         const utilWorkspace = document.getElementById('utilities-workspace');
         const phBox = document.getElementById('placeholder-box');
@@ -938,6 +1084,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const mainContainer = document.getElementById('reader-container-main');
         if (mainContainer) mainContainer.classList.remove('split-active');
         if (omrPanel) omrPanel.style.display = 'none';
+        if (resizer) resizer.style.display = 'none';
+        if (splitLockBtn) splitLockBtn.style.display = 'none';
         isSplitActive = false;
         if (startExamBtn) startExamBtn.style.display = 'flex';
     });
@@ -1109,6 +1257,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (fullscreenBtn) fullscreenBtn.style.display = 'flex';
         if (notesToggleBtn) notesToggleBtn.style.display = 'flex';
         
+        // Handle Action Buttons Visibility
         if (currentRoot === 'SIMULATOR') {
             if (startExamBtn) startExamBtn.style.display = 'flex';
             if (splitScreenBtn) splitScreenBtn.style.display = 'none';
@@ -1179,7 +1328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         for (let i = 0; i < localStorage.length; i++) {
             let k = localStorage.key(i);
-            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_'))) {
+            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable' || k === 'jee_syllabus')) {
                 backupData.notes[k] = localStorage.getItem(k);
             }
         }
@@ -1391,13 +1540,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (musicModalOverlay) musicModalOverlay.classList.remove('open');
             const analyticsModal = document.getElementById('analytics-modal-overlay');
             if (analyticsModal) analyticsModal.classList.remove('open');
+            const wbOverlay = document.getElementById('whiteboard-overlay');
+            if (wbOverlay) wbOverlay.classList.remove('open');
             if (chatWindow) chatWindow.classList.remove('open');
             if (notesPanel) notesPanel.classList.remove('open');
         }
     });
 
-    // Boot routines
-    renderTasks();
-    applyPomoSettingsUI();
-    updatePomoDisplay();
 });
