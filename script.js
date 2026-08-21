@@ -62,77 +62,67 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // 2. DOM CACHING
     // ==========================================
-    const D = {
-        pomoTimeDisplay: document.getElementById('pomo-time'),
-        pomoToggleBtn: document.getElementById('pomo-toggle'),
-        pomoResetBtn: document.getElementById('pomo-reset'),
-        pomoStatusText: document.getElementById('pomo-status-text'),
-        pomoCard: document.getElementById('pomo-card'),
-        pomoBubble: document.getElementById('pomo-bubble'),
-        pomoContainer: document.getElementById('pomo-container'),
-        pomoLogoIcon: document.getElementById('pomo-logo-icon'),
-        pomoHighlightBox: document.getElementById('pomo-highlight-box'),
-        pomoHighlightText: document.getElementById('pomo-highlight-text'),
+    const pomoTimeDisplay = document.getElementById('pomo-time');
+    const pomoToggleBtn = document.getElementById('pomo-toggle');
+    const pomoResetBtn = document.getElementById('pomo-reset');
+    const pomoStatusText = document.getElementById('pomo-status-text');
+    const pomoCard = document.getElementById('pomo-card');
+    const pomoBubble = document.getElementById('pomo-bubble');
+    const pomoContainer = document.getElementById('pomo-container');
+    const pomoLogoIcon = document.getElementById('pomo-logo-icon');
+    const pomoHighlightBox = document.getElementById('pomo-highlight-box');
+    const pomoHighlightText = document.getElementById('pomo-highlight-text');
 
-        modalOverlay: document.getElementById('pomo-modal-overlay'),
-        musicModalOverlay: document.getElementById('music-modal-overlay'),
-        settingsSaveBtn: document.getElementById('pomo-save-settings'),
+    const modalOverlay = document.getElementById('pomo-modal-overlay');
+    const musicModalOverlay = document.getElementById('music-modal-overlay');
+    const settingsSaveBtn = document.getElementById('pomo-save-settings');
 
-        bookListElement: document.getElementById('book-list'),
-        searchBar: document.getElementById('search-bar'),
-        themeToggle: document.getElementById('theme-toggle'),
-        viewerWrapper: document.getElementById('viewer-wrapper'),
-        viewerWrapperSplit: document.getElementById('viewer-wrapper-split'),
-        bookFrame: document.getElementById('book-frame'),
-        bookFrameSplit: document.getElementById('book-frame-split'),
-        
-        // Header Actions
-        playlistDropdown: document.getElementById('playlist-dropdown'),
-        downloadBtn: document.getElementById('download-btn'),
-        startExamBtn: document.getElementById('start-exam-btn'),
-        splitScreenBtn: document.getElementById('split-screen-btn'),
-        splitLockBtn: document.getElementById('split-lock-btn'),
-        fullscreenBtn: document.getElementById('fullscreen-btn'),
-        selectorBox: document.getElementById('dynamic-mode-selector'),
+    const bookListElement = document.getElementById('book-list');
+    const searchBar = document.getElementById('search-bar');
+    const themeToggle = document.getElementById('theme-toggle');
+    const viewerWrapper = document.getElementById('viewer-wrapper');
+    const viewerWrapperSplit = document.getElementById('viewer-wrapper-split');
+    const bookFrame = document.getElementById('book-frame');
+    const bookFrameSplit = document.getElementById('book-frame-split');
+    
+    // Header Actions
+    const playlistDropdown = document.getElementById('playlist-dropdown');
+    const downloadBtn = document.getElementById('download-btn');
+    const startExamBtn = document.getElementById('start-exam-btn');
+    const splitScreenBtn = document.getElementById('split-screen-btn');
+    const analyticsBtn = document.getElementById('analytics-btn');
+    const whiteboardBtn = document.getElementById('whiteboard-btn');
+    const notesToggleBtn = document.getElementById('notes-toggle-btn');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const selectorBox = document.getElementById('dynamic-mode-selector');
 
-        chatFab: document.getElementById('chat-fab-btn'),
-        chatWindow: document.getElementById('chat-window'),
-        chatClose: document.getElementById('chat-close-btn'),
-        chatBody: document.getElementById('chat-body'),
-        chatInput: document.getElementById('chat-input'),
-        chatSend: document.getElementById('chat-send-btn'),
+    const chatFab = document.getElementById('chat-fab-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const chatClose = document.getElementById('chat-close-btn');
+    const chatBody = document.getElementById('chat-body');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send-btn');
 
-        desktopSidebarToggle: document.getElementById('desktop-sidebar-toggle'),
-        sidebar: document.getElementById('sidebar'),
+    const desktopSidebarToggle = document.getElementById('desktop-sidebar-toggle');
+    const sidebar = document.getElementById('sidebar');
 
-        notesPanel: document.getElementById('notes-panel'),
-        notesArea: document.getElementById('notes-area'),
-        notesToggleBtn: document.getElementById('notes-toggle-btn'),
-        closeNotesBtn: document.getElementById('close-notes-btn'),
-        notesCopyBtn: document.getElementById('notes-copy-btn'),
-        notesDlBtn: document.getElementById('notes-dl-btn'),
-        notesLabel: document.getElementById('notes-title-label'),
-
-        libView: document.getElementById('library-sidebar-view'),
-        utilView: document.getElementById('utilities-sidebar-view'),
-        phBox: document.getElementById('placeholder-box'),
-        resizer: document.getElementById('split-resizer'),
-        lvlBadge: document.getElementById('user-level-badge'),
-
-        omrPanel: document.getElementById('omr-panel'),
-        omrContainer: document.getElementById('omr-questions-container'),
-        omrGrid: document.getElementById('omr-jump-grid')
-    };
+    const notesPanel = document.getElementById('notes-panel');
+    const notesArea = document.getElementById('notes-area');
+    const closeNotesBtn = document.getElementById('close-notes-btn');
+    const notesCopyBtn = document.getElementById('notes-copy-btn');
+    const notesDlBtn = document.getElementById('notes-dl-btn');
 
     // ==========================================
     // 3. GAMIFICATION (Level Engine)
     // ==========================================
     function updateGamification() {
-        if (!D.lvlBadge) return;
+        const lvlBadge = document.getElementById('user-level-badge');
+        if (!lvlBadge) return;
         let totalMins = 0;
         for (let date in studyStats) {
             totalMins += (studyStats[date] * pomoSettings.focusTime);
         }
+        // Formula: Level up gets progressively harder. 30m = Lvl 2. 120m = Lvl 3.
         let lvl = Math.floor(Math.sqrt(totalMins / 30)) + 1;
         
         let title = "Novice";
@@ -140,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (lvl > 10) title = "Capybara Sage";
         if (lvl > 25) title = "Ascended Master";
 
-        D.lvlBadge.innerText = `Lvl ${lvl}: ${title}`;
+        lvlBadge.innerText = `Lvl ${lvl}: ${title}`;
     }
 
     // ==========================================
@@ -261,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const url = document.getElementById('custom-music-url').value.trim();
         if (!url) return;
         const musicFrame = document.getElementById('music-frame');
-        
         if (musicFrame) {
             musicFrame.style.display = 'block';
             if (url.includes('open.spotify.com')) {
@@ -280,22 +269,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     document.getElementById('pomo-open-settings')?.addEventListener('click', () => { 
         renderModuleCheckboxes(); 
-        if (D.modalOverlay) D.modalOverlay.classList.add('open'); 
+        if (modalOverlay) modalOverlay.classList.add('open'); 
     });
     
     document.getElementById('pomo-close-modal')?.addEventListener('click', () => {
-        if (D.modalOverlay) D.modalOverlay.classList.remove('open');
+        if (modalOverlay) modalOverlay.classList.remove('open');
     });
 
-    if (D.modalOverlay) {
-        D.modalOverlay.addEventListener('click', (e) => { 
-            if (e.target === D.modalOverlay) D.modalOverlay.classList.remove('open'); 
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => { 
+            if (e.target === modalOverlay) modalOverlay.classList.remove('open'); 
         });
     }
 
-    document.getElementById('music-open-btn')?.addEventListener('click', () => D.musicModalOverlay?.classList.add('open'));
-    document.getElementById('music-close-modal')?.addEventListener('click', () => D.musicModalOverlay?.classList.remove('open'));
-    if (D.musicModalOverlay) D.musicModalOverlay.addEventListener('click', (e) => { if (e.target === D.musicModalOverlay) D.musicModalOverlay.classList.remove('open'); });
+    document.getElementById('music-open-btn')?.addEventListener('click', () => musicModalOverlay?.classList.add('open'));
+    document.getElementById('music-close-modal')?.addEventListener('click', () => musicModalOverlay?.classList.remove('open'));
+    if (musicModalOverlay) musicModalOverlay.addEventListener('click', (e) => { if (e.target === musicModalOverlay) musicModalOverlay.classList.remove('open'); });
 
     // Modal Tabs
     document.querySelectorAll('.pomo-tab-btn').forEach(btn => {
@@ -312,23 +301,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const el = document.getElementById(id);
         if (el) el.value = val;
     }
-    
     function getSettingVal(id, defaultVal) {
         const el = document.getElementById(id);
         return el ? el.value : defaultVal;
     }
 
     function applyPomoSettingsUI() {
-        if (D.pomoContainer) D.pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
-        if (D.pomoBubble) D.pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
-        if (D.pomoLogoIcon) D.pomoLogoIcon.textContent = pomoSettings.icon || '🍅';
+        if (pomoContainer) pomoContainer.style.display = pomoSettings.enabled === 'yes' ? 'flex' : 'none';
+        if (pomoBubble) pomoBubble.style.display = pomoSettings.bubbles === 'yes' ? 'block' : 'none';
+        if (pomoLogoIcon) pomoLogoIcon.textContent = pomoSettings.icon || '🍅';
         
-        if (D.chatFab) D.chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
-        if (pomoSettings.aiEnabled === 'no' && D.chatWindow) D.chatWindow.classList.remove('open');
+        if (chatFab) chatFab.style.display = pomoSettings.aiEnabled === 'no' ? 'none' : 'flex';
+        if (pomoSettings.aiEnabled === 'no' && chatWindow) chatWindow.classList.remove('open');
 
         document.body.className = `${pomoSettings.themeShade} ${pomoSettings.fontSize} ${pomoSettings.zenMode === 'yes' ? 'zen-mode' : ''}`;
 
-        // Safely prefill form fields
         setSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
         setSettingVal('pomo-setting-enable', pomoSettings.enabled);
         setSettingVal('pomo-setting-focus', pomoSettings.focusTime);
@@ -347,15 +334,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (pomoSettings.highlightTask === 'yes' && pomoTasks.length > 0) {
             let firstIncomplete = pomoTasks.find(t => !t.done) || pomoTasks[0];
-            if (D.pomoHighlightText) D.pomoHighlightText.textContent = firstIncomplete.text;
-            if (D.pomoHighlightBox) D.pomoHighlightBox.style.display = 'flex';
+            if (pomoHighlightText) pomoHighlightText.textContent = firstIncomplete.text;
+            if (pomoHighlightBox) pomoHighlightBox.style.display = 'flex';
         } else {
-            if (D.pomoHighlightBox) D.pomoHighlightBox.style.display = 'none';
+            if (pomoHighlightBox) pomoHighlightBox.style.display = 'none';
         }
     }
 
-    if (D.settingsSaveBtn) {
-        D.settingsSaveBtn.addEventListener('click', () => {
+    if (settingsSaveBtn) {
+        settingsSaveBtn.addEventListener('click', () => {
             pomoSettings.themeShade = getSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
             pomoSettings.enabled = getSettingVal('pomo-setting-enable', pomoSettings.enabled);
             pomoSettings.focusTime = parseInt(getSettingVal('pomo-setting-focus', pomoSettings.focusTime));
@@ -379,16 +366,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (!isPomoRunning) {
                 pomoSeconds = (isFocusMode ? pomoSettings.focusTime : pomoSettings.breakTime) * 60;
-                if (D.pomoTimeDisplay) {
+                if (pomoTimeDisplay) {
                     let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
                     let s = String(pomoSeconds % 60).padStart(2, '0');
-                    D.pomoTimeDisplay.textContent = `${m}:${s}`;
+                    pomoTimeDisplay.textContent = `${m}:${s}`;
                 }
             }
 
             renderDynamicTopNav();
             applyPomoSettingsUI();
-            if (D.modalOverlay) D.modalOverlay.classList.remove('open');
+            if (modalOverlay) modalOverlay.classList.remove('open');
         });
     }
 
@@ -418,8 +405,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderDynamicTopNav() {
-        if (!D.selectorBox) return;
-        D.selectorBox.innerHTML = '';
+        if (!selectorBox) return;
+        selectorBox.innerHTML = '';
         let selectedMods = ALL_MODULES.filter(m => pomoSettings.activeModules.includes(m.id));
         if (selectedMods.length === 0) selectedMods = [ALL_MODULES[0]];
 
@@ -437,37 +424,50 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentRoot = mod.id;
                 
                 // ROUTING: Utilities vs Library
+                const libView = document.getElementById('library-sidebar-view');
+                const utilView = document.getElementById('utilities-sidebar-view');
+                const phBox = document.getElementById('placeholder-box');
+                const mainContainer = document.getElementById('reader-container-main');
+
                 if (currentRoot === 'UTILITIES') {
-                    if (D.libView) D.libView.style.display = 'none';
-                    if (D.utilView) D.utilView.style.display = 'flex';
-                    if (D.phBox) {
-                        D.phBox.querySelector('h2').innerText = "UTILITIES HUB";
-                        D.phBox.querySelector('p').innerText = "Select a tool from the sidebar to launch it.";
-                        D.phBox.style.display = 'block';
+                    if (libView) libView.style.display = 'none';
+                    if (utilView) utilView.style.display = 'flex';
+                    if (phBox) {
+                        phBox.querySelector('h2').innerText = "UTILITIES HUB";
+                        phBox.querySelector('p').innerText = "Select a tool from the sidebar to launch it.";
+                        phBox.style.display = 'block';
                     }
-                    if (D.view1) D.view1.style.display = 'none';
-                    if (D.view2) D.view2.style.display = 'none';
-                    if (D.omrPanel) D.omrPanel.style.display = 'none';
-                    if (D.resizer) D.resizer.style.display = 'none';
-                    if (D.btnSplit) D.btnSplit.style.display = 'none';
-                    if (D.btnLock) D.btnLock.style.display = 'none';
-                    if (D.btnExam) D.btnExam.style.display = 'none';
+                    if (viewerWrapper) viewerWrapper.style.display = 'none';
+                    if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none';
+                    const omrPanel = document.getElementById('omr-panel');
+                    if (omrPanel) omrPanel.style.display = 'none';
+                    const resizer = document.getElementById('split-resizer');
+                    if (resizer) resizer.style.display = 'none';
+                    if (splitScreenBtn) splitScreenBtn.style.display = 'none';
+                    const splitLockBtn = document.getElementById('split-lock-btn');
+                    if (splitLockBtn) splitLockBtn.style.display = 'none';
+                    if (startExamBtn) startExamBtn.style.display = 'none';
+                    if (mainContainer) mainContainer.classList.remove('split-active');
+                    isSplitActive = false;
                 } else {
-                    if (D.utilView) D.utilView.style.display = 'none';
-                    if (D.libView) D.libView.style.display = 'flex';
-                    if (D.searchBar) D.searchBar.value = ''; 
-                    if (D.phBox) {
-                        D.phBox.querySelector('h2').innerText = "COMING NEVER";
-                        D.phBox.querySelector('p').innerText = "This was made with AI and the person who gave the command is busy with other shit.";
-                        D.phBox.style.display = 'block';
+                    if (utilView) utilView.style.display = 'none';
+                    if (libView) libView.style.display = 'flex';
+                    if (searchBar) searchBar.value = ''; 
+                    if (phBox) {
+                        phBox.querySelector('h2').innerText = "COMING NEVER";
+                        phBox.querySelector('p').innerText = "This was made with AI and the person who gave the command is busy with other shit.";
+                        phBox.style.display = 'block';
                     }
-                    if (D.view1) D.view1.style.display = 'none';
-                    if (D.view2) D.view2.style.display = 'none';
-                    if (D.omrPanel) D.omrPanel.style.display = 'none';
+                    if (viewerWrapper) viewerWrapper.style.display = 'none';
+                    if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none';
+                    const omrPanel = document.getElementById('omr-panel');
+                    if (omrPanel) omrPanel.style.display = 'none';
+                    if (mainContainer) mainContainer.classList.remove('split-active');
+                    isSplitActive = false;
                     filterAndRender();
                 }
             });
-            D.selectorBox.appendChild(btn);
+            selectorBox.appendChild(btn);
         });
         filterAndRender();
     }
@@ -508,22 +508,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function updatePomoDisplay() {
-        if (!D.pomoTimeDisplay) return;
+        if (!pomoTimeDisplay) return;
         let m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
         let s = String(pomoSeconds % 60).padStart(2, '0');
-        D.pomoTimeDisplay.textContent = `${m}:${s}`;
+        pomoTimeDisplay.textContent = `${m}:${s}`;
     }
 
-    D.pomoToggleBtn?.addEventListener('click', () => {
+    pomoToggleBtn?.addEventListener('click', () => {
         if (isPomoRunning) {
             clearInterval(pomoInterval);
             isPomoRunning = false;
-            D.pomoToggleBtn.textContent = '▶️';
-            if (D.pomoCard) D.pomoCard.classList.remove('running');
+            pomoToggleBtn.textContent = '▶️';
+            if (pomoCard) pomoCard.classList.remove('running');
         } else {
             isPomoRunning = true;
-            D.pomoToggleBtn.textContent = '⏸️';
-            if (D.pomoCard) D.pomoCard.classList.add('running');
+            pomoToggleBtn.textContent = '⏸️';
+            if (pomoCard) pomoCard.classList.add('running');
             pomoInterval = setInterval(() => {
                 if (pomoSeconds > 0) {
                     pomoSeconds--;
@@ -531,10 +531,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     clearInterval(pomoInterval);
                     isPomoRunning = false;
-                    D.pomoToggleBtn.textContent = '▶️';
-                    if (D.pomoCard) D.pomoCard.classList.remove('running');
+                    pomoToggleBtn.textContent = '▶️';
+                    if (pomoCard) pomoCard.classList.remove('running');
                     
-                    // Analytics & Level Up
+                    // Add to analytics!
                     studyStats[todayStr]++;
                     localStorage.setItem('study_stats', JSON.stringify(studyStats));
                     updateGamification();
@@ -545,12 +545,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    D.pomoResetBtn?.addEventListener('click', () => {
+    pomoResetBtn?.addEventListener('click', () => {
         clearInterval(pomoInterval);
         isPomoRunning = false;
         pomoSeconds = pomoSettings.focusTime * 60;
-        if (D.pomoToggleBtn) D.pomoToggleBtn.textContent = '▶️';
-        if (D.pomoCard) D.pomoCard.classList.remove('running');
+        if (pomoToggleBtn) pomoToggleBtn.textContent = '▶️';
+        if (pomoCard) pomoCard.classList.remove('running');
         updatePomoDisplay();
     });
 
@@ -558,25 +558,26 @@ document.addEventListener("DOMContentLoaded", () => {
     // 9. FILE VIEWER, SPLIT SCREEN & UTILITIES
     // ==========================================
     function toggleMobileMenu() {
-        if (D.sidebar) D.sidebar.classList.toggle('open');
-        if (D.overlay) D.overlay.classList.toggle('open');
+        if (sidebar) sidebar.classList.toggle('open');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (overlay) overlay.classList.toggle('open');
     }
     document.getElementById('mobile-menu-btn')?.addEventListener('click', toggleMobileMenu);
-    D.overlay?.addEventListener('click', toggleMobileMenu);
+    document.getElementById('sidebar-overlay')?.addEventListener('click', toggleMobileMenu);
 
-    D.desktopSidebarToggle?.addEventListener('click', () => {
-        if (D.sidebar) D.sidebar.classList.toggle('collapsed');
-        D.desktopSidebarToggle.textContent = D.sidebar.classList.contains('collapsed') ? '▶' : '◀';
+    desktopSidebarToggle?.addEventListener('click', () => {
+        if (sidebar) sidebar.classList.toggle('collapsed');
+        desktopSidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
     });
 
-    D.themeToggle?.addEventListener('click', () => {
+    themeToggle?.addEventListener('click', () => {
         pomoSettings.themeShade = pomoSettings.themeShade === 'theme-light' ? 'theme-amoled' : 'theme-light';
-        D.themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
+        themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
         applyPomoSettingsUI();
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
     });
 
-    D.fullscreenBtn?.addEventListener('click', () => {
+    fullscreenBtn?.addEventListener('click', () => {
         const container = document.getElementById('reader-container-main');
         if (!container) return;
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -588,118 +589,126 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // QoL 3: Split Screen & Draggable Resizer Logic
-    if (D.btnSplit) {
-        D.btnSplit.addEventListener('click', () => {
+    // Split Screen Draggable Logic
+    const splitLockBtn = document.getElementById('split-lock-btn');
+    const resizer = document.getElementById('split-resizer');
+    
+    if (splitScreenBtn) {
+        splitScreenBtn.addEventListener('click', () => {
             isSplitActive = !isSplitActive;
             const mainContainer = document.getElementById('reader-container-main');
             
-            if (!mainContainer || !D.viewerWrapperSplit || !D.bookFrameSplit) return;
+            if (!mainContainer || !viewerWrapperSplit || !bookFrameSplit) return;
 
             if (isSplitActive) {
                 mainContainer.classList.add('split-active');
-                D.viewerWrapperSplit.style.display = 'block';
-                if (D.bookFrame) D.bookFrameSplit.src = D.bookFrame.src;
-                D.btnSplit.style.backgroundColor = 'var(--success)';
-                if (D.omrPanel) D.omrPanel.style.display = 'none';
+                viewerWrapperSplit.style.display = 'block';
+                if (bookFrame) bookFrameSplit.src = bookFrame.src;
+                splitScreenBtn.style.backgroundColor = 'var(--success)';
+                const omrPanel = document.getElementById('omr-panel');
+                if (omrPanel) omrPanel.style.display = 'none'; 
                 
-                // Show resizer and lock
-                if (D.resizer) D.resizer.style.display = 'block';
-                if (D.btnLock) D.btnLock.style.display = 'flex';
-                if (D.view1) D.view1.style.width = '50%';
-                if (D.view2) D.view2.style.width = '50%';
+                if (resizer) resizer.style.display = 'block';
+                if (splitLockBtn) splitLockBtn.style.display = 'flex';
+                if (viewerWrapper) viewerWrapper.style.width = '50%';
+                if (viewerWrapperSplit) viewerWrapperSplit.style.width = '50%';
             } else {
                 mainContainer.classList.remove('split-active');
-                D.viewerWrapperSplit.style.display = 'none';
-                D.bookFrameSplit.src = '';
-                D.btnSplit.style.backgroundColor = '';
+                viewerWrapperSplit.style.display = 'none';
+                bookFrameSplit.src = '';
+                splitScreenBtn.style.backgroundColor = '';
                 
-                // Hide resizer and lock
-                if (D.resizer) D.resizer.style.display = 'none';
-                if (D.btnLock) D.btnLock.style.display = 'none';
-                if (D.view1) D.view1.style.width = '100%';
+                if (resizer) resizer.style.display = 'none';
+                if (splitLockBtn) splitLockBtn.style.display = 'none';
+                if (viewerWrapper) viewerWrapper.style.width = '100%';
             }
         });
     }
 
-    if (D.btnLock && D.resizer) {
-        D.btnLock.addEventListener('click', () => {
+    if (splitLockBtn && resizer) {
+        splitLockBtn.addEventListener('click', () => {
             isSplitLocked = !isSplitLocked;
-            D.btnLock.textContent = isSplitLocked ? '🔒' : '🔓';
-            if (isSplitLocked) D.resizer.classList.add('locked');
-            else D.resizer.classList.remove('locked');
+            splitLockBtn.textContent = isSplitLocked ? '🔒' : '🔓';
+            if (isSplitLocked) resizer.classList.add('locked');
+            else resizer.classList.remove('locked');
         });
 
-        D.resizer.addEventListener('mousedown', (e) => {
+        resizer.addEventListener('mousedown', (e) => {
             if (isSplitLocked) return;
             isResizing = true;
-            D.resizer.classList.add('dragging');
+            resizer.classList.add('dragging');
             document.body.style.cursor = 'col-resize';
-            if (D.view1) D.view1.style.pointerEvents = 'none';
-            if (D.view2) D.view2.style.pointerEvents = 'none';
+            if (viewerWrapper) viewerWrapper.style.pointerEvents = 'none';
+            if (viewerWrapperSplit) viewerWrapperSplit.style.pointerEvents = 'none';
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (!isResizing || !D.mainContainer) return;
-            const containerRect = D.mainContainer.getBoundingClientRect();
+            if (!isResizing) return;
+            const mainContainer = document.getElementById('reader-container-main');
+            if (!mainContainer) return;
+            const containerRect = mainContainer.getBoundingClientRect();
             let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-            // Limit boundary 20% to 80%
             if (newWidth < 20) newWidth = 20;
             if (newWidth > 80) newWidth = 80;
-            if (D.view1) D.view1.style.width = `${newWidth}%`;
-            if (D.view2) D.view2.style.width = `${100 - newWidth}%`;
+            if (viewerWrapper) viewerWrapper.style.width = `${newWidth}%`;
+            if (viewerWrapperSplit) viewerWrapperSplit.style.width = `${100 - newWidth}%`;
         });
 
         document.addEventListener('mouseup', () => {
             if (isResizing) {
                 isResizing = false;
-                D.resizer.classList.remove('dragging');
+                resizer.classList.remove('dragging');
                 document.body.style.cursor = 'default';
-                if (D.view1) D.view1.style.pointerEvents = 'auto';
-                if (D.view2) D.view2.style.pointerEvents = 'auto';
+                if (viewerWrapper) viewerWrapper.style.pointerEvents = 'auto';
+                if (viewerWrapperSplit) viewerWrapperSplit.style.pointerEvents = 'auto';
             }
         });
     }
 
-    // QoL 2: Context Aware Notes
+    // Context Notes Logic
     let currentNoteKey = 'quick_notes_general';
-    D.notesToggleBtn?.addEventListener('click', () => D.notesPanel?.classList.toggle('open'));
-    D.closeNotesBtn?.addEventListener('click', () => D.notesPanel?.classList.remove('open'));
+    if (notesToggleBtn && notesPanel) notesToggleBtn.addEventListener('click', () => notesPanel.classList.toggle('open'));
+    if (closeNotesBtn && notesPanel) closeNotesBtn.addEventListener('click', () => notesPanel.classList.remove('open'));
     
-    if (D.notesArea) {
-        D.notesArea.addEventListener('input', () => localStorage.setItem(currentNoteKey, D.notesArea.value));
+    if (notesArea) {
+        notesArea.value = localStorage.getItem(currentNoteKey) || '';
+        notesArea.addEventListener('input', () => localStorage.setItem(currentNoteKey, notesArea.value));
     }
 
     function loadContextNotes(bookTitle) {
-        if (!D.notesArea || !D.notesLabel) return;
+        if (!notesArea || !document.getElementById('notes-title-label')) return;
         if (bookTitle) {
             currentNoteKey = 'notes_' + bookTitle.replace(/[^a-z0-9]/gi, '_');
-            D.notesLabel.innerHTML = `📝 Notes: <span style="opacity:0.7; font-size:0.85em; font-weight:normal;">${bookTitle}</span>`;
+            document.getElementById('notes-title-label').innerHTML = `📝 Notes: <span style="opacity:0.7; font-size:0.85em; font-weight:normal;">${bookTitle}</span>`;
         } else {
             currentNoteKey = 'quick_notes_general';
-            D.notesLabel.innerHTML = `📝 General Scratchpad`;
+            document.getElementById('notes-title-label').innerHTML = `📝 General Scratchpad`;
         }
-        D.notesArea.value = localStorage.getItem(currentNoteKey) || '';
+        notesArea.value = localStorage.getItem(currentNoteKey) || '';
     }
 
-    D.notesCopyBtn?.addEventListener('click', () => {
-        if (!D.notesArea) return;
-        navigator.clipboard.writeText(D.notesArea.value).then(() => {
-            D.notesCopyBtn.textContent = '✅';
-            setTimeout(() => D.notesCopyBtn.textContent = '📋', 1500);
+    if (notesCopyBtn && notesArea) {
+        notesCopyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(notesArea.value).then(() => {
+                notesCopyBtn.textContent = '✅';
+                setTimeout(() => notesCopyBtn.textContent = '📋', 1500);
+            });
         });
-    });
+    }
 
-    D.notesDlBtn?.addEventListener('click', () => {
-        if (!D.notesArea) return;
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(new Blob([D.notesArea.value], { type: "text/plain" }));
-        a.download = "Study_Notes.txt";
-        a.click();
-    });
+    if (notesDlBtn && notesArea) {
+        notesDlBtn.addEventListener('click', () => {
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([notesArea.value], { type: "text/plain" }));
+            a.download = "Study_Notes.txt";
+            a.click();
+        });
+    }
 
-    // UTILITIES TRIGGERS
-    document.getElementById('util-btn-analytics')?.addEventListener('click', () => {
+    // ==========================================
+    // 10. UTILITIES LOGIC (Analytics & Whiteboard)
+    // ==========================================
+    document.getElementById('util-sidebar-analytics')?.addEventListener('click', () => {
         const analyticsModal = document.getElementById('analytics-modal-overlay');
         if (!analyticsModal) return;
         
@@ -745,7 +754,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('analytics-modal-overlay')?.classList.remove('open');
     });
 
-    document.getElementById('util-btn-whiteboard')?.addEventListener('click', () => {
+    document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => {
         const wbOverlay = document.getElementById('whiteboard-overlay');
         const canvas = document.getElementById('wb-canvas');
         if (!wbOverlay || !canvas) return;
@@ -755,7 +764,7 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.height = window.innerHeight - 60;
     });
 
-    document.getElementById('util-btn-settings')?.addEventListener('click', () => {
+    document.getElementById('util-sidebar-settings')?.addEventListener('click', () => {
         document.getElementById('pomo-open-settings')?.click();
     });
 
@@ -794,19 +803,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 10. NATIVE OMR SIMULATOR (QoL 5)
+    // 11. NATIVE OMR SIMULATOR (QoL 5)
     // ==========================================
     let examTimerInterval;
     let examSeconds = 10800; 
+    const omrPanel = document.getElementById('omr-panel');
 
     document.getElementById('omr-grid-toggle')?.addEventListener('click', () => {
-        if (D.omrGrid) D.omrGrid.style.display = D.omrGrid.style.display === 'none' ? 'grid' : 'none';
+        const omrGrid = document.getElementById('omr-jump-grid');
+        if (omrGrid) omrGrid.style.display = omrGrid.style.display === 'none' ? 'grid' : 'none';
     });
 
     function renderOMRSheet() {
-        if (!D.omrContainer || !D.omrGrid) return;
-        D.omrContainer.innerHTML = '';
-        D.omrGrid.innerHTML = '';
+        const omrContainer = document.getElementById('omr-questions-container');
+        const omrGrid = document.getElementById('omr-jump-grid');
+        if (!omrContainer || !omrGrid) return;
+        
+        omrContainer.innerHTML = '';
+        omrGrid.innerHTML = '';
 
         for (let i = 1; i <= 75; i++) {
             let box = document.createElement('div');
@@ -814,7 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
             box.id = `grid-box-${i}`;
             box.innerText = i;
             box.addEventListener('click', () => document.getElementById(`q-row-${i}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-            D.omrGrid.appendChild(box);
+            omrGrid.appendChild(box);
 
             let row = document.createElement('div');
             row.className = 'omr-row';
@@ -822,14 +836,14 @@ document.addEventListener("DOMContentLoaded", () => {
             row.innerHTML = `
                 <div class="omr-num">${i}.</div>
                 <div class="omr-options">
-                    <div class="omr-circle" data-opt="A">A</div>
-                    <div class="omr-circle" data-opt="B">B</div>
-                    <div class="omr-circle" data-opt="C">C</div>
-                    <div class="omr-circle" data-opt="D">D</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="A">A</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="B">B</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="C">C</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="D">D</div>
                 </div>
                 <button class="btn-review" id="rev-${i}">Mark</button>
             `;
-            D.omrContainer.appendChild(row);
+            omrContainer.appendChild(row);
             
             row.querySelectorAll('.omr-circle').forEach(circle => {
                 circle.addEventListener('click', (e) => {
@@ -851,33 +865,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    D.btnExam?.addEventListener('click', () => {
-        isSplitActive = true;
-        if (D.mainContainer) D.mainContainer.classList.add('split-active');
-        if (D.omrPanel) D.omrPanel.style.display = 'flex';
-        if (D.view2) D.view2.style.display = 'none'; 
-        if (D.resizer) D.resizer.style.display = 'block'; // Allow resizer for OMR
-        if (D.btnLock) D.btnLock.style.display = 'flex';
-        
-        D.btnExam.style.display = 'none';
-        
-        renderOMRSheet();
-        examSeconds = 10800;
-        clearInterval(examTimerInterval);
-        examTimerInterval = setInterval(() => {
-            if(examSeconds <= 0) {
-                clearInterval(examTimerInterval);
-                document.getElementById('omr-submit-btn')?.click();
-            } else {
-                examSeconds--;
-                let h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
-                let m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
-                let s = String(examSeconds % 60).padStart(2, '0');
-                const timerEl = document.getElementById('omr-timer');
-                if (timerEl) timerEl.innerText = `${h}:${m}:${s}`;
-            }
-        }, 1000);
-    });
+    if (startExamBtn && omrPanel) {
+        startExamBtn.addEventListener('click', () => {
+            isSplitActive = true;
+            const mainContainer = document.getElementById('reader-container-main');
+            if (mainContainer) mainContainer.classList.add('split-active');
+            omrPanel.style.display = 'flex';
+            if (viewerWrapperSplit) viewerWrapperSplit.style.display = 'none'; 
+            startExamBtn.style.display = 'none';
+            
+            if (resizer) resizer.style.display = 'block';
+            if (splitLockBtn) splitLockBtn.style.display = 'flex';
+            if (viewerWrapper) viewerWrapper.style.width = '50%';
+            
+            renderOMRSheet();
+            examSeconds = 10800;
+            
+            clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                if(examSeconds <= 0) {
+                    clearInterval(examTimerInterval);
+                    document.getElementById('omr-submit-btn')?.click();
+                } else {
+                    examSeconds--;
+                    let h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
+                    let m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
+                    let s = String(examSeconds % 60).padStart(2, '0');
+                    const timerEl = document.getElementById('omr-timer');
+                    if (timerEl) timerEl.innerText = `${h}:${m}:${s}`;
+                }
+            }, 1000);
+        });
+    }
 
     document.getElementById('omr-submit-btn')?.addEventListener('click', () => {
         clearInterval(examTimerInterval);
@@ -885,34 +904,45 @@ document.addEventListener("DOMContentLoaded", () => {
         let simulatedScore = answered * 4 - Math.floor(answered * 0.2); 
         alert(`Exam Submitted!\nYou attempted ${answered}/75 questions.\nEstimated Score: ${simulatedScore}/300`);
         
-        if (D.mainContainer) D.mainContainer.classList.remove('split-active');
-        if (D.omrPanel) D.omrPanel.style.display = 'none';
-        if (D.resizer) D.resizer.style.display = 'none';
-        if (D.btnLock) D.btnLock.style.display = 'none';
+        const mainContainer = document.getElementById('reader-container-main');
+        if (mainContainer) mainContainer.classList.remove('split-active');
+        if (omrPanel) omrPanel.style.display = 'none';
+        if (resizer) resizer.style.display = 'none';
+        if (splitLockBtn) splitLockBtn.style.display = 'none';
         isSplitActive = false;
-        if (D.btnExam) D.btnExam.style.display = 'flex';
+        if (startExamBtn) startExamBtn.style.display = 'flex';
     });
 
     // ==========================================
-    // 11. LIBRARY FILTERING & RENDERING
+    // 12. LIBRARY FILTERING & RENDERING
     // ==========================================
-    D.searchBar?.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterAndRender, 200); 
-    });
-
-    document.querySelectorAll('.subj-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            currentSubject = chip.getAttribute('data-subj');
-            filterAndRender();
+    if (searchBar) {
+        searchBar.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(filterAndRender, 200); 
         });
-    });
+    }
+
+    const folderToggleBtn = document.getElementById('folder-toggle-btn');
+    if (folderToggleBtn) {
+        folderToggleBtn.addEventListener('click', () => {
+            isTreeExpanded = !isTreeExpanded;
+            document.querySelectorAll('#book-list details').forEach(d => d.open = isTreeExpanded);
+        });
+    }
+
+    const localFileInput = document.getElementById('local-file-input');
+    if (localFileInput) {
+        localFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            loadBook({ title: file.name, folders: ["LOCAL FILES", file.name], url: URL.createObjectURL(file) }, {});
+        });
+    }
 
     function filterAndRender() {
-        if (!D.bookListElement || masterLibrary.length === 0) return;
-        const query = D.searchBar ? D.searchBar.value.toLowerCase().trim() : "";
+        if (!bookListElement || masterLibrary.length === 0) return;
+        const query = searchBar ? searchBar.value.toLowerCase().trim() : "";
         let filteredBooks = [];
 
         if (currentRoot === "FAVORITES") {
@@ -931,15 +961,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderTree(booksArray) {
-        if (!D.bookListElement) return;
-        D.bookListElement.innerHTML = ''; 
+        if (!bookListElement) return;
+        bookListElement.innerHTML = ''; 
         if (booksArray.length === 0) {
-            D.bookListElement.innerHTML = `<div class="placeholder-text" style="font-size:0.85em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred files yet.' : 'No files found.'}</div>`; 
+            bookListElement.innerHTML = `<div class="placeholder-text" style="font-size:0.85em; margin-top:20px; text-align:center;">${currentRoot === 'FAVORITES' ? 'No starred files yet.' : 'No files found.'}</div>`; 
             return;
         }
 
         if (currentRoot === "FAVORITES") {
-            booksArray.forEach(b => D.bookListElement.appendChild(createBookElement(b)));
+            booksArray.forEach(b => bookListElement.appendChild(createBookElement(b)));
             return;
         }
 
@@ -979,7 +1009,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return container;
         }
-        D.bookListElement.appendChild(buildNode(fileTree, D.searchBar && D.searchBar.value.length > 0));
+        bookListElement.appendChild(buildNode(fileTree, searchBar && searchBar.value.length > 0));
     }
 
     function createBookElement(book) {
@@ -1039,94 +1069,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const titleText = document.getElementById('current-book-title');
         const breadcrumbText = document.getElementById('current-book-breadcrumb');
+        const phBox = document.getElementById('placeholder-box');
 
         if (titleText) titleText.textContent = book.title || "File";
         if (breadcrumbText) breadcrumbText.textContent = book.folders ? book.folders.join(" > ") : (book.title || "");
-        if (D.phBox) D.phBox.style.display = 'none';
+        if (phBox) phBox.style.display = 'none';
         
-        if (D.btnFull) D.btnFull.style.display = 'flex';
-        if (D.btnNotes) D.btnNotes.style.display = 'flex';
+        if (fullscreenBtn) fullscreenBtn.style.display = 'flex';
+        if (notesToggleBtn) notesToggleBtn.style.display = 'flex';
+        if (analyticsBtn) analyticsBtn.style.display = 'flex';
+        if (whiteboardBtn) whiteboardBtn.style.display = 'flex';
         
-        // Handle Action Buttons Visibility
+        // Hide/Show correct buttons based on SIMULATOR
         if (currentRoot === 'SIMULATOR') {
-            if (D.btnExam) D.btnExam.style.display = 'flex';
-            if (D.btnSplit) D.btnSplit.style.display = 'none';
-            if (D.btnLock) D.btnLock.style.display = 'none';
+            if (startExamBtn) startExamBtn.style.display = 'flex';
+            if (splitScreenBtn) splitScreenBtn.style.display = 'none';
+            if (splitLockBtn) splitLockBtn.style.display = 'none';
         } else {
-            if (D.btnExam) D.btnExam.style.display = 'none';
-            if (D.btnSplit) D.btnSplit.style.display = 'flex';
-            if (D.btnLock) D.btnLock.style.display = isSplitActive ? 'flex' : 'none';
-            if (D.omrPanel) D.omrPanel.style.display = 'none';
+            if (startExamBtn) startExamBtn.style.display = 'none';
+            if (splitScreenBtn) splitScreenBtn.style.display = 'flex';
+            if (splitLockBtn) splitLockBtn.style.display = isSplitActive ? 'flex' : 'none';
+            const omrPanel = document.getElementById('omr-panel');
+            if (omrPanel) omrPanel.style.display = 'none';
+            
+            const mainContainer = document.getElementById('reader-container-main');
+            if (mainContainer) mainContainer.classList.remove('split-active');
+            isSplitActive = false;
         }
 
         let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
 
         if (book.playlist && book.playlist.length > 0) {
-            if (D.playlistDropdown) {
-                D.playlistDropdown.innerHTML = '';
+            if (playlistDropdown) {
+                playlistDropdown.innerHTML = '';
                 book.playlist.forEach((vid, index) => {
                     let opt = document.createElement('option');
                     opt.value = vid.url; 
                     opt.textContent = vid.title || `Lecture ${index + 1}`;
-                    D.playlistDropdown.appendChild(opt);
+                    playlistDropdown.appendChild(opt);
                 });
-                D.playlistDropdown.style.display = 'block';
-                D.playlistDropdown.onchange = (e) => {
-                    if (D.bookFrame) D.bookFrame.src = e.target.value;
-                    if (isSplitActive && D.bookFrameSplit) D.bookFrameSplit.src = e.target.value;
+                playlistDropdown.style.display = 'block';
+                playlistDropdown.onchange = (e) => {
+                    if (bookFrame) bookFrame.src = e.target.value;
+                    if (isSplitActive && bookFrameSplit) bookFrameSplit.src = e.target.value;
                 };
             }
-            if (D.bookFrame) D.bookFrame.src = book.playlist[0].url;
-            if (isSplitActive && D.bookFrameSplit) D.bookFrameSplit.src = book.playlist[0].url;
+            if (bookFrame) bookFrame.src = book.playlist[0].url;
+            if (isSplitActive && bookFrameSplit) bookFrameSplit.src = book.playlist[0].url;
         } else {
-            if (D.playlistDropdown) D.playlistDropdown.style.display = 'none';
-            if (D.bookFrame) D.bookFrame.src = finalUrl;
-            if (isSplitActive && currentRoot !== 'SIMULATOR' && D.bookFrameSplit) D.bookFrameSplit.src = finalUrl;
+            if (playlistDropdown) playlistDropdown.style.display = 'none';
+            if (bookFrame) bookFrame.src = finalUrl;
+            if (isSplitActive && currentRoot !== 'SIMULATOR' && bookFrameSplit) bookFrameSplit.src = finalUrl;
         }
 
-        if (D.view1) D.view1.style.display = 'block';
+        if (viewerWrapper) viewerWrapper.style.display = 'block';
 
-        if (pomoSettings.zenMode === 'yes' && D.sidebar && D.desktopSidebarToggle) {
-            D.sidebar.classList.add('collapsed');
-            D.desktopSidebarToggle.textContent = '▶';
+        if (pomoSettings.zenMode === 'yes' && sidebar && desktopSidebarToggle) {
+            sidebar.classList.add('collapsed');
+            desktopSidebarToggle.textContent = '▶';
         }
 
         if (window.innerWidth <= 800) {
-            D.sidebar?.classList.remove('open');
-            D.overlay?.classList.remove('open');
+            sidebar?.classList.remove('open');
+            document.getElementById('sidebar-overlay')?.classList.remove('open');
         }
     }
 
     // ==========================================
-    // 12. AI COPILOT CHAT & DECONTAMINATION
+    // 13. AI COPILOT CHAT
     // ==========================================
-    D.chatFab?.addEventListener('click', () => D.chatWindow?.classList.add('open'));
-    D.chatClose?.addEventListener('click', () => D.chatWindow?.classList.remove('open'));
+    if (chatFab && chatWindow) {
+        chatFab.addEventListener('click', () => chatWindow.classList.add('open'));
+    }
+    if (chatClose && chatWindow) {
+        chatClose.addEventListener('click', () => chatWindow.classList.remove('open'));
+    }
 
-    if (D.chatBody) {
+    if (chatBody) {
         let savedChat = localStorage.getItem('ai_chat_history');
         if (savedChat) { 
-            D.chatBody.innerHTML = savedChat; 
-            D.chatBody.scrollTop = D.chatBody.scrollHeight; 
+            chatBody.innerHTML = savedChat; 
+            chatBody.scrollTop = chatBody.scrollHeight; 
         }
     }
 
     function appendMsg(html, isUser) {
-        if (!D.chatBody) return;
+        if (!chatBody) return;
         const d = document.createElement('div');
         d.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
         d.innerHTML = html;
-        D.chatBody.appendChild(d);
-        D.chatBody.scrollTop = D.chatBody.scrollHeight;
-        localStorage.setItem('ai_chat_history', D.chatBody.innerHTML);
+        chatBody.appendChild(d);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        localStorage.setItem('ai_chat_history', chatBody.innerHTML);
     }
 
     async function handleChatSubmit() {
-        if (!D.chatInput) return;
-        const val = D.chatInput.value.trim();
+        if (!chatInput) return;
+        const val = chatInput.value.trim();
         if (!val) return;
         appendMsg(val, true);
-        D.chatInput.value = '';
+        chatInput.value = '';
 
         try {
             if (typeof processAIQuery !== 'undefined') {
@@ -1159,32 +1201,41 @@ document.addEventListener("DOMContentLoaded", () => {
         const book = masterLibrary[index];
         if (book) { 
             loadBook(book, null); 
-            if (D.chatWindow) D.chatWindow.classList.remove('open'); 
+            if (chatWindow) chatWindow.classList.remove('open'); 
         }
     };
 
-    D.chatSend?.addEventListener('click', handleChatSubmit);
-    D.chatInput?.addEventListener('keypress', (e) => { 
-        if (e.key === 'Enter') handleChatSubmit(); 
-    });
+    if (chatSend) chatSend.addEventListener('click', handleChatSubmit);
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') handleChatSubmit(); 
+        });
+    }
 
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'b' && D.desktopSidebarToggle) {
-            e.preventDefault(); D.desktopSidebarToggle.click();
-        }
-        if (e.ctrlKey && e.key === ' ' && D.chatFab && D.chatWindow) {
+        if (e.ctrlKey && e.key.toLowerCase() === 'b' && desktopSidebarToggle) {
             e.preventDefault();
-            D.chatWindow.classList.contains('open') ? D.chatClose.click() : D.chatFab.click();
+            desktopSidebarToggle.click();
+        }
+        if (e.ctrlKey && e.key === ' ' && chatFab && chatWindow) {
+            e.preventDefault();
+            chatWindow.classList.contains('open') ? chatClose.click() : chatFab.click();
         }
         if (e.key === 'Escape') {
-            D.modalOverlay?.classList.remove('open');
-            D.musicModalOverlay?.classList.remove('open');
-            document.getElementById('analytics-modal-overlay')?.classList.remove('open');
-            document.getElementById('whiteboard-overlay')?.classList.remove('open');
-            D.chatWindow?.classList.remove('open');
-            D.notesPanel?.classList.remove('open');
+            if (modalOverlay) modalOverlay.classList.remove('open');
+            if (musicModalOverlay) musicModalOverlay.classList.remove('open');
+            const analyticsModal = document.getElementById('analytics-modal-overlay');
+            if (analyticsModal) analyticsModal.classList.remove('open');
+            const wbOverlay = document.getElementById('whiteboard-overlay');
+            if (wbOverlay) wbOverlay.classList.remove('open');
+            if (chatWindow) chatWindow.classList.remove('open');
+            if (notesPanel) notesPanel.classList.remove('open');
         }
     });
 
+    // Boot routines
+    renderTasks();
+    applyPomoSettingsUI();
+    updatePomoDisplay();
 });
