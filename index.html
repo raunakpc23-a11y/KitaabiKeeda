@@ -19,9 +19,11 @@
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
             <div class="header-controls-group">
-                <button class="icon-btn-header" id="music-open-btn" title="Open Ambient & Music Hub">🎵</button>
-                <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Open Settings & Tasks">⚙️</button>
-                <button id="theme-toggle" class="icon-btn" title="Toggle Light/Dark Mode">🌙</button>
+                <!-- QoL 6: Gamification Badge -->
+                <div id="user-level-badge" class="level-badge" title="Complete Focus Sessions to Level Up!">Lvl 1</div>
+                <button class="icon-btn-header" id="music-open-btn" title="Open Audio Hub">🎵</button>
+                <button class="pomo-gear-sidebar" id="pomo-open-settings" title="Settings">⚙️</button>
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme">🌙</button>
             </div>
         </div>
 
@@ -46,289 +48,110 @@
             </div>
         </div>
 
-        <!-- DYNAMIC SEGMENTED CONTROL -->
+        <!-- DYNAMIC TOP NAVIGATION (Max 4) -->
         <div class="mode-selector" id="dynamic-mode-selector"></div>
 
-        <!-- SEARCH CONTAINER -->
-        <div class="search-container">
-            <div class="subject-filters" id="subject-filters">
-                <button class="subj-chip active" data-subj="All">All</button>
-                <button class="subj-chip" data-subj="Physics">Physics</button>
-                <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
-                <button class="subj-chip" data-subj="Maths">Maths</button>
-            </div>
-            
-            <div class="search-row">
-                <div class="search-wrapper">
-                    <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+        <!-- NORMAL LIBRARY VIEW -->
+        <div id="library-sidebar-view">
+            <div class="search-container">
+                <div class="subject-filters" id="subject-filters">
+                    <button class="subj-chip active" data-subj="All">All</button>
+                    <button class="subj-chip" data-subj="Physics">Physics</button>
+                    <button class="subj-chip" data-subj="Chemistry">Chemistry</button>
+                    <button class="subj-chip" data-subj="Maths">Maths</button>
                 </div>
-                <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse All Folders">↕️</button>
-                <label class="local-file-btn" title="Open any PDF/file from your device">
-                    📂
-                    <input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
-                </label>
+                <div class="search-row">
+                    <div class="search-wrapper">
+                        <input type="text" id="search-bar" class="search-input" placeholder="Search files & videos... (Press '/')">
+                    </div>
+                    <button class="folder-toggle-btn" id="folder-toggle-btn" title="Expand/Collapse Folders">↕️</button>
+                    <label class="local-file-btn" title="Open local file">
+                        📂<input type="file" id="local-file-input" style="display:none;" accept=".pdf,video/*,audio/*,.txt,image/*">
+                    </label>
+                </div>
             </div>
+            <div class="book-list" id="book-list"></div>
         </div>
-        
-        <!-- BOOK/FILE LIST -->
-        <div class="book-list" id="book-list"></div>
+
+        <!-- UTILITIES SIDEBAR VIEW (Hidden by default) -->
+        <div id="utilities-sidebar-view" style="display:none; padding: 20px; display:flex; flex-direction:column; gap:12px;">
+            <button class="utility-menu-btn" id="util-btn-analytics">📊 Analytics Dashboard</button>
+            <button class="utility-menu-btn" id="util-btn-whiteboard">🖌️ Digital Scratchpad</button>
+            <button class="utility-menu-btn" id="util-btn-settings">⚙️ System Preferences</button>
+        </div>
     </div>
 
-    <!-- MUSIC & AMBIENT HUB MODAL -->
+    <!-- MUSIC MODAL -->
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
-                <span>🎵 Focus Music & Ambient Generator</span>
-                <button class="icon-btn" id="music-close-modal">✖</button>
+                <span>🎵 Focus Music Hub</span><button class="icon-btn" id="music-close-modal">✖</button>
             </div>
             <div class="pomo-modal-body">
                 <div class="pomo-setting-group">
                     <label>Audio Mode:</label>
                     <select id="music-preset-select">
-                        <option value="ambient-rain">🌧️ Synthesized Ambient Rain</option>
-                        <option value="ambient-brown">🌊 Synthesized Brown/Deep Noise</option>
-                        <option value="ambient-white">📻 Synthesized Pure White Noise</option>
+                        <option value="ambient-rain">🌧️ Synthesized Rain</option>
+                        <option value="ambient-brown">🌊 Deep Brown Noise</option>
+                        <option value="ambient-white">📻 Pure White Noise</option>
                         <option value="spotify-lofi">Spotify: Lofi Study Beats</option>
-                        <option value="spotify-focus">Spotify: Deep Focus Instrumental</option>
-                        <option value="spotify-classical">Spotify: Classical Essentials</option>
-                        <option value="yt-lofi">YouTube: Lofi Girl Live Stream</option>
-                        <option value="custom">Custom Spotify / YouTube URL</option>
+                        <option value="spotify-focus">Spotify: Deep Focus</option>
+                        <option value="yt-lofi">YouTube: Lofi Girl</option>
                     </select>
                 </div>
-
                 <div class="ambient-controls-box" id="ambient-controls-box">
-                    <button class="primary-btn" id="ambient-play-toggle" style="width: 100%; justify-content: center; margin-bottom: 8px;">▶ Start Ambient Sound</button>
+                    <button class="primary-btn" id="ambient-play-toggle" style="width: 100%; justify-content: center;">▶ Start Ambient Sound</button>
                 </div>
-
-                <div class="pomo-setting-group" id="custom-music-group" style="display:none;">
-                    <label>Paste Spotify Playlist/Track or YouTube URL:</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="custom-music-url" placeholder="https://open.spotify.com/playlist/...">
-                        <button class="primary-btn" id="custom-music-apply-btn" style="padding: 6px 12px; font-size: 0.8em;">Apply</button>
-                    </div>
-                </div>
-
                 <div class="music-iframe-wrapper" id="music-iframe-container" style="display:none;">
-                    <iframe id="music-frame" src="" width="100%" height="152" frameBorder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <iframe id="music-frame" src="" width="100%" height="152" frameBorder="0" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MASTER SETTINGS MODAL -->
+    <!-- SETTINGS MODAL -->
     <div class="pomo-modal-overlay" id="pomo-modal-overlay">
         <div class="pomo-modal">
-            <div class="pomo-modal-header">
-                <span>⚙️ Control Panel</span>
-                <button class="icon-btn" id="pomo-close-modal">✖</button>
-            </div>
-            
+            <div class="pomo-modal-header"><span>⚙️ Control Panel</span><button class="icon-btn" id="pomo-close-modal">✖</button></div>
             <div class="pomo-modal-tabs">
                 <button class="pomo-tab-btn active" data-tab="tab-focus">🎯 Focus</button>
                 <button class="pomo-tab-btn" data-tab="tab-ui">🎨 Theme</button>
                 <button class="pomo-tab-btn" data-tab="tab-modules">🧩 Modules</button>
                 <button class="pomo-tab-btn" data-tab="tab-audio">🔔 Audio</button>
             </div>
-
             <div class="pomo-modal-body">
-                <!-- TAB 1: FOCUS -->
                 <div class="pomo-tab-content active" id="tab-focus">
-                    <div class="pomo-setting-group">
-                        <label>Focus Duration:</label>
-                        <select id="pomo-setting-focus">
-                            <option value="5">5 Minutes</option>
-                            <option value="15">15 Minutes</option>
-                            <option value="25" selected>25 Minutes (Standard)</option>
-                            <option value="45">45 Minutes (Deep Work)</option>
-                            <option value="60">60 Minutes (1 Hour)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Break Duration:</label>
-                        <select id="pomo-setting-break">
-                            <option value="5" selected>5 Minutes</option>
-                            <option value="10">10 Minutes</option>
-                            <option value="15">15 Minutes</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Auto-Start Next Session:</label>
-                        <select id="pomo-setting-autostart">
-                            <option value="no" selected>Disabled (Manual Start)</option>
-                            <option value="yes">Enabled (Continuous Flow)</option>
-                        </select>
-                    </div>
+                    <div class="pomo-setting-group"><label>Focus Duration:</label><select id="pomo-setting-focus"><option value="5">5 Mins</option><option value="25" selected>25 Mins</option><option value="50">50 Mins</option></select></div>
+                    <div class="pomo-setting-group"><label>Break Duration:</label><select id="pomo-setting-break"><option value="5" selected>5 Mins</option><option value="10">10 Mins</option></select></div>
+                    <div class="pomo-setting-group"><label>Auto-Start Next Session:</label><select id="pomo-setting-autostart"><option value="no">Disabled</option><option value="yes">Enabled</option></select></div>
                     <div class="pomo-tasks-container">
-                        <label style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">📝 Session Goal / Tasks:</label>
-                        <div class="pomo-task-input-row">
-                            <input type="text" id="pomo-new-task" placeholder="Add a task...">
-                            <button class="primary-btn" id="pomo-add-task-btn" style="padding: 6px 12px; font-size: 0.8em;">Add</button>
-                        </div>
+                        <label style="font-weight: 700;">📝 Tasks:</label>
+                        <div class="pomo-task-input-row"><input type="text" id="pomo-new-task" placeholder="Add task..."><button class="primary-btn" id="pomo-add-task-btn">Add</button></div>
                         <div class="pomo-task-list" id="pomo-task-list"></div>
                     </div>
                 </div>
-
-                <!-- TAB 2: THEME -->
                 <div class="pomo-tab-content" id="tab-ui">
-                    <div class="pomo-setting-group">
-                        <label>Dark / Light Mode Shade:</label>
-                        <select id="pomo-setting-theme-shade">
-                            <option value="theme-amoled">AMOLED Pitch Black (#000000)</option>
-                            <option value="theme-charcoal">Charcoal Dark (#121212)</option>
-                            <option value="theme-slate">Slate Navy (#0f172a)</option>
-                            <option value="theme-light">Standard Light Mode</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>App Font Size:</label>
-                        <select id="pomo-setting-fontsize">
-                            <option value="font-small">Small</option>
-                            <option value="font-medium" selected>Medium (Default)</option>
-                            <option value="font-large">Large</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Pomodoro Icon Style:</label>
-                        <select id="pomo-setting-icon">
-                            <option value="🍅" selected>🍅 Tomato</option>
-                            <option value="🐉">🐉 Komodo Dragon</option>
-                            <option value="⚡">⚡ Lightning</option>
-                            <option value="🧠">🧠 Brain</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Zen Mode (Distraction Shield):</label>
-                        <select id="pomo-setting-zen">
-                            <option value="no" selected>Disabled (Normal View)</option>
-                            <option value="yes">Enabled (Hides Sidebar on File View)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Highlight Main Task on Main Page:</label>
-                        <select id="pomo-setting-highlight">
-                            <option value="yes" selected>Enabled (Show Banner)</option>
-                            <option value="no">Disabled (Hidden)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Motivational Bubbles:</label>
-                        <select id="pomo-setting-bubbles">
-                            <option value="yes" selected>Show Bubbles</option>
-                            <option value="no">Hide Bubbles</option>
-                        </select>
-                    </div>
+                    <div class="pomo-setting-group"><label>Theme:</label><select id="pomo-setting-theme-shade"><option value="theme-amoled">AMOLED Dark</option><option value="theme-slate">Slate</option><option value="theme-light">Light</option></select></div>
+                    <div class="pomo-setting-group"><label>App Font Size:</label><select id="pomo-setting-fontsize"><option value="font-small">Small</option><option value="font-medium" selected>Medium</option></select></div>
+                    <div class="pomo-setting-group"><label>Pomodoro Icon Style:</label><select id="pomo-setting-icon"><option value="🍅" selected>🍅 Tomato</option><option value="🐉">🐉 Komodo Dragon</option><option value="🦦">🦦 Capybara</option></select></div>
+                    <div class="pomo-setting-group"><label>Zen Mode:</label><select id="pomo-setting-zen"><option value="no">Disabled</option><option value="yes">Enabled</option></select></div>
+                    <div class="pomo-setting-group"><label>Show Motivational Bubbles:</label><select id="pomo-setting-bubbles"><option value="yes">Yes</option><option value="no">No</option></select></div>
+                    <div class="pomo-setting-group"><label>Highlight Main Task:</label><select id="pomo-setting-highlight"><option value="yes">Yes</option><option value="no">No</option></select></div>
                 </div>
-
-                <!-- TAB 3: MODULES -->
                 <div class="pomo-tab-content" id="tab-modules">
-                    <div class="pomo-setting-group">
-                        <label>AI Study Copilot (Chatbot):</label>
-                        <select id="pomo-setting-ai">
-                            <option value="yes" selected>Enabled</option>
-                            <option value="no">Disabled (Hide Copilot)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Enable Pomodoro Widget:</label>
-                        <select id="pomo-setting-enable">
-                            <option value="yes" selected>Enabled</option>
-                            <option value="no">Disabled (Hidden)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group" style="margin-top: 8px;">
-                        <label>Top Navigation Modules (Choose up to 4):</label>
-                        <div class="module-checkbox-grid" id="module-checkbox-grid"></div>
-                    </div>
+                    <div class="pomo-setting-group"><label>AI Mate Enable:</label><select id="pomo-setting-ai"><option value="yes">Enabled</option><option value="no">Disabled</option></select></div>
+                    <div class="pomo-setting-group"><label>Pomodoro Widget:</label><select id="pomo-setting-enable"><option value="yes">Enabled</option><option value="no">Disabled</option></select></div>
+                    <div class="pomo-setting-group"><label>Top Navigation Modules (Max 4):</label><div class="module-checkbox-grid" id="module-checkbox-grid"></div></div>
                 </div>
-
-                <!-- TAB 4: AUDIO -->
                 <div class="pomo-tab-content" id="tab-audio">
-                    <div class="pomo-setting-group">
-                        <label>Alert Tone:</label>
-                        <select id="pomo-setting-sound">
-                            <option value="beep">Digital Beep</option>
-                            <option value="chime">Soft Chime</option>
-                            <option value="none">Mute (No Sound)</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Alert Volume:</label>
-                        <input type="range" id="pomo-setting-volume" min="0" max="1" step="0.05" value="0.5">
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Vibration Alert:</label>
-                        <select id="pomo-setting-vibrate">
-                            <option value="yes">Enabled</option>
-                            <option value="no" selected>Disabled</option>
-                        </select>
-                    </div>
-                    <div class="pomo-setting-group">
-                        <label>Quote Rotation Speed:</label>
-                        <select id="pomo-setting-rate">
-                            <option value="10">Every 10 Seconds</option>
-                            <option value="30" selected>Every 30 Seconds</option>
-                            <option value="60">Every 1 Minute</option>
-                            <option value="300">Every 5 Minutes</option>
-                        </select>
-                    </div>
+                    <div class="pomo-setting-group"><label>Alert Tone:</label><select id="pomo-setting-sound"><option value="beep">Digital Beep</option><option value="chime">Soft Chime</option><option value="none">Mute</option></select></div>
+                    <div class="pomo-setting-group"><label>Alert Volume:</label><input type="range" id="pomo-setting-volume" min="0" max="1" step="0.05" value="0.5"></div>
+                    <div class="pomo-setting-group"><label>Vibration Alert:</label><select id="pomo-setting-vibrate"><option value="yes">Enabled</option><option value="no" selected>Disabled</option></select></div>
+                    <div class="pomo-setting-group"><label>Quote Rotation Speed:</label><select id="pomo-setting-rate"><option value="30">30s</option><option value="60">1m</option></select></div>
                 </div>
             </div>
-
-            <div class="pomo-modal-footer">
-                <button class="primary-btn" id="pomo-save-settings">Save Settings</button>
-            </div>
+            <div class="pomo-modal-footer"><button class="primary-btn" id="pomo-save-settings">Save Settings</button></div>
         </div>
-    </div>
-
-    <!-- ANALYTICS DASHBOARD MODAL -->
-    <div class="pomo-modal-overlay" id="analytics-modal-overlay">
-        <div class="pomo-modal" style="width: 520px;">
-            <div class="pomo-modal-header">
-                <span>📊 Study Analytics Dashboard</span>
-                <button class="icon-btn" id="analytics-close-modal">✖</button>
-            </div>
-            <div class="pomo-modal-body">
-                <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:10px;">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-total-pomos">0</div>
-                        <div class="stat-label">Total Focus Sessions</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-streak" style="color: #ef4444;">0 🔥</div>
-                        <div class="stat-label">Current Day Streak</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-hours">0.0</div>
-                        <div class="stat-label">Hours Studied</div>
-                    </div>
-                </div>
-                <div class="pomo-setting-group">
-                    <label>Last 30 Days Heatmap:</label>
-                    <div class="heatmap-grid" id="heatmap-container"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- WHITEBOARD OVERLAY -->
-    <div id="whiteboard-overlay" class="whiteboard-overlay">
-        <div class="whiteboard-header">
-            <div style="display:flex; gap:10px; align-items:center;">
-                <span style="font-weight:bold; margin-right:15px; font-size:1.1em;">🖌️ Scratchpad</span>
-                <button class="color-btn active" style="background:#f8fafc;" data-color="#f8fafc"></button>
-                <button class="color-btn" style="background:#ef4444;" data-color="#ef4444"></button>
-                <button class="color-btn" style="background:#3b82f6;" data-color="#3b82f6"></button>
-                <button class="color-btn" style="background:#22c55e;" data-color="#22c55e"></button>
-                <button class="icon-btn" id="wb-eraser" title="Eraser">🧹</button>
-                <input type="range" id="wb-size" min="1" max="15" value="3" style="width: 80px;">
-            </div>
-            <div style="display:flex; gap:6px;">
-                <button class="icon-btn" id="wb-clear" title="Clear All">🗑️</button>
-                <button class="icon-btn" id="wb-download" title="Save PNG">💾</button>
-                <button class="icon-btn" id="wb-close" style="color:#ef4444;">✖</button>
-            </div>
-        </div>
-        <canvas id="wb-canvas"></canvas>
     </div>
 
     <!-- MAIN WORKSPACE -->
@@ -336,98 +159,104 @@
         <div class="reader-header">
             <div class="reader-header-info">
                 <div class="title-row">
-                    <button id="mobile-menu-btn" class="icon-btn" title="Open Menu">☰</button>
-                    <button id="desktop-sidebar-toggle" class="icon-btn" title="Toggle Sidebar (Ctrl+B)">◀</button>
+                    <button id="mobile-menu-btn" class="icon-btn">☰</button>
+                    <button id="desktop-sidebar-toggle" class="icon-btn">◀</button>
                     <h2 id="current-book-title">Select a file</h2>
                 </div>
                 <div id="current-book-breadcrumb" class="breadcrumb"></div>
                 <select id="playlist-dropdown" class="playlist-select" style="display:none;"></select>
             </div>
-            
-            <!-- NEW: UTILITIES IN HEADER -->
             <div class="header-actions">
-                <button id="download-btn" class="icon-btn" style="display:none;"></button>
                 <button id="start-exam-btn" class="primary-btn" style="display:none; background-color:#ef4444;">⏱️ Start Exam</button>
-                
                 <div style="width:1px; height:24px; background:var(--border-color); margin:0 4px;"></div>
-                
-                <button id="analytics-btn" class="icon-btn" title="Analytics Dashboard">📊</button>
-                <button id="whiteboard-btn" class="icon-btn" title="Digital Scratchpad">🖌️</button>
-                <button id="notes-toggle-btn" class="icon-btn" title="Quick Notes" style="display:none;">📝</button>
-                <button id="split-screen-btn" class="icon-btn" title="Toggle Split-Screen View" style="display:none;">🔲</button>
+                <button id="notes-toggle-btn" class="icon-btn" title="Context Notes" style="display:none;">📝</button>
+                <!-- QoL 3: Split Lock Toggle -->
+                <button id="split-lock-btn" class="icon-btn" title="Lock Split Ratio" style="display:none;">🔓</button>
+                <button id="split-screen-btn" class="icon-btn" title="Toggle Split Screen" style="display:none;">🔲</button>
                 <button id="fullscreen-btn" class="icon-btn primary-btn" style="display:none;">⛶ <span>Fullscreen</span></button>
             </div>
         </div>
         
         <div class="reader-container" id="reader-container-main">
+            <!-- PLACEHOLDER (COMING NEVER) -->
             <div class="placeholder-container" id="placeholder-box">
-                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">READY TO STUDY</h2>
-                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
+                <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">COMING NEVER</h2>
+                <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">This was made with AI and the person who gave the command is busy with other shit.</p>
             </div>
             
-            <!-- Viewer 1 (Main PDF/Video) -->
+            <!-- Viewer 1 (Main) -->
             <div id="viewer-wrapper">
-                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
-                <div class="floating-nav" id="floating-nav">
-                    <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
-                </div>
+                <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
             </div>
             
-            <!-- Viewer 2 (Standard Split Screen) -->
+            <!-- QoL 3: Draggable Split Resizer -->
+            <div id="split-resizer" class="resizer" style="display:none;"></div>
+
+            <!-- Viewer 2 (Split) -->
             <div id="viewer-wrapper-split" style="display:none;">
-                <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
+                <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>
             </div>
 
-            <!-- Viewer 3 (Native OMR Simulator Panel) -->
+            <!-- EXAM OMR PANEL -->
             <div id="omr-panel" class="omr-panel" style="display:none;">
                 <div class="omr-header">
-                    <h3>Exam OMR Sheet</h3>
-                    <div id="omr-timer" class="omr-timer">03:00:00</div>
+                    <h3>Exam OMR</h3>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <!-- QoL 5: Grid Toggle Button -->
+                        <button id="omr-grid-toggle" class="icon-btn" style="font-size:0.9em; border: 1px solid var(--border-color);">🔢 Grid</button>
+                        <div id="omr-timer" class="omr-timer">03:00:00</div>
+                    </div>
                 </div>
-                <div id="omr-questions-container" class="omr-questions-container">
-                    <!-- JS Injected 75 Questions -->
-                </div>
-                <div class="omr-footer">
-                    <button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam & Score</button>
-                </div>
+                
+                <!-- QoL 5: Exam Jump Grid -->
+                <div id="omr-jump-grid" class="omr-jump-grid" style="display:none;"></div>
+
+                <div id="omr-questions-container" class="omr-questions-container"></div>
+                <div class="omr-footer"><button id="omr-submit-btn" class="primary-btn" style="width:100%; justify-content:center;">Submit Exam</button></div>
+            </div>
+
+            <!-- UTILITIES FULL-SCREEN WORKSPACE -->
+            <div id="utilities-workspace" style="display:none; width:100%; height:100%; background:var(--reader-bg); flex-direction:column;">
+                <!-- Content Injected via JS (Analytics / Whiteboard) -->
             </div>
         </div>
 
-        <!-- QUICK NOTES DRAWER -->
+        <!-- CONTEXT NOTES DRAWER (QoL 2) -->
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
-                <span>📝 Quick Notes</span>
+                <span id="notes-title-label">📝 Quick Notes</span>
                 <div style="display: flex; gap: 4px;">
-                    <button class="icon-btn" id="notes-copy-btn" title="Copy to Clipboard">📋</button>
-                    <button class="icon-btn" id="notes-dl-btn" title="Download Notes">💾</button>
+                    <button class="icon-btn" id="notes-copy-btn" title="Copy">📋</button>
+                    <button class="icon-btn" id="notes-dl-btn" title="Download">💾</button>
                     <button class="icon-btn" id="close-notes-btn">✖</button>
                 </div>
             </div>
-            <textarea id="notes-area" class="notes-area" placeholder="Type your notes here... They auto-save!"></textarea>
+            <textarea id="notes-area" class="notes-area" placeholder="Type notes here... They auto-save specifically to the file you are reading!"></textarea>
         </div>
         
-        <!-- AI COPILOT CHAT -->
-        <button class="chat-fab" id="chat-fab-btn" title="AI Navigator & Copilot (Ctrl+Space)">🤖</button>
+        <!-- AI CAPYBARA CHAT -->
+        <button class="chat-fab" id="chat-fab-btn" title="Capybara Mate (Ctrl+Space)">🦦</button>
         <div class="chat-window" id="chat-window">
             <div class="chat-header">
-                <span>🧭 AI Study Copilot</span>
-                <button class="icon-btn" id="chat-close-btn">✖</button>
+                <span>🦦 Capybara Study Mate</span><button class="icon-btn" id="chat-close-btn">✖</button>
             </div>
             <div class="chat-body" id="chat-body">
                 <div class="chat-msg bot-msg">
-                    👋 <strong>Hi! I'm your AI Study Copilot.</strong><br><br>
+                    👋 <strong>Hi Mate! I'm Capybara, your Study Mate.</strong><br>
+                    <i style="font-size:0.85em; opacity:0.8;">I am totally an AI. Definitely not a giant rodent.</i> 🦦<br><br>
                     • <strong>Search:</strong> <em>"Find math mock tests"</em><br>
                     • <strong>Define:</strong> <em>"What is kinetic energy?"</em><br>
-                    • <strong>Solve:</strong> <em>"Calculate 45 * 12"</em>
+                    • <strong>Read:</strong> <em>"What file am I looking at?"</em>
                 </div>
             </div>
             <div class="chat-footer">
-                <input type="text" id="chat-input" placeholder="Ask to define, calculate, or find...">
+                <input type="text" id="chat-input" placeholder="Ask to define, calculate, or read...">
                 <button id="chat-send-btn">Ask</button>
             </div>
         </div>
     </div>
 
+    <!-- CORE SCRIPTS -->
     <script src="ai.js"></script>
     <script src="script.js"></script>
 </body>
