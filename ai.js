@@ -6,13 +6,10 @@
  * and Rich Wikipedia API integration.
  */
 
-// ==========================================
-// 1. CORE UTILITIES & NLP HELPERS
-// ==========================================
 const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// Expanded stopword dictionary for better NLP keyword extraction
 const removeStopwords = (str) => {
+    if (!str) return "";
     const stopwords = [
         'i', 'want', 'to', 'know', 'about', 'need', 'some', 'looking', 'for', 'the', 
         'can', 'you', 'pull', 'up', 'give', 'me', 'any', 'anything', 'have', 'we', 
@@ -25,23 +22,15 @@ const removeStopwords = (str) => {
     return str.split(' ').filter(w => !stopwords.includes(w)).join(' ').trim();
 };
 
-// ==========================================
-// 2. APP CONTROL UI BUTTONS
-// ==========================================
-// The AI dynamically generates HTML buttons to physically control the workspace
 const appControls = {
-    timer: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#ef4444;" onclick="document.getElementById('pomo-toggle').click()">⏱️ Start/Pause Timer</button>`,
-    whiteboard: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#3b82f6;" onclick="document.getElementById('whiteboard-btn').click()">🖌️ Open Scratchpad</button>`,
-    analytics: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#f59e0b;" onclick="document.getElementById('analytics-btn').click()">📊 View Study Stats</button>`,
-    music: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#8b5cf6;" onclick="document.getElementById('music-open-btn').click()">🎵 Open Audio Hub</button>`,
-    theme: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#64748b;" onclick="document.getElementById('theme-toggle').click()">🌙 Switch Theme</button>`,
-    notes: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#10b981;" onclick="document.getElementById('notes-toggle-btn').click()">📝 Open Quick Notes</button>`
+    timer: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#ef4444;" onclick="document.getElementById('pomo-toggle')?.click()">⏱️ Start/Pause Timer</button>`,
+    whiteboard: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#3b82f6;" onclick="document.getElementById('whiteboard-btn')?.click()">🖌️ Open Scratchpad</button>`,
+    analytics: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#f59e0b;" onclick="document.getElementById('analytics-btn')?.click()">📊 View Study Stats</button>`,
+    music: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#8b5cf6;" onclick="document.getElementById('music-open-btn')?.click()">🎵 Open Audio Hub</button>`,
+    theme: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#64748b;" onclick="document.getElementById('theme-toggle')?.click()">🌙 Switch Theme</button>`,
+    notes: `<button class="primary-btn" style="margin-top:10px; width:100%; justify-content:center; background:#10b981;" onclick="document.getElementById('notes-toggle-btn')?.click()">📝 Open Quick Notes</button>`
 };
 
-// ==========================================
-// 3. CAPYBARA MATE PERSONA & INTENT DICTIONARY
-// ==========================================
-// Vastly expanded reach to handle a multitude of user moods, queries, and jokes.
 const conversationIntents = [
     {
         patterns: [/\b(past|history|before|friends|know you|who are you really|komodo|dragon|fish|remember)\b/i],
@@ -157,9 +146,6 @@ const conversationIntents = [
     }
 ];
 
-// ==========================================
-// 4. RICH MEDIA GENERATORS
-// ==========================================
 function getCapybaraImage() {
     const capyImgs = [
         'https://upload.wikimedia.org/wikipedia/commons/3/34/Hydrochoerus_hydrochaeris_in_Brazil_in_Hot_Day.jpg',
@@ -178,10 +164,31 @@ function getKomodoImage() {
     return rand(komodoImgs);
 }
 
-// ==========================================
-// 5. SAFELY EVALUATE ADVANCED MATH ENGINE
-// ==========================================
+function matchConversation(query) {
+    if (!query) return null;
+    const qLower = query.toLowerCase();
+
+    if (qLower.match(/(what time is it|time please|current time)/)) {
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        return `It's exactly <strong>${time}</strong>. Let's make every single minute count! ⏳ ${appControls.timer}`;
+    }
+    if (qLower.match(/(what day is it|current date|what is today)/)) {
+        const date = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        return `Today is <strong>${date}</strong>. Make it a productive one! 📅`;
+    }
+
+    if (qLower.split(' ').length < 15) {
+        for (let intent of conversationIntents) {
+            for (let pattern of intent.patterns) {
+                if (pattern.test(qLower)) return rand(intent.replies);
+            }
+        }
+    }
+    return null;
+}
+
 function solveMath(query) {
+    if (!query) return null;
     let normalized = query.toLowerCase()
         .replace(/plus/g, '+')
         .replace(/minus/g, '-')
@@ -201,7 +208,6 @@ function solveMath(query) {
     if (calcMatch && calcMatch[1].trim().length > 0) {
         try {
             let expression = calcMatch[1].replace(/\^/g, '**'); 
-            // Strict regex to prevent XSS/harmful execution (allows Math. objects and operators)
             if (/^[0-9\+\-\*\/\(\)\.\s\*MathsqrcostnPIlogeExpE]+$/.test(expression)) {
                 let result = new Function(`'use strict'; return (${expression})`)();
                 if (!isNaN(result)) {
@@ -219,11 +225,8 @@ function solveMath(query) {
     return null;
 }
 
-// ==========================================
-// 6. WEIGHTED LIBRARY SEARCH
-// ==========================================
 function smartSearch(query, libraryData, isBroad = false) {
-    if (!libraryData || libraryData.length === 0) return null;
+    if (!libraryData || libraryData.length === 0 || !query) return null;
     
     let matchPattern = isBroad ? query : query.match(/(?:find|search|where|show|open|look for|pull up|i need|do you have|notes on|lectures on|practice) (.+)/i);
     let searchTarget = isBroad ? matchPattern : (matchPattern ? matchPattern[1] : null);
@@ -232,7 +235,6 @@ function smartSearch(query, libraryData, isBroad = false) {
     const searchWords = removeStopwords(searchTarget).split(' ').filter(w => w.length > 2);
     if (searchWords.length === 0) return null;
 
-    // Advanced Alias Mapping (Expands reach)
     const aliases = {
         'math': ['mathematics', 'calculus', 'algebra', 'trig'],
         'physics': ['mechanics', 'kinematics', 'thermodynamics'],
@@ -248,8 +250,9 @@ function smartSearch(query, libraryData, isBroad = false) {
     });
 
     let scoredBooks = libraryData.map(book => {
-        const titleLower = book.title.toLowerCase();
-        const folderLower = book.folders ? book.folders.join(" ").toLowerCase() : "";
+        if (!book) return { book, score: 0 };
+        const titleLower = (book.title || "").toLowerCase();
+        const folderLower = (book.folders && Array.isArray(book.folders)) ? book.folders.join(" ").toLowerCase() : "";
         let score = 0;
         
         expandedSearchWords.forEach(w => { 
@@ -264,15 +267,13 @@ function smartSearch(query, libraryData, isBroad = false) {
 
     if (scoredBooks.length > 0) {
         scoredBooks.sort((a, b) => b.score - a.score); 
-        return scoredBooks.map(item => item.book).slice(0, 5); // Return Top 5 best matches
+        return scoredBooks.map(item => item.book).slice(0, 5); 
     }
     return null;
 }
 
-// ==========================================
-// 7. RICH WIKIPEDIA FETCHING
-// ==========================================
 async function fetchWikipedia(query) {
+    if (!query) return null;
     const defMatch = query.match(/(?:what is|define|who is|explain|what are|meaning of|theory behind|concept of) (.+)/i);
     let searchTopic = defMatch ? removeStopwords(defMatch[1].replace(/\?$/, '').trim()) : null;
 
@@ -298,7 +299,6 @@ async function fetchWikipedia(query) {
                         if (wikiData.thumbnail && wikiData.thumbnail.source) {
                             imgHtml = `<img src="${wikiData.thumbnail.source}" style="width:100%; max-height:140px; object-fit:cover; border-radius:6px; margin-bottom:8px; border:1px solid var(--border-color);">`;
                         }
-
                         return `
                             <div style="background:var(--folder-bg); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
                                 ${imgHtml}
@@ -315,13 +315,11 @@ async function fetchWikipedia(query) {
     return null;
 }
 
-// ==========================================
-// 8. MASTER ROUTER & ORCHESTRATOR
-// ==========================================
 async function processAIQuery(query, libraryData) {
+    if (!query) return null;
     const qLower = query.toLowerCase().trim();
 
-    // Route 0.1: Easter Egg - Capybara Image Trigger
+    // Route 0.1: Easter Egg - Capybara Image
     if (qLower.includes('capybara')) {
         return {
             type: 'fact',
@@ -333,7 +331,7 @@ async function processAIQuery(query, libraryData) {
         };
     }
 
-    // Route 0.2: Easter Egg - Komodo Dragon Image Trigger
+    // Route 0.2: Easter Egg - Komodo Dragon Image
     if (qLower.includes('komodo dragon')) {
         return {
             type: 'fact',
@@ -345,15 +343,15 @@ async function processAIQuery(query, libraryData) {
         };
     }
 
-    // Route 1: Small Talk, App Control & Emotion
+    // Route 1: Small Talk & Emotion
     const convoReply = matchConversation(query);
     if (convoReply) return { type: 'fact', reply: convoReply };
 
-    // Route 2: Math Calculation
+    // Route 2: Math
     const mathReply = solveMath(query);
     if (mathReply) return { type: 'fact', reply: mathReply };
 
-    // Route 3: Specific Library Navigation
+    // Route 3: Specific File Search
     const navMatches = smartSearch(qLower, libraryData, false);
     if (navMatches) {
         return { 
@@ -367,11 +365,11 @@ async function processAIQuery(query, libraryData) {
         };
     }
 
-    // Route 4: Knowledge / Wikipedia Fetch
+    // Route 4: Wikipedia Fetch
     const wikiReply = await fetchWikipedia(query);
     if (wikiReply) return { type: 'fact', reply: wikiReply };
 
-    // Route 5: Broad Keyword Library Search (Fallback)
+    // Route 5: Broad Fallback Search
     const fallbackMatches = smartSearch(qLower, libraryData, true);
     if (fallbackMatches) {
         return {
@@ -381,7 +379,7 @@ async function processAIQuery(query, libraryData) {
         };
     }
 
-    // Route 6: Catch-All / Web Search Generator
+    // Route 6: Google Fallback
     if (qLower.includes('?')) {
         return {
             type: 'fact',
@@ -403,22 +401,14 @@ async function processAIQuery(query, libraryData) {
     }
 }
 
-// ==========================================
-// 9. UI HIJACKER (Auto-Rebrands the HTML on load)
-// ==========================================
+// UI HIJACKER (Auto-Rebrands HTML on load safely)
 document.addEventListener("DOMContentLoaded", () => {
-    // Change the chat button icon
     const fab = document.getElementById('chat-fab-btn');
-    if (fab) {
-        fab.innerHTML = '🦦';
-        fab.title = "Capybara Mate (Ctrl+Space)";
-    }
+    if (fab) { fab.innerHTML = '🦦'; fab.title = "Capybara Mate (Ctrl+Space)"; }
 
-    // Change the chat window header
     const headerSpan = document.querySelector('.chat-header span');
     if (headerSpan) headerSpan.innerHTML = '🦦 Capybara Study Mate';
 
-    // Update the intro message ONLY if there's no chat history
     const introMsg = document.querySelector('.bot-msg');
     if (introMsg && !localStorage.getItem('ai_chat_history')) {
         introMsg.innerHTML = `
