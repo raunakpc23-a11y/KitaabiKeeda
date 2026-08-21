@@ -2194,7 +2194,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/18_mcOetIuv2-XSXBaLbIO_G-FwrymI1A/preview"
@@ -2204,7 +2204,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1jRh0FyjWCHHuCaXIhdEv7Tj8-AZiXUD6/preview"
@@ -2214,7 +2214,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/12UUAzXguNgETp-BguebpE55Q72HDlQhs/preview"
@@ -2224,7 +2224,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1a1E6DuNdllWzIm5rUuBfBWNxUBijn6f0/preview"
@@ -2234,7 +2234,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1-J6BPBQmUszCdnnkH0wyAheCuGQrUhEn/preview"
@@ -2244,7 +2244,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1kwHYdYSP-bO2NAtmQKA9f4HfljUNhyRG/preview"
@@ -2254,7 +2254,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1FpB8JGRMPd60TAGygocRTFLkqDow-Hb_/preview"
@@ -2264,7 +2264,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1GDXP2sJlQ4do05hHh_IoAbRTk22aeMlu/preview"
@@ -2274,7 +2274,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1n6zANn6Gz32GhLbCo7tEL4wZPHprhi0W/preview"
@@ -2284,7 +2284,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1gTBwoGU5GzaaOIlG2ZihDSEEmyJH9aFG/preview"
@@ -2294,7 +2294,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1H950_SoOzi4Ll_9AYQ7syc1STV4BOBss/preview"
@@ -2304,7 +2304,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1PepL9JEy1d3vNGITz9aquE-wlRr5-vF6/preview"
@@ -2314,7 +2314,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1TIQrbMh-L6oplN2LR3iQanv5jgWwrB0c/preview"
@@ -2324,7 +2324,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1138LQl_OegEByQ-hYgY3DnIVEd-zOhhf/preview"
@@ -2334,7 +2334,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1JyGSHZnq3DSPFDFXvB3N0rVm515BjTu9/preview"
@@ -2344,7 +2344,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/19bkGlS526PHEdS4lPbOkO7--aUMJvf1_/preview"
@@ -2354,7 +2354,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1s3dIxGCC88WYOAV5XlD7y2cNxGNx1vt7/preview"
@@ -2364,7 +2364,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1wI9ioYcRAOZ6ogSR7eW_zu4RalzUmnDX/preview"
@@ -2374,7 +2374,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1SaqUlWE20CDg3AgUyaVn-0cu2rsYWd9n/preview"
@@ -2384,7 +2384,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1_uE3Uf1lBvL6hP1epYlk2fMgCZzR_c58/preview"
@@ -2394,7 +2394,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/11hDexOsXH5WPjqVqsw_PprJ2P3XALwcJ/preview"
@@ -2404,7 +2404,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1a_z_rVmIMEprK3vJurvEVOkql--MbG3k/preview"
@@ -2414,7 +2414,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physical Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1UmNWQ1bP23QFAOedy80zM23v3Wi9ye8m/preview"
@@ -2424,7 +2424,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1GwGaSv32UZK70oRhjqdvxjHj6KRJBc5K/preview"
@@ -2434,7 +2434,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1SWqX_mHSdU_v6x84yvQ5JjI-p8z2NKzE/preview"
@@ -2444,7 +2444,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1ElfKw0ghE3CHRiCy__mQj-w3tuydYurK/preview"
@@ -2454,7 +2454,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1cc3ts2K23zknehhfkTRERPrqH25Q-LOS/preview"
@@ -2464,7 +2464,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1tYbnp3etrxdoxFMbZPNWbaxAgkjfqpP7/preview"
@@ -2474,7 +2474,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1xq_dheRxFUmkKWYohEMFkv7sOMIWe-lH/preview"
@@ -2484,7 +2484,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/19uRStPW01R1GZHeePW7Q8B84pCjrfZN0/preview"
@@ -2494,7 +2494,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1psdLjJSST4j9sMmDKMN_0LGH0kZyVair/preview"
@@ -2504,7 +2504,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/18QRTYT4SHbEYl4Oz9l_7FlkAvE4Mnpnm/preview"
@@ -2514,7 +2514,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1EQZEUIyDMO0O7MmCpmwY368D_vzck3lQ/preview"
@@ -2524,7 +2524,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1nFl2KwQtYcZye-htOP61o5IoWSV8t5zB/preview"
@@ -2534,7 +2534,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1KV72VMfo7v_kybZNRxhbX2b4hi1LOBfB/preview"
@@ -2544,7 +2544,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1dXi_4gGMGaJQj9eFqMOLjcmXgVrJWnXw/preview"
@@ -2554,7 +2554,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1_2WczhgMG3HR1M-RQgbdw4SVpkSFDoj9/preview"
@@ -2564,7 +2564,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1xP7q9XX1b798bbirClT6K59kWEYXDSAF/preview"
@@ -2574,7 +2574,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Organic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1jmcg7ApU5gx17TJadMJ7hXn3HAPhKYCO/preview"
@@ -2584,7 +2584,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1CNPCPWYJFZmME5_aN_4dxPUHsNif9-bI/preview"
@@ -2594,7 +2594,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/10lw0pFZHr_3vtfNBaFmPRW8LQ7grsNpV/preview"
@@ -2604,7 +2604,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1qfLLl2FXFwpNEO1K2asg5G11ueBEwf9v/preview"
@@ -2614,7 +2614,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1UKddBCT476D0AVANXW4QBQe9A1F_U4-_/preview"
@@ -2624,7 +2624,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1VKKZmra9YgI-cH4akRlJZ0g4QbEolJs3/preview"
@@ -2634,7 +2634,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/17qsbbM3e3vG7CnPLA5ZUPvJ_jt4qfASU/preview"
@@ -2644,7 +2644,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/11DVOJ55Z-ywaTwBLGzG7hnO3UTz3NINF/preview"
@@ -2654,7 +2654,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1hhQhO_-dC25bWc9Nx-RfS_Kx1O9HcrWi/preview"
@@ -2664,7 +2664,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/10IJPXMAJuZGSn0PsMa2PEr6q_GTWaDiE/preview"
@@ -2674,7 +2674,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1_UWYQoSQIw7wp4WRwfpvv7X6_HmQdxpb/preview"
@@ -2684,7 +2684,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1SJEsXZiG85er4dYw-JWo-tHIEvzcC7oe/preview"
@@ -2694,7 +2694,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1MDbvgRHjU1GA3BBdB-s5enLPeULzP3AY/preview"
@@ -2704,7 +2704,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1DHgQK71psHN_gAYBzZeIdGkVswiXrgmx/preview"
@@ -2714,7 +2714,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1a2oHImqGqD6n3sxi4gCXNHEH65m_KGAu/preview"
@@ -2724,7 +2724,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1tO1br4bqL7S7h5ljW7qpWGwQSy4LH5jO/preview"
@@ -2734,7 +2734,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1YvsS0ny5mE5o-Ao0AO1OTRUwyKiX3WvK/preview"
@@ -2744,7 +2744,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1ztCkESFdIJSq1-POoQ8WCasRUxB-7PbQ/preview"
@@ -2754,7 +2754,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1VflIal16FNAugn-9RcnL6LgLwi0PHXfH/preview"
@@ -2764,7 +2764,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1scBgpsLfQQk-K0nUONPxgvKLGDcbC--q/preview"
@@ -2774,7 +2774,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1wOkiGDiSrF2STy4EYfq__ycaYMTAZDhp/preview"
@@ -2784,7 +2784,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1boSyKBvSJEeF5o33HmbFIv3NuJPnVvPa/preview"
@@ -2794,7 +2794,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1NVNYgCQZSDJDxqAqelK8DI9Smo1tIHBI/preview"
@@ -2804,7 +2804,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1VhwvQo0YscE0pUyum_zShn2px_DjguTH/preview"
@@ -2814,7 +2814,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1CWsMzd5R0kYXxE3eVNNJbvQRTXushlqR/preview"
@@ -2824,7 +2824,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1FIfpgrpA0rxunh1t0KVNFqqGRszGYpk7/preview"
@@ -2834,7 +2834,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Dg1-C8NiS6A2SI2Ph6iNMag91HtvVM8k/preview"
@@ -2844,7 +2844,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1v5ErYP35CuKB_JaT1AmY60JW3j8PZ_1S/preview"
@@ -2854,7 +2854,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1iZhCBlXqJG3fGvPVCCpO3AAW3k4DhfKQ/preview"
@@ -2864,7 +2864,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1YteatMgN4_wGqX7IPYzQejhBBrx_BX_D/preview"
@@ -2874,7 +2874,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1y1-WJw3hRZJZo8PNRij9c3hXc4cFYgxt/preview"
@@ -2884,7 +2884,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1ISoLBLdO-_vPXrNWJk_mpy2kAxZaPMsS/preview"
@@ -2894,7 +2894,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1I7oj7cK2gN9k5yQRw-B9kNT_7P_E7CTB/preview"
@@ -2904,7 +2904,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1i6ZfCILubZHLKviMFyD4TgruUrL0vRfH/preview"
@@ -2914,7 +2914,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1iTVQG2xKgKoG2NpS6wIKW9F_nxxQgUQP/preview"
@@ -2924,7 +2924,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1c5PDH-45yCjbK_blRBBQJgl65Nu0OsZp/preview"
@@ -2934,7 +2934,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/14idOSLu4txozg19w3WlnpKKEJVwvLcFJ/preview"
@@ -2944,7 +2944,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1OOtK2RubRIX1lj7xm8ad1c0VNpHb4PDT/preview"
@@ -2954,7 +2954,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/15HzkGah9lroiB-kYf1ErU7Y9slFz3mAj/preview"
@@ -2964,7 +2964,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Oj63WYRRqhfgHe1gEf6wzcEJwKsrxDTl/preview"
@@ -2974,7 +2974,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1tbn_hP5PHqgoSzcGDHoSUyZx3DLZgD8v/preview"
@@ -2984,7 +2984,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1TaptuIBpPsH10FaN4Vi7cdYaNaU8VuMH/preview"
@@ -2994,7 +2994,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1j7xoda99qLZVfjs8C2H5ZY7GnFa9BQuI/preview"
@@ -3004,7 +3004,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/15clOLKkw0R9GD5Dolw5THxTQAlDOh6zN/preview"
@@ -3014,7 +3014,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1VaYXXcgJe71WC5FvyKRZ_7Q7DGJKn1j7/preview"
@@ -3024,7 +3024,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1A5kDlX5Se04liMvMLJT7k-7I1AXyY49h/preview"
@@ -3034,7 +3034,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1P2F67KaR457gkxbw2rO8Mbc382vDf_Bp/preview"
@@ -3044,7 +3044,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Q91kSwk1OjYHlzimYbCoYajkBbfqOxsD/preview"
@@ -3054,7 +3054,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1tnt62RGpLWMp4NDadG89SQMZtXYBnNTR/preview"
@@ -3064,7 +3064,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/18rwizlvVcVTQcZt1hpzpqNJ4hkdJlIZN/preview"
@@ -3074,7 +3074,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1HOdy4jWiOwzUeOjr-WrJC8xPwk999opg/preview"
@@ -3084,7 +3084,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1kjeASY3wZH8xLXVJNb2fAv2KL0sInZhO/preview"
@@ -3094,7 +3094,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1wJdNSSH4GrbD6UGceYkkyDnyXwNFjvES/preview"
@@ -3104,7 +3104,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/16d6tLa7GiVrzPDEg-UQOd6lHpqiM0utQ/preview"
@@ -3114,7 +3114,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1KN9HRv-s5dtMLNdMxOQjyEwlqDGVnNgA/preview"
@@ -3124,7 +3124,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/11NoDhy536AUkVkpMTa_KdJAwCildNq0B/preview"
@@ -3134,7 +3134,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1iKeU-MkPT-omXLhMssZvV0CW4fZLe3tV/preview"
@@ -3144,7 +3144,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1MRZ0ofaNjuSoZ8l2srYKLfD0-dS-_b9d/preview"
@@ -3154,7 +3154,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1jUT6sbOxuls-NUov_HUiz_eJ9Ezw7vPm/preview"
@@ -3164,7 +3164,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1rJXkS8Zqi8C7EHMJGqrI7Bskx7_qGmDX/preview"
@@ -3174,7 +3174,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/109A9iOpB1QsE_HeKkk0Sg2qDXrgNz9XI/preview"
@@ -3184,7 +3184,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1tV7H_biFJ3x43oXNvIXhh2XP2zdCMcHu/preview"
@@ -3194,7 +3194,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1ETxnDKQ_ymbuiOKdG1rKErk6wfdd3MBE/preview"
@@ -3204,7 +3204,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1jUO4SqGIfS8J2xTcWGVAeZMUe-BSAwml/preview"
@@ -3214,7 +3214,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1_d4b2kyKaZPoE9wfmaIw5xyVIVOJsZQk/preview"
@@ -3224,7 +3224,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1y_rV_RQUnmeiLBTITGd3Q4NU8_lV6iQp/preview"
@@ -3234,7 +3234,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1KaEwpsBNo75S7wrBVTa_-ah8TEJ-2JpH/preview"
@@ -3244,7 +3244,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/190V4cRwPhMAAhgY-yzGZjzb3tIjJbI1K/preview"
@@ -3254,7 +3254,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1igyT9TtO528hFipLHOwxkT1iyhd8sul5/preview"
@@ -3264,7 +3264,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Gqhqpm4gh0BRyz7ESUGMWqGmTCih2yai/preview"
@@ -3274,7 +3274,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1lsj7nbH4tDTS8GC1zZSodqVXNyo5pwBK/preview"
@@ -3284,7 +3284,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Maths all material combined"
     ],
     "url": "https://drive.google.com/file/d/1bseMjg43y2CNlAMw8zFLokQRVmghnndm/preview"
@@ -3294,7 +3294,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Sln4QD-RWLmRtk5slk9jGA-hBHyRSGfs/preview"
@@ -3304,7 +3304,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1LfhOnXEACveq6Rh6ebVk099Z6GjLBQlC/preview"
@@ -3314,7 +3314,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1jyW0WNXF_gPl2YH562yFtMzsNJRzPTjH/preview"
@@ -3324,7 +3324,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1kE2FRbIFKVHI20CSQAFxN3CH65aj8thX/preview"
@@ -3334,7 +3334,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/17Dw0f6mNb_irJ-zJE8ryW7FxX4SQxiY_/preview"
@@ -3344,7 +3344,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1cEfbHxGPoJRgyOaM7f71DZ7wmyKWKa_w/preview"
@@ -3354,7 +3354,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/13Js67CwPIGwsKYhcrl_4i4lc2EZjjIh1/preview"
@@ -3364,7 +3364,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1QwqMq0_Fw5KKWfZj9hkKCGetEabROoHp/preview"
@@ -3374,7 +3374,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/10GTGvz16Vj6OggzVvPU0f6WNdwMBd8jm/preview"
@@ -3384,7 +3384,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1WhijOo4YA9X8jZeIFHPDyytZj3s60tWT/preview"
@@ -3394,7 +3394,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1EKqOAWw4xX1xbm5770-3qUjGRdr4-cvz/preview"
@@ -3404,7 +3404,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/15whfiz3vlrEms8ToccIwdZSNi5fl1sAg/preview"
@@ -3414,7 +3414,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1fmexKj8CsaHwN9BpxtE4h7hxMt8SWkUj/preview"
@@ -3424,7 +3424,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1UBQ43kUY06IOPBChBGhrXc1whWZyDYO1/preview"
@@ -3434,7 +3434,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1hKRkm1uJ7l2xn2HavnKcQdenC9eyMpqA/preview"
@@ -3444,7 +3444,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1NyxAHhSbKyEs2ZhaLleQuTdiV1M-Imeo/preview"
@@ -3454,7 +3454,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/13GIV3GkNSpI98szERL5psLR_oeWLitJ3/preview"
@@ -3464,7 +3464,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Inorganic Chem all material combined"
     ],
     "url": "https://drive.google.com/file/d/1l-YiNp6cxhwllMiDboNm15o5TAaLTC-y/preview"
@@ -3474,7 +3474,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1_bLGNVletLtckmCQc1SWnYkjkfxveQqC/preview"
@@ -3484,7 +3484,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/13vHR3kW4_8q8T0VIvNismYaBh54Pegk8/preview"
@@ -3494,7 +3494,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1h5UZ4eFklHAIavTyYCjgj8BBeoEVbOmQ/preview"
@@ -3504,7 +3504,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1LlGoorVU5XrEzuiL97GZltzDsfWPF4SS/preview"
@@ -3514,7 +3514,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1s8Kryi_cujPj6nl7i8UhckNqgudrO_7w/preview"
@@ -3524,7 +3524,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1XrUH2uHB8YZiCal3LnGXPKRaDtIaATGT/preview"
@@ -3534,7 +3534,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1i_L6LFconFA2Ukdg1RtL6oIRbmxUuN_M/preview"
@@ -3544,7 +3544,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1IANGbOHXAZ6UNWIA-bSO6HlDR97VI2NY/preview"
@@ -3554,7 +3554,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1q70URE_INYFUSfvbCxo7YcUnm4rXox42/preview"
@@ -3564,7 +3564,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1ekDiD1p_IhAGlZE3aUpsjNwEL1MKJwmD/preview"
@@ -3574,7 +3574,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1biGMCXYYfDJCFpUrcXvEbMz-r9qpJiSy/preview"
@@ -3584,7 +3584,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1dV7ADNYhc5R70skNAT5wI3G0Sg7NxbIq/preview"
@@ -3594,7 +3594,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1DxMVlA1tLKxLwlsSRsjCCOm70vq1Xsgp/preview"
@@ -3604,7 +3604,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Xkemn634qijAiauiOTlfeOFIsPVRwMQd/preview"
@@ -3614,7 +3614,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1bPwqOWhE9RjutbTKQXgILJ8MV2hm76TV/preview"
@@ -3624,7 +3624,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1cocef9OO-FVdp7RReEJV7t6GWI6OsfuQ/preview"
@@ -3634,7 +3634,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1qQ51a69QLC5MNwL7XnSSVHEBpSpc5o8J/preview"
@@ -3644,7 +3644,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1XWkvzCju3aqP49g7WIsNb5oANKIDlXeg/preview"
@@ -3654,7 +3654,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1hZU18Z6kDSk06S95sSOefE13I51A5IsC/preview"
@@ -3664,7 +3664,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1wypFbDemNZ7ki2aK4nCTJs0pWtO8xZ0Q/preview"
@@ -3674,7 +3674,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/14CeUayh75I9-6D5fER3JnXMMA7Ofx8TL/preview"
@@ -3684,7 +3684,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1MYAoiERjFDdcEAAu2cfd1pbK4spkjmaI/preview"
@@ -3694,7 +3694,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1r77hBwB3hJc3wLISUzUyIQTlexjctdMF/preview"
@@ -3704,7 +3704,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/129501PgA2HQCanJxETeUVgkSuO9sJp66/preview"
@@ -3714,7 +3714,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1pc5C0mgg23gpPRjDgimezvW8ih2aR4Y7/preview"
@@ -3724,7 +3724,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/16vAQ7-jwxa06CxSDJhV4xz9-5OzsTbnl/preview"
@@ -3734,7 +3734,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1NqMkkuU-Xg_e-ZhmG8VBn6BX60qnrTtw/preview"
@@ -3744,7 +3744,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/19DagY_M1pyNSAcpA36WFXVbuv7xNyeP0/preview"
@@ -3754,7 +3754,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1reoYl5KyoHUsupk5T4dfTF9LbkTIp5dX/preview"
@@ -3764,7 +3764,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1Xey717viqw1xlb4kSOELiZKYtSYpg2RF/preview"
@@ -3774,7 +3774,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1xE-vjIildJddke88M10ftyp5PP7Txp4X/preview"
@@ -3784,7 +3784,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1fPF1T6pUekrCIDHZBRkwS0WF9K_QaI5P/preview"
@@ -3794,7 +3794,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1pqdSL5uDwes58ubcGdj87Y9VYiyHbs-1/preview"
@@ -3804,7 +3804,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/16-VMiFsmsl06pcvoN4a1JmWaSm8SNjyQ/preview"
@@ -3814,7 +3814,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1RBLsMciAtKyP89YRPhGdeS9EXfdy9SWW/preview"
@@ -3824,7 +3824,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1lmnC-Z7b0nOZBIZXQ4k7mDIMyTLa7RDh/preview"
@@ -3834,7 +3834,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1EIiR_2xpF5C_z9p3TW9LYVGv0GXLBeFC/preview"
@@ -3844,7 +3844,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1w2etrCBlfdDPVQFMXGT5bc1n57nVxgRQ/preview"
@@ -3854,7 +3854,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1co8RkEYE3g5-3CDpChp7HdhC12eSPZXT/preview"
@@ -3864,7 +3864,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1RgQlSmLCIVQamyz9VO_M_jNJBY_KHNrj/preview"
@@ -3874,7 +3874,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1wBqCdOI88OXxaZh2ZlI5RDakeQpjid0t/preview"
@@ -3884,7 +3884,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1TyiO9kWPJOFP4ZhRhbtTxw-UC2ackqaX/preview"
@@ -3894,7 +3894,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/12WGLLwxX7ktTu69MN6Ycz-cbCmxfo0vL/preview"
@@ -3904,7 +3904,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1RIIcikbMjNqQw_MvSpiSPVMDEzMBFyNK/preview"
@@ -3914,7 +3914,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1QGshntBl624U3kf7AkkvRFY7wZnxgsH4/preview"
@@ -3924,7 +3924,7 @@ let allBooks = [
     "folders": [
       "IIT-JEE",
       "COACHINGS",
-      "NUCLEAS Modules",
+      "NUCLEUS Modules",
       "Nucleus Physics all material combined"
     ],
     "url": "https://drive.google.com/file/d/1FFyk9X9eB2KVoQSEy68jGA4EU3AN8Pnv/preview"
