@@ -771,12 +771,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     <h2 style="font-size:2.2em; margin-bottom:20px; text-align:center;">📅 Study Timetable</h2>
                     <div class="tt-layout">
                         <div class="tt-monthly">
-                            <h3 style="color:var(--highlight-text); text-align:center;">🎯 Monthly Goals</h3>
+                            <h3 style="color:var(--highlight-text); text-align:center; margin-bottom: 10px;">🎯 Monthly Goals</h3>
                             <textarea id="tt-monthly-goals" placeholder="What are we conquering this month?"></textarea>
                         </div>
                         <div class="tt-daily">
                             <div class="tt-tabs" id="tt-tabs-container"></div>
-                            <div class="tt-hours-container" id="tt-hours-container"></div>
+                            <div class="tt-daily-content">
+                                <div class="tt-add-task-form">
+                                    <input type="time" id="tt-start" class="tt-time-input" required>
+                                    <span style="color:var(--text-muted); font-weight:bold;">to</span>
+                                    <input type="time" id="tt-end" class="tt-time-input" required>
+                                    <input type="text" id="tt-task" class="tt-task-input" placeholder="Enter task / goal...">
+                                    <button class="primary-btn" id="tt-add-btn">Add</button>
+                                </div>
+                                <div class="tt-tasks-container" id="tt-tasks-container"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -791,42 +800,100 @@ document.addEventListener("DOMContentLoaded", () => {
                 dateList.push(d);
             }
 
-            let ttData = JSON.parse(localStorage.getItem('study_timetable_pro')) || {};
+            let ttData = JSON.parse(localStorage.getItem('study_timetable_pro_v2')) || {};
             
             const monthlyBox = document.getElementById('tt-monthly-goals');
             monthlyBox.value = ttData.monthly || "";
             monthlyBox.addEventListener('input', (e) => {
                 ttData.monthly = e.target.value;
-                localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
+                localStorage.setItem('study_timetable_pro_v2', JSON.stringify(ttData));
             });
 
             const tabsContainer = document.getElementById('tt-tabs-container');
-            const hoursContainer = document.getElementById('tt-hours-container');
-
-            const hours = ["06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"];
+            const tasksContainer = document.getElementById('tt-tasks-container');
+            let currentTTDate = dateList[1]; // default Today
 
             function renderDay(dateObj) {
-                hoursContainer.innerHTML = '';
+                tasksContainer.innerHTML = '';
                 const dateKey = dateObj.toISOString().split('T')[0];
+                let dayTasks = ttData[dateKey] || [];
                 
-                hours.forEach(timeStr => {
-                    let slotKey = `${dateKey}_${timeStr}`;
-                    let row = document.createElement('div');
-                    row.className = 'tt-hour-row';
-                    row.innerHTML = `
-                        <div class="tt-time">${timeStr}</div>
-                        <div class="tt-input" contenteditable="true" placeholder="Plan for ${timeStr}..."></div>
-                    `;
+                // Sort tasks chronologically by start time
+                dayTasks.sort((a,b) => a.start.localeCompare(b.start));
+
+                if(dayTasks.length === 0) {
+                    tasksContainer.innerHTML = `<div style="text-align:center; opacity:0.5; margin-top:30px; font-style:italic;">No tasks scheduled. Add one above!</div>`;
+                }
+
+                const formatTime = (time24) => {
+                    let [h, m] = time24.split(':');
+                    let ampm = h >= 12 ? 'PM' : 'AM';
+                    h = h % 12 || 12;
+                    return `${String(h).padStart(2,'0')}:${m} ${ampm}`;
+                };
+
+                dayTasks.forEach(task => {
+                    let div = document.createElement('div');
+                    div.className = `tt-task-item ${task.done ? 'completed' : ''}`;
                     
-                    let inputDiv = row.querySelector('.tt-input');
-                    inputDiv.innerText = ttData[slotKey] || "";
-                    inputDiv.addEventListener('input', (e) => {
-                        ttData[slotKey] = e.target.innerText;
-                        localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
+                    let timeStr = `${formatTime(task.start)} - ${formatTime(task.end)}`;
+                    
+                    div.innerHTML = `
+                        <div class="tt-task-left">
+                            <input type="checkbox" class="tt-checkbox" ${task.done ? 'checked' : ''}>
+                            <div class="tt-task-time">${timeStr}</div>
+                            <div class="tt-task-title">${task.task}</div>
+                        </div>
+                        <button class="tt-del-btn" title="Delete Task">✖</button>
+                    `;
+
+                    div.querySelector('.tt-checkbox').addEventListener('change', (e) => {
+                        task.done = e.target.checked;
+                        localStorage.setItem('study_timetable_pro_v2', JSON.stringify(ttData));
+                        renderDay(dateObj); 
                     });
-                    hoursContainer.appendChild(row);
+                    
+                    div.querySelector('.tt-del-btn').addEventListener('click', () => {
+                        ttData[dateKey] = ttData[dateKey].filter(t => t.id !== task.id);
+                        localStorage.setItem('study_timetable_pro_v2', JSON.stringify(ttData));
+                        renderDay(dateObj);
+                    });
+
+                    tasksContainer.appendChild(div);
                 });
             }
+
+            document.getElementById('tt-add-btn').addEventListener('click', () => {
+                let start = document.getElementById('tt-start').value;
+                let end = document.getElementById('tt-end').value;
+                let text = document.getElementById('tt-task').value.trim();
+                
+                if(!start || !end || !text) {
+                    alert("Please fill in start time, end time, and task!");
+                    return;
+                }
+                if(start >= end) {
+                    alert("End time must be after start time!");
+                    return;
+                }
+                
+                const dateKey = currentTTDate.toISOString().split('T')[0];
+                if(!ttData[dateKey]) ttData[dateKey] = [];
+                
+                ttData[dateKey].push({
+                    id: Date.now().toString(),
+                    start: start,
+                    end: end,
+                    task: text,
+                    done: false
+                });
+                
+                localStorage.setItem('study_timetable_pro_v2', JSON.stringify(ttData));
+                document.getElementById('tt-start').value = '';
+                document.getElementById('tt-end').value = '';
+                document.getElementById('tt-task').value = '';
+                renderDay(currentTTDate);
+            });
 
             dateList.forEach((d, idx) => {
                 let tab = document.createElement('div');
@@ -841,29 +908,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tt-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
+                    currentTTDate = d;
                     renderDay(d);
                 });
                 tabsContainer.appendChild(tab);
             });
 
-            renderDay(dateList[1]); 
+            renderDay(currentTTDate); 
         }
         else if (type === 'syllabus') {
             const deepSyllabus = {
                 "Class12": {
-                    "Physics": ["Electric Charges & Fields", "Electrostatic Potential", "Current Electricity", "Moving Charges & Magnetism", "Magnetism & Matter", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics", "Wave Optics", "Dual Nature", "Atoms", "Nuclei", "Semiconductors"],
-                    "Chemistry": ["Solutions", "Electrochemistry", "Chemical Kinetics", "d and f Block", "Coordination Compounds", "Haloalkanes", "Alcohols, Phenols", "Aldehydes, Ketones", "Amines", "Biomolecules"],
-                    "Maths": ["Relations & Functions", "Inverse Trigonometric Functions", "Matrices", "Determinants", "Continuity & Differentiability", "Application of Derivatives", "Integrals", "Application of Integrals", "Differential Equations", "Vector Algebra", "3D Geometry", "Linear Programming", "Probability"]
+                    "Physics": ["Electric Charges and Fields", "Electrostatic Potential and Capacitance", "Current Electricity", "Moving Charges and Magnetism", "Magnetism and Matter", "Electromagnetic Induction", "Alternating Current", "Electromagnetic Waves", "Ray Optics and Optical Instruments", "Wave Optics", "Dual Nature of Radiation and Matter", "Atoms", "Nuclei", "Semiconductor Electronics"],
+                    "Chemistry": ["Solutions", "Electrochemistry", "Chemical Kinetics", "d-and f-Block Elements", "Coordination Compounds", "Haloalkanes and Haloarenes", "Alcohols Phenols and Ethers", "Aldehydes Ketones and Carboxylic Acids", "Amines", "Biomolecules"],
+                    "Maths": ["Relations and Functions", "Inverse Trigonometric Functions", "Matrices", "Determinants", "Continuity and Differentiability", "Application of Derivatives", "Integrals", "Applications of the Integrals", "Differential Equations", "Vector Algebra", "3D Geometry", "Linear Programming", "Probability"]
                 },
                 "JEEMains": {
-                    "Physics": ["Physics & Measurement", "Kinematics", "Laws of Motion", "Work, Energy & Power", "Rotational Motion", "Gravitation", "Properties of Matter", "Thermodynamics", "Kinetic Theory", "Oscillations & Waves", "Electrostatics", "Current Electricity", "Magnetic Effects", "EMI & AC", "EM Waves", "Optics", "Dual Nature", "Atoms & Nuclei", "Electronic Devices", "Experimental Skills"],
-                    "Chemistry": ["Basic Concepts", "Atomic Structure", "Chemical Bonding", "Thermodynamics", "Solutions", "Equilibrium", "Redox Reactions", "Chemical Kinetics", "Classification", "p-Block", "d & f Block", "Coordination", "Purification", "Hydrocarbons", "Halogens", "Oxygen Compounds", "Nitrogen Compounds", "Biomolecules", "Practical Chemistry"],
-                    "Maths": ["Sets & Functions", "Complex Numbers", "Matrices & Determinants", "Permutations & Combinations", "Binomial Theorem", "Sequence & Series", "Limit & Continuity", "Integral Calculus", "Differential Equations", "Coordinate Geometry", "3D Geometry", "Vector Algebra", "Statistics & Probability", "Trigonometry"]
+                    "Physics": ["Physics and Measurement", "Kinematics", "Laws of Motion", "Work Energy and Power", "Rotational Motion", "Gravitation", "Properties of Solids and Liquids", "Thermodynamics", "Kinetic Theory of Gases", "Oscillations and Waves", "Electrostatics", "Current Electricity", "Magnetic Effects of Current and Magnetism", "Electromagnetic Induction and Alternating Currents", "Electromagnetic Waves", "Optics", "Dual Nature of Matter and Radiation", "Atoms and Nuclei", "Electronic Devices", "Experimental Skills"],
+                    "Chemistry": ["Some Basic Concepts in Chemistry", "Atomic Structure", "Chemical Bonding and Molecular Structure", "Chemical Thermodynamics", "Solutions", "Equilibrium", "Redox Reactions and Electrochemistry", "Chemical Kinetics", "Classification of Elements and Periodicity", "p-Block Elements", "d- and f-Block Elements", "Coordination Compounds", "Purification and Characterisation of Organic Compounds", "Some Basic Principles of Organic Chemistry", "Hydrocarbons", "Organic Compounds Containing Halogens", "Organic Compounds Containing Oxygen", "Organic Compounds Containing Nitrogen", "Biomolecules", "Principles Related to Practical Chemistry"],
+                    "Maths": ["Sets Relations and Functions", "Complex Numbers and Quadratic Equations", "Matrices and Determinants", "Permutations and Combinations", "Binomial Theorem", "Sequence and Series", "Limit Continuity and Differentiability", "Integral Calculus", "Differential Equations", "Coordinate Geometry", "Three Dimensional Geometry", "Vector Algebra", "Statistics and Probability", "Trigonometry"]
                 },
                 "JEEAdv": {
-                    "Physics": ["General Physics", "Mechanics", "Thermal Physics", "Electricity & Magnetism", "Electromagnetic Waves", "Optics", "Modern Physics"],
-                    "Chemistry": ["General Topics", "Gaseous & Liquid States", "Atomic Structure & Bonding", "Energetics", "Chemical Equilibrium", "Electrochemistry", "Chemical Kinetics", "Solid State", "Solutions", "Surface Chemistry", "Nuclear Chemistry", "Isolation of Metals", "Transition Elements", "Basic Organic", "Reaction Mechanisms", "Polymers & Biomolecules"],
-                    "Maths": ["Algebra", "Matrices", "Probability", "Trigonometry", "Analytical Geometry (2D & 3D)", "Differential Calculus", "Integral Calculus", "Vectors"]
+                    "Physics": ["General Physics", "Kinematics", "Laws of Motion", "Work Power Energy", "Conservation of Momentum", "Rigid Body Dynamics", "Gravitation", "Thermal Physics", "Electrostatics", "Current Electricity", "Magnetic Effects of Current", "Electromagnetic Induction", "Alternating Current", "Ray Optics", "Wave Optics", "Modern Physics"],
+                    "Chemistry": ["Concept of Atoms and Molecules", "Gaseous and Liquid States", "Atomic Structure", "Chemical Bonding", "Energetics", "Chemical Equilibrium", "Electrochemistry", "Chemical Kinetics", "Solid State", "Solutions", "Surface Chemistry", "Nuclear Chemistry", "Preparation and Properties of Non-Metals", "Preparation and Properties of Compounds", "Transition Elements", "Ores and Minerals", "Extractive Metallurgy", "Principles of Qualitative Analysis", "Basic Concepts of Organic Chemistry", "Alkanes Alkenes Alkynes", "Benzene", "Phenols", "Alkyl Halides", "Alcohols and Ethers", "Aldehydes and Ketones", "Carboxylic Acids and Derivatives", "Amines", "Carbohydrates Amino Acids and Peptides", "Practical Organic Chemistry"],
+                    "Maths": ["Algebra of Complex Numbers", "Quadratic Equations", "Sequences and Series", "Logarithms", "Permutations and Combinations", "Binomial Theorem", "Matrices and Determinants", "Probability", "Trigonometric Functions and Equations", "Solutions of Triangles", "Analytical Geometry 2D", "Analytical Geometry 3D", "Differential Calculus", "Integral Calculus", "Vectors"]
                 }
             };
 
@@ -1373,7 +1441,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         for (let i = 0; i < localStorage.length; i++) {
             let k = localStorage.key(i);
-            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable_pro' || k === 'jee_syllabus')) {
+            if (k && (k.startsWith('notes_') || k.startsWith('quick_notes_') || k === 'study_timetable_pro_v2' || k === 'jee_syllabus')) {
                 backupData.notes[k] = localStorage.getItem(k);
             }
         }
@@ -1564,7 +1632,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Keyboard Shortcuts
+    // Keyboard Shortcuts (including Spotlight Ctrl+K)
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
             e.preventDefault();
