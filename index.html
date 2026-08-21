@@ -8,12 +8,13 @@
 </head>
 <body class="theme-amoled font-medium">
 
-    <script src="data.js?v=44"></script>
-    <script src="lectures.js?v=44"></script>
-    <script src="mocktests.js?v=44"></script>
+    <script src="data.js"></script>
+    <script src="lectures.js"></script>
+    <script src="mocktests.js"></script>
 
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <h2>📚 Study Library</h2>
@@ -48,6 +49,7 @@
         <!-- DYNAMIC SEGMENTED CONTROL (MAX 4 MODULES) -->
         <div class="mode-selector" id="dynamic-mode-selector"></div>
 
+        <!-- SEARCH CONTAINER -->
         <div class="search-container">
             <div class="subject-filters" id="subject-filters">
                 <button class="subj-chip active" data-subj="All">All</button>
@@ -68,10 +70,11 @@
             </div>
         </div>
         
+        <!-- BOOK/FILE LIST -->
         <div class="book-list" id="book-list"></div>
     </div>
 
-    <!-- MUSIC PLAYER MODAL -->
+    <!-- MUSIC & AMBIENT HUB MODAL -->
     <div class="pomo-modal-overlay" id="music-modal-overlay">
         <div class="pomo-modal music-modal">
             <div class="pomo-modal-header">
@@ -121,10 +124,10 @@
             </div>
             
             <div class="pomo-modal-tabs">
-                <button class="pomo-tab-btn active" onclick="switchPomoTab(event, 'tab-focus')">🎯 Focus</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-ui')">🎨 Theme</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-modules')">🧩 Modules</button>
-                <button class="pomo-tab-btn" onclick="switchPomoTab(event, 'tab-audio')">🔔 Audio</button>
+                <button class="pomo-tab-btn active" data-tab="tab-focus">🎯 Focus</button>
+                <button class="pomo-tab-btn" data-tab="tab-ui">🎨 Theme</button>
+                <button class="pomo-tab-btn" data-tab="tab-modules">🧩 Modules</button>
+                <button class="pomo-tab-btn" data-tab="tab-audio">🔔 Audio</button>
             </div>
 
             <div class="pomo-modal-body">
@@ -268,6 +271,7 @@
         </div>
     </div>
 
+    <!-- MAIN VIEWER & WORKSPACE -->
     <div class="main-content">
         <div class="reader-header">
             <div class="reader-header-info">
@@ -292,17 +296,22 @@
                 <h2 style="color: var(--text-color); font-size: 1.8em; margin-bottom: 10px; letter-spacing: 0.5px;">READY TO STUDY</h2>
                 <p class="placeholder-text" style="color: var(--text-color); opacity: 0.7; font-size: 1em; line-height: 1.5;">Select a subject, notes file, or video lecture from the sidebar to begin.</p>
             </div>
+            
+            <!-- Viewer 1 (Main) -->
             <div id="viewer-wrapper">
                 <iframe id="book-frame" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
                 <div class="floating-nav" id="floating-nav">
                     <button id="prev-btn">◀ Prev</button> <span>|</span> <button id="next-btn">Next ▶</button>
                 </div>
             </div>
+            
+            <!-- Viewer 2 (Split Screen) -->
             <div id="viewer-wrapper-split" style="display:none;">
                 <iframe id="book-frame-split" src="" style="width:100%; height:100%; border:none;" allowfullscreen allow="fullscreen; autoplay; encrypted-media"></iframe>
             </div>
         </div>
 
+        <!-- QUICK NOTES DRAWER -->
         <div id="notes-panel" class="notes-panel">
             <div class="notes-header">
                 <span>📝 Quick Notes</span>
@@ -337,7 +346,7 @@
         </div>
     </div>
 
-    <script src="ai.js?v=44"></script>
-    <script src="script.js?v=44"></script>
+    <script src="ai.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
