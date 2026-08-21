@@ -11,6 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
     let isTreeExpanded = false; 
     let isSplitActive = false;
 
+    // Study Analytics State
+    let studyStats = JSON.parse(localStorage.getItem('study_stats')) || {}; 
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (!studyStats[todayStr]) studyStats[todayStr] = 0;
+
     const ALL_MODULES = [
         { id: 'CLASS 10', label: '🎓 Class 10' },
         { id: 'IIT-JEE', label: '⚡ IIT-JEE' },
@@ -33,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (saved && typeof saved === 'object') pomoSettings = { ...defaultSettings, ...saved };
     } catch(e) {}
 
+    // Ensure valid active modules array
     if (!Array.isArray(pomoSettings.activeModules) || pomoSettings.activeModules.length === 0) {
         pomoSettings.activeModules = ['CLASS 10', 'IIT-JEE', 'LECTURES', 'SIMULATOR'];
     }
@@ -71,9 +77,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const viewerWrapperSplit = document.getElementById('viewer-wrapper-split');
     const bookFrame = document.getElementById('book-frame');
     const bookFrameSplit = document.getElementById('book-frame-split');
+    
+    // Header Actions
     const playlistDropdown = document.getElementById('playlist-dropdown');
     const downloadBtn = document.getElementById('download-btn');
+    const startExamBtn = document.getElementById('start-exam-btn');
     const splitScreenBtn = document.getElementById('split-screen-btn');
+    const analyticsBtn = document.getElementById('analytics-btn');
+    const whiteboardBtn = document.getElementById('whiteboard-btn');
+    const notesToggleBtn = document.getElementById('notes-toggle-btn');
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
     const selectorBox = document.getElementById('dynamic-mode-selector');
 
     const chatFab = document.getElementById('chat-fab-btn');
@@ -88,13 +101,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const notesPanel = document.getElementById('notes-panel');
     const notesArea = document.getElementById('notes-area');
-    const notesToggleBtn = document.getElementById('notes-toggle-btn');
     const closeNotesBtn = document.getElementById('close-notes-btn');
     const notesCopyBtn = document.getElementById('notes-copy-btn');
     const notesDlBtn = document.getElementById('notes-dl-btn');
 
     // ==========================================
-    // 3. DATA LOADING
+    // 3. LOAD EXTERNAL LIBRARIES
     // ==========================================
     setTimeout(() => {
         if (typeof allBooks !== 'undefined' && Array.isArray(allBooks)) masterLibrary.push(...allBooks);
@@ -130,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (type === 'ambient-brown') {
                 lastOut = (lastOut + (0.02 * white)) / 1.02;
                 output[i] = lastOut * 1.5;
-            } else { // Rain
+            } else { // Synthesize Rain
                 b0 = 0.99886 * b0 + white * 0.0555179;
                 b1 = 0.99332 * b1 + white * 0.0750759;
                 b2 = 0.96900 * b2 + white * 0.1538520;
@@ -253,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- SAFETY WRAPPERS FOR SETTINGS (Prevents Crashes) ---
+    // Safety Wrappers for DOM Form Value Extraction
     function setSettingVal(id, val) {
         const el = document.getElementById(id);
         if (el) el.value = val;
@@ -300,9 +312,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // THE SAVE SETTINGS BUTTON
+    // THE SAVE SETTINGS BUTTON (Fixed Scope)
     settingsSaveBtn.addEventListener('click', () => {
-        // Safely extract form fields
         pomoSettings.themeShade = getSettingVal('pomo-setting-theme-shade', pomoSettings.themeShade);
         pomoSettings.enabled = getSettingVal('pomo-setting-enable', pomoSettings.enabled);
         pomoSettings.focusTime = parseInt(getSettingVal('pomo-setting-focus', pomoSettings.focusTime));
@@ -442,6 +453,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     isPomoRunning = false;
                     pomoToggleBtn.textContent = '▶️';
                     pomoCard.classList.remove('running');
+                    
+                    // Add to analytics!
+                    studyStats[todayStr]++;
+                    localStorage.setItem('study_stats', JSON.stringify(studyStats));
+
                     alert("Timer completed!");
                 }
             }, 1000);
@@ -458,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ==========================================
-    // 8. FILE VIEWER, SPLIT SCREEN & NOTES
+    // 8. FILE VIEWER & UTILITIES (OMR, Dashboard, Whiteboard)
     // ==========================================
     function toggleMobileMenu() {
         sidebar.classList.toggle('open');
@@ -472,15 +488,6 @@ document.addEventListener("DOMContentLoaded", () => {
         desktopSidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
     });
 
-    document.querySelectorAll('.subj-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            document.querySelectorAll('.subj-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            currentSubject = chip.getAttribute('data-subj');
-            filterAndRender();
-        });
-    });
-
     themeToggle.addEventListener('click', () => {
         pomoSettings.themeShade = pomoSettings.themeShade === 'theme-light' ? 'theme-amoled' : 'theme-light';
         themeToggle.textContent = pomoSettings.themeShade === 'theme-light' ? '🌙' : '☀️';
@@ -488,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('pomo_settings', JSON.stringify(pomoSettings));
     });
 
-    document.getElementById('fullscreen-btn').addEventListener('click', () => {
+    fullscreenBtn.addEventListener('click', () => {
         const container = document.getElementById('reader-container-main');
         if (!document.fullscreenElement && !document.webkitFullscreenElement) {
             if (container.requestFullscreen) container.requestFullscreen();
@@ -507,6 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
             viewerWrapperSplit.style.display = 'block';
             bookFrameSplit.src = bookFrame.src;
             splitScreenBtn.style.backgroundColor = 'var(--success)';
+            document.getElementById('omr-panel').style.display = 'none'; // hide OMR if standard split
         } else {
             mainContainer.classList.remove('split-active');
             viewerWrapperSplit.style.display = 'none';
@@ -515,27 +523,214 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Notes Panel
     notesToggleBtn.addEventListener('click', () => notesPanel.classList.toggle('open'));
     closeNotesBtn.addEventListener('click', () => notesPanel.classList.remove('open'));
-
     notesArea.value = localStorage.getItem('quick_notes') || '';
     notesArea.addEventListener('input', () => localStorage.setItem('quick_notes', notesArea.value));
-
-    notesCopyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(notesArea.value).then(() => {
-            notesCopyBtn.textContent = '✅';
-            setTimeout(() => notesCopyBtn.textContent = '📋', 1500);
-        });
-    });
-
+    notesCopyBtn.addEventListener('click', () => navigator.clipboard.writeText(notesArea.value));
     notesDlBtn.addEventListener('click', () => {
-        const blob = new Blob([notesArea.value], { type: "text/plain" });
         const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(new Blob([notesArea.value], { type: "text/plain" }));
         a.download = "Study_Notes.txt";
         a.click();
     });
 
+    // --- ANALYTICS DASHBOARD ---
+    const analyticsModal = document.getElementById('analytics-modal-overlay');
+    analyticsBtn.addEventListener('click', () => {
+        let total = 0;
+        let streak = 0;
+        let currDate = new Date();
+
+        for (let date in studyStats) total += studyStats[date];
+        document.getElementById('stat-total-pomos').innerText = total;
+        document.getElementById('stat-hours').innerText = ((total * 25) / 60).toFixed(1);
+
+        // Calculate Streak
+        while(true) {
+            let dStr = currDate.toISOString().split('T')[0];
+            if (studyStats[dStr] && studyStats[dStr] > 0) {
+                streak++;
+                currDate.setDate(currDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        document.getElementById('stat-streak').innerText = `${streak} 🔥`;
+
+        // Render Heatmap
+        const grid = document.getElementById('heatmap-container');
+        grid.innerHTML = '';
+        let heatDate = new Date();
+        heatDate.setDate(heatDate.getDate() - 27); // Last 28 days
+        for(let i=0; i<28; i++) {
+            let box = document.createElement('div');
+            box.className = 'heatmap-box';
+            let str = heatDate.toISOString().split('T')[0];
+            let count = studyStats[str] || 0;
+            if (count > 0) box.classList.add('lvl-1');
+            if (count > 2) box.classList.add('lvl-2');
+            if (count > 4) box.classList.add('lvl-3');
+            if (count > 6) box.classList.add('lvl-4');
+            box.title = `${str}: ${count} sessions`;
+            grid.appendChild(box);
+            heatDate.setDate(heatDate.getDate() + 1);
+        }
+        analyticsModal.classList.add('open');
+    });
+    document.getElementById('analytics-close-modal').addEventListener('click', () => analyticsModal.classList.remove('open'));
+
+    // --- NATIVE OMR SIMULATOR ---
+    let examTimerInterval;
+    let examSeconds = 10800; // 3 hours
+
+    function renderOMRSheet() {
+        const container = document.getElementById('omr-questions-container');
+        container.innerHTML = '';
+        for (let i = 1; i <= 75; i++) {
+            let row = document.createElement('div');
+            row.className = 'omr-row';
+            row.innerHTML = `
+                <div class="omr-num">${i}.</div>
+                <div class="omr-options">
+                    <div class="omr-circle" data-q="${i}" data-opt="A">A</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="B">B</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="C">C</div>
+                    <div class="omr-circle" data-q="${i}" data-opt="D">D</div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+        
+        document.querySelectorAll('.omr-circle').forEach(circle => {
+            circle.addEventListener('click', (e) => {
+                let siblings = e.target.parentElement.querySelectorAll('.omr-circle');
+                siblings.forEach(s => s.classList.remove('selected'));
+                e.target.classList.add('selected');
+            });
+        });
+    }
+
+    startExamBtn.addEventListener('click', () => {
+        isSplitActive = true;
+        document.getElementById('reader-container-main').classList.add('split-active');
+        document.getElementById('omr-panel').style.display = 'flex';
+        viewerWrapperSplit.style.display = 'none'; // Override standard split
+        startExamBtn.style.display = 'none';
+        
+        renderOMRSheet();
+        examSeconds = 10800;
+        
+        clearInterval(examTimerInterval);
+        examTimerInterval = setInterval(() => {
+            if(examSeconds <= 0) {
+                clearInterval(examTimerInterval);
+                document.getElementById('omr-submit-btn').click();
+            } else {
+                examSeconds--;
+                let h = String(Math.floor(examSeconds / 3600)).padStart(2, '0');
+                let m = String(Math.floor((examSeconds % 3600) / 60)).padStart(2, '0');
+                let s = String(examSeconds % 60).padStart(2, '0');
+                document.getElementById('omr-timer').innerText = `${h}:${m}:${s}`;
+            }
+        }, 1000);
+    });
+
+    document.getElementById('omr-submit-btn').addEventListener('click', () => {
+        clearInterval(examTimerInterval);
+        let answered = document.querySelectorAll('.omr-circle.selected').length;
+        // Dummy Score Calculation (Assuming 4 marks per question)
+        let simulatedScore = answered * 4 - Math.floor(answered * 0.2); // Random fake negative marking
+        alert(`Exam Submitted!\nYou attempted ${answered}/75 questions.\nEstimated Simulated Score: ${simulatedScore}/300`);
+        document.getElementById('reader-container-main').classList.remove('split-active');
+        document.getElementById('omr-panel').style.display = 'none';
+        isSplitActive = false;
+        startExamBtn.style.display = 'flex';
+    });
+
+    // --- WHITEBOARD / SCRATCHPAD ---
+    const wbOverlay = document.getElementById('whiteboard-overlay');
+    const canvas = document.getElementById('wb-canvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let currentColor = '#f8fafc';
+    let currentSize = 3;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 60; // minus header
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    whiteboardBtn.addEventListener('click', () => {
+        wbOverlay.classList.add('open');
+        resizeCanvas();
+    });
+
+    document.getElementById('wb-close').addEventListener('click', () => wbOverlay.classList.remove('open'));
+    
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentColor = e.target.getAttribute('data-color');
+        });
+    });
+
+    document.getElementById('wb-eraser').addEventListener('click', () => {
+        currentColor = getComputedStyle(document.body).getPropertyValue('--primary-bg').trim(); // Erase matches background
+    });
+
+    document.getElementById('wb-clear').addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+    
+    document.getElementById('wb-size').addEventListener('input', (e) => currentSize = e.target.value);
+
+    document.getElementById('wb-download').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'scratchpad.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+
+    // Drawing Events
+    function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX || e.touches[0].clientX) - rect.left,
+            y: (e.clientY || e.touches[0].clientY) - rect.top
+        };
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const pos = getMousePos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDrawing) return;
+        const pos = getMousePos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+    });
+
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    // Touch support
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if (!isDrawing) return; const pos = getMousePos(e); ctx.lineTo(pos.x, pos.y); ctx.strokeStyle = currentColor; ctx.lineWidth = currentSize; ctx.lineCap = 'round'; ctx.stroke(); });
+    canvas.addEventListener('touchend', () => isDrawing = false);
+
+
+    // ==========================================
+    // 9. LIBRARY FILTERING & RENDERING
+    // ==========================================
     searchBar.addEventListener('input', () => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(filterAndRender, 200); 
@@ -677,10 +872,23 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('current-book-breadcrumb').textContent = book.folders ? book.folders.join(" > ") : book.title;
         document.getElementById('placeholder-box').style.display = 'none';
         
-        document.getElementById('fullscreen-btn').style.display = 'flex';
-        splitScreenBtn.style.display = 'flex';
+        fullscreenBtn.style.display = 'flex';
         notesToggleBtn.style.display = 'flex';
+        analyticsBtn.style.display = 'flex';
+        whiteboardBtn.style.display = 'flex';
         
+        // Hide/Show correct buttons based on SIMULATOR
+        if (currentRoot === 'SIMULATOR') {
+            startExamBtn.style.display = 'flex';
+            splitScreenBtn.style.display = 'none';
+        } else {
+            startExamBtn.style.display = 'none';
+            splitScreenBtn.style.display = 'flex';
+            document.getElementById('omr-panel').style.display = 'none';
+            document.getElementById('reader-container-main').classList.remove('split-active');
+            isSplitActive = false;
+        }
+
         let finalUrl = book.url || book.questionUrl || book.answerKeyUrl || '';
 
         if (book.playlist && book.playlist.length > 0) {
@@ -703,10 +911,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         viewerWrapper.style.display = 'block';
-        document.getElementById('floating-nav').style.display = 'flex';
         if (!book.playlist) {
             bookFrame.src = finalUrl;
-            if (isSplitActive) bookFrameSplit.src = finalUrl;
+            if (isSplitActive && currentRoot !== 'SIMULATOR') bookFrameSplit.src = finalUrl;
         }
 
         if (pomoSettings.zenMode === 'yes') {
@@ -718,7 +925,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // 9. AI COPILOT CHAT
+    // 10. AI COPILOT CHAT
     // ==========================================
     chatFab.addEventListener('click', () => chatWindow.classList.add('open'));
     chatClose.addEventListener('click', () => chatWindow.classList.remove('open'));
@@ -785,6 +992,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === 'Escape') {
             modalOverlay.classList.remove('open');
             musicModalOverlay.classList.remove('open');
+            analyticsModal.classList.remove('open');
+            wbOverlay.classList.remove('open');
             chatWindow.classList.remove('open');
             notesPanel.classList.remove('open');
         }
