@@ -767,10 +767,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         else if (type === 'timetable') {
             utilWorkspace.innerHTML = `
-                <div class="util-workspace-inner" style="padding: 20px;">
+                <div class="util-workspace-inner" style="padding: 20px; align-items: stretch;">
+                    <h2 style="font-size:2.2em; margin-bottom:20px; text-align:center;">📅 Study Timetable</h2>
                     <div class="tt-layout">
                         <div class="tt-monthly">
-                            <h3>🎯 Monthly Goals</h3>
+                            <h3 style="color:var(--highlight-text); text-align:center;">🎯 Monthly Goals</h3>
                             <textarea id="tt-monthly-goals" placeholder="What are we conquering this month?"></textarea>
                         </div>
                         <div class="tt-daily">
@@ -781,7 +782,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
 
-            // Initialize 10 Dates
             const today = new Date();
             today.setHours(0,0,0,0);
             const dateList = [];
@@ -793,8 +793,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let ttData = JSON.parse(localStorage.getItem('study_timetable_pro')) || {};
             
-            document.getElementById('tt-monthly-goals').value = ttData.monthly || "";
-            document.getElementById('tt-monthly-goals').addEventListener('input', (e) => {
+            const monthlyBox = document.getElementById('tt-monthly-goals');
+            monthlyBox.value = ttData.monthly || "";
+            monthlyBox.addEventListener('input', (e) => {
                 ttData.monthly = e.target.value;
                 localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
             });
@@ -802,16 +803,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const tabsContainer = document.getElementById('tt-tabs-container');
             const hoursContainer = document.getElementById('tt-hours-container');
 
+            const hours = ["06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM", "11:00 PM"];
+
             function renderDay(dateObj) {
                 hoursContainer.innerHTML = '';
                 const dateKey = dateObj.toISOString().split('T')[0];
                 
-                for(let hour = 6; hour <= 23; hour++) {
-                    let ampm = hour >= 12 ? 'PM' : 'AM';
-                    let displayHour = hour % 12 === 0 ? 12 : hour % 12;
-                    let timeStr = `${String(displayHour).padStart(2, '0')}:00 ${ampm}`;
+                hours.forEach(timeStr => {
                     let slotKey = `${dateKey}_${timeStr}`;
-
                     let row = document.createElement('div');
                     row.className = 'tt-hour-row';
                     row.innerHTML = `
@@ -825,19 +824,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         ttData[slotKey] = e.target.innerText;
                         localStorage.setItem('study_timetable_pro', JSON.stringify(ttData));
                     });
-
                     hoursContainer.appendChild(row);
-                }
+                });
             }
 
             dateList.forEach((d, idx) => {
                 let tab = document.createElement('div');
                 tab.className = 'tt-tab';
-                if(idx === 1) tab.classList.add('active'); // Today is idx 1
+                if(idx === 1) tab.classList.add('active'); 
                 
                 let dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
                 let monthDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                let label = idx === 1 ? "Today" : `${dayName}, ${monthDate}`;
+                let label = idx === 1 ? "Today" : (idx === 0 ? "Yesterday" : `${dayName}, ${monthDate}`);
                 tab.innerText = label;
 
                 tab.addEventListener('click', () => {
@@ -848,7 +846,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tabsContainer.appendChild(tab);
             });
 
-            renderDay(dateList[1]); // Render Today
+            renderDay(dateList[1]); 
         }
         else if (type === 'syllabus') {
             const deepSyllabus = {
@@ -922,7 +920,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     let detail = document.createElement('details');
                     detail.className = 'syl-subject';
                     detail.open = true;
-                    detail.innerHTML = `<summary>${subj} (${pageData[subj].length} Chapters)</summary> <div class="syl-grid" id="grid-${subj}"></div>`;
+                    detail.innerHTML = `<summary>${subj} <span style="font-size:0.8em; opacity:0.8; font-weight:normal;">(${pageData[subj].length} Chapters)</span></summary> <div class="syl-grid" id="grid-${subj}"></div>`;
                     contentArea.appendChild(detail);
 
                     const grid = detail.querySelector(`#grid-${subj}`);
@@ -1025,9 +1023,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('util-sidebar-syllabus')?.addEventListener('click', () => openUtilityWorkspace('syllabus'));
     document.getElementById('util-sidebar-whiteboard')?.addEventListener('click', () => openUtilityWorkspace('whiteboard'));
     document.getElementById('util-sidebar-settings')?.addEventListener('click', () => document.getElementById('pomo-open-settings')?.click());
-
-    // Legacy Analytics Button from header
-    document.getElementById('analytics-btn')?.addEventListener('click', () => openUtilityWorkspace('analytics'));
 
     // ==========================================
     // 11. NATIVE OMR SIMULATOR (QoL 5)
